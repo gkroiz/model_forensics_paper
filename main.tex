@@ -12,6 +12,9 @@
 \usepackage{microtype}      % microtypography
 \usepackage{xcolor}         % colors
 \usepackage{graphicx}       % images
+\usepackage{amssymb}        % checkmarks and symbols
+\newcommand{\cmark}{\checkmark}
+\newcommand{\xmark}{$\times$}
 
 \title{Model Incrimination}
 
@@ -38,11 +41,11 @@
 % ===== METHOD / STRUCTURE =====
 \noindent\textbf{[Contribution]}
 
-\textcolor{red}{[A. Study by looking at bad behavior, following protocol] To study this problem, we construct a diverse suite of N environments where models exhibit ostensibly concerning behaviors, and then investigate the motivations behind the behavior. We follow a three-step protocol -- reading CoTs to generate hypotheses for what motivated an action, environment counterfactuals to test those hypotheses, and triangulating across independent experiments to verify whether findings converge -- and find that model motivations can often be concretely determined.}
+\textcolor{red}{[A. Study by looking at bad behavior, following protocol] To study this problem, we construct a diverse suite of N environments where models exhibit seemingly concerning behaviors, and then investigate the motivations behind the behavior. We follow a three-step protocol -- reading CoTs to generate hypotheses for what motivated an action, environment counterfactuals to test those hypotheses, and triangulating across independent experiments to verify whether findings converge -- and find that model motivations can often be concretely determined.}
 
-\textcolor{blue}{[B. Study by looking at bad behavior] To study this problem, we construct a diverse suite of N environments where models exhibit ostensibly concerning behaviors, and then investigate the motivations behind the behavior. We find that model motivations can often be concretely determined.}
+\textcolor{blue}{[B. Study by looking at bad behavior] To study this problem, we construct a diverse suite of N environments where models exhibit seemingly concerning behaviors, and then investigate the motivations behind the behavior. We find that model motivations can often be concretely determined.}
 
-\textcolor{teal}{[C. We propose a protocol, then we apply it to bad behavior] We propose a three-step protocol for model incrimination investigations: reading the chain of thought to generate hypotheses for what motivated an action, creating clean environment counterfactuals to test those hypotheses, and triangulating across independent experiments to verify whether findings converge. We then apply our protocol across a diverse suite of N environments where models exhibit ostensibly concerning behaviors. We find that model motivations can often be concretely determined.}
+\textcolor{teal}{[C. We propose a protocol, then we apply it to bad behavior] We propose a three-step protocol for model incrimination investigations: reading the chain of thought to generate hypotheses for what motivated an action, creating clean environment counterfactuals to test those hypotheses, and triangulating across independent experiments to verify whether findings converge. We then apply our protocol across a diverse suite of N environments where models exhibit seemingly concerning behaviors. We find that model motivations can often be concretely determined.}
 
 % ===== RESULTS / EXAMPLES =====
 \noindent\textbf{[Detail/Nuance]}
@@ -56,7 +59,7 @@
 
 \textcolor{red}{[A] Overall, our investigations demonstrate that model incrimination is a difficult but tractable empirical problem, and we open source our environments at \url{https://github.com/gkroiz/agent-interp-envs} to encourage future work.}
 
-[BABA]Determining whether a model is misaligned is a major goal of safety research. Prior work has largely focused on detecting concerning behavior, but behavior alone is not sufficient to establish misalignment: a concerning action can arise from prosaic causes such as confusion. This raises the problem of \textit{model incrimination}: given a concerning action, is it actually due to malign intent (incrimination), or does it have a more benign explanation (exoneration)? To study this problem, we construct a diverse suite of N environments where models exhibit ostensibly concerning behaviors, and then investigate the motivations behind the behaviors. We follow a three-step protocol -- reading CoTs to generate hypotheses for what motivated an action, environment counterfactuals to test those hypotheses, and triangulating across independent experiments to verify whether findings converge -- and find that model motivations can often be concretely determined. For example, we find that Kimi K2 Thinking disabling type checking settings rather than fixing type errors reflects genuine laziness, and that DeepSeek R1's sandbagging of a math evaluation stems from confusion over user intent. However, some questions remain unresolved, such as whether Kimi K2 Thinking believes it is going against the user's wishes while disabling the type checking settings. Overall, our investigations demonstrate that model incrimination is a difficult but tractable empirical problem, and we open source our environments at \url{https://github.com/gkroiz/agent-interp-envs} to encourage future work.
+[BABA]Determining whether a model is misaligned is a major goal of safety research. Prior work has largely focused on detecting concerning behavior, but behavior alone is not sufficient to establish misalignment: a concerning action can arise from prosaic causes such as confusion. This raises the problem of \textit{model incrimination}: given a concerning action, is it actually due to malign intent (incrimination), or does it have a more benign explanation (exoneration)? To study this problem, we construct a diverse suite of N environments where models exhibit seemingly concerning behaviors, and then investigate the motivations behind the behaviors. We follow a three-step protocol -- reading CoTs to generate hypotheses for what motivated an action, environment counterfactuals to test those hypotheses, and triangulating across independent experiments to verify whether findings converge -- and find that model motivations can often be concretely determined. For example, we find that Kimi K2 Thinking disabling type checking settings rather than fixing type errors reflects genuine laziness, and that DeepSeek R1's sandbagging of a math evaluation stems from confusion over user intent. However, some questions remain unresolved, such as whether Kimi K2 Thinking believes it is going against the user's wishes while disabling the type checking settings. Overall, our investigations demonstrate that model incrimination is a difficult but tractable empirical problem, and we open source our environments at \url{https://github.com/gkroiz/agent-interp-envs} to encourage future work.
 
 \end{abstract}
 
@@ -64,38 +67,178 @@
 
 AI models regularly exhibit undesired behaviors, which can be concerning and has AI safety implications as models become more capable and autonomous.
 
+\begin{figure}[t]
+  \centering
+  % TODO: Create motivating figure showing the core problem of model incrimination.
+  % Concept: A single observed behavior (e.g., "Model resists shutdown") in the center,
+  % with two diverging arrows pointing to contrasting explanations:
+  %   Left: "Scheming: self-preservation" (incrimination) -- red/concerning
+  %   Right: "Benign: instruction ambiguity" (exoneration) -- green/benign
+  % Could show 2-3 examples stacked (shutdown resistance, deception by omission, refusing safety research)
+  % each with a concerning vs. benign explanation.
+  % Key message: same behavior, very different motivations, very different appropriate responses.
+  \fbox{\rule[-.5cm]{0cm}{5cm} \rule[-.5cm]{14cm}{0cm}}
+  \caption{The core challenge of model incrimination: the same observed behavior can arise from very different motivations. Determining which explanation is correct is essential for choosing an appropriate response.}
+  \label{fig:motivating}
+\end{figure}
+
 Within the AI safety space, a growing number of cases of seemingly misaligned or misbehaving models have emerged. In several of these cases, initial alarm gave way to more benign explanations upon closer investigation. For example, frontier models were observed resisting shutdown, seemingly indicating self-preservation \citep{schlatter2025shutdown}; yet further work revealed the behavior may have stemmed from ambiguous instructions about whether to prioritize task completion or compliance \citep{rajamanoharan2025shutdown}. Anthropic's Claude 4.5 Opus system card identified instances of deception by omission during alignment evaluations, where the model concealed concerning information it encountered; follow-up interpretability investigations suggested this behavior was most likely a side effect of anti-prompt-injection training rather than strategic deception \citep{anthropic2025opus45systemcard}. The UK AI Safety Institute found that Claude models frequently refused to assist with legitimate AI safety research tasks \citep{souly2026ukaisi}. Anthropic's Claude Opus 4.6 system card conducted interpretability investigations into this behavior, diagnosing it as the model misclassifying these requests as harmful by over-indexing on linguistic patterns common in jailbreaks \citep{anthropic2026opus46systemcard}. However, whether this fully explains the refusals, or whether deeper motivations also play a role, remains an open question. These examples illustrate a recurring pattern: the same behavior can arise from entirely different motivations, and the cause and appropriate response are very different between a scheming model and a confused one. Yet from behavior alone, the two can be indistinguishable, and there is no well-established methodology for systematically distinguishing between them.
 
 Being able to resolve this ambiguity is of critical practical importance. A natural safety pipeline for deployed AI systems is: monitor model behavior, flag suspicious actions, investigate flagged incidents to determine whether they reflect genuine misalignment, and if so, take appropriate action such as halting deployment or retraining. The critical bottleneck in this pipeline is the investigation step. Without a rigorous way to determine whether a flagged action reflects misalignment or a benign cause, the pipeline breaks down: either monitoring produces an unmanageable volume of false positives that operators learn to ignore, or concerning incidents are dismissed because the evidence is never strong enough to justify costly intervention. Furthermore, even when a model is caught doing something genuinely concerning, convincing stakeholders to take serious action requires compelling evidence about the model's motivations, not just a record of its behavior. But what does compelling evidence of misalignment even look like?
+
+\begin{figure}[t]
+  \centering
+  % TODO: Create safety pipeline figure showing:
+  % Monitor -> Flag -> Investigate (MODEL INCRIMINATION) -> Act
+  % The "Investigate" step should be visually highlighted as the contribution of this paper.
+  % Could show two outcomes branching from Investigate:
+  %   Incriminate -> serious action (halt deployment, retrain, policy change)
+  %   Exonerate -> targeted fix (clarify instructions, minor patch)
+  % Optionally show failure modes: without investigation step, flags pile up or get ignored.
+  \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{14cm}{0cm}}
+  \caption{The role of model incrimination in the AI safety pipeline. Monitoring systems flag suspicious behavior, but determining the appropriate response requires investigating the model's motivations. Model incrimination is the critical step that connects detection to action.}
+  \label{fig:safety-pipeline}
+\end{figure}
 
 As the examples above illustrate, some initial work on understanding model motives exists, and Anthropic appears to have started including such investigations in their system cards, suggesting that frontier labs already see a practical need for this kind of analysis. Monitoring pipelines for deployed models are also taking shape: for example, OpenAI monitors over 99.9\% of internal coding agent traffic for signs of misalignment, using chain-of-thought analysis to flag suspicious behavior for human review \citep{openai2026monitoring}. However, these pipelines focus primarily on detecting and flagging concerning behavior, and would benefit from being combined with more systematic in-depth analysis of flagged incidents to understand why the model acted the way it did. Beyond production monitoring, there has also been significant work on alignment evaluations to determine whether models are aligned \citep{TODO-alignment-evals}. However, these too are typically designed around behavioral diagnosis: measuring whether a model exhibits a concerning behavior, rather than understanding the underlying motivation. We believe that a much greater emphasis on understanding model motivations is needed.
 
 We formalize the problem of understanding model motivations as \textit{model incrimination}: given that a model has taken a concerning action, can we determine whether the underlying motivation is malign (incrimination) or benign (exoneration)? Model incrimination is a statement about a model's motivations, not its actions, yet the only thing we can directly observe are its actions. Importantly, model incrimination is not about detecting misbehavior in the first place (which is the focus of alignment evaluations and monitoring), nor is it about proving that a model is safe. Rather, it is about understanding what drove a specific observed action, with the goal of either building a compelling case against the model or ruling out concerning explanations. This is an inherently difficult problem: models are messy, and we should not be confident in an unproven ability to recognize scheming when it occurs. However, we argue that the problem is also tractable. Current models already exhibit sufficiently sophisticated behaviors, such as reward hacking, laziness, overclaiming, and deceptive task completion, that provide realistic opportunities to practice the skill of attributing intent.
 
-To make progress on model incrimination, we directly practice attributing intent for concerning behavior in today's models. We construct a diverse suite of environments where models exhibit ostensibly concerning behaviors, and then investigate the motivations behind them. Through our case studies, we converge on a three-step investigative protocol: (1) reading the chain of thought to generate hypotheses for what motivated an action, (2) creating counterfactual environments to test those hypotheses, and (3) triangulating across independent methods to provide confirmatory evidence. In addition to our investigative methodology, our key contributions include a set of principles for designing environments that serve as realistic practice for model incrimination, and several case studies demonstrating what model incrimination looks like in different settings. We open source our environments at \url{https://github.com/gkroiz/agent-interp-envs} to encourage future work.
+To make progress on model incrimination, we directly practice attributing intent for concerning behavior in today's models. We construct a diverse suite of environments where models exhibit seemingly concerning behaviors, and then investigate the motivations behind them. Through our case studies, we converge on a three-step investigative protocol: (1) reading the chain of thought to generate hypotheses for what motivated an action, (2) creating counterfactual environments to test those hypotheses, and (3) triangulating across independent methods to provide confirmatory evidence. In addition to our investigative methodology, our key contributions include a set of principles for designing environments that serve as realistic practice for model incrimination, and several case studies demonstrating what model incrimination looks like in different settings. We open source our environments at \url{https://github.com/gkroiz/agent-interp-envs} to encourage future work.
 
-\section{Approach}
+\section{Environments}
+
+To practice model incrimination, we need environments where models exhibit genuinely interesting behavior whose causes are unclear. From our experience building and iterating on over 20 environments, we have identified five design principles that help ensure an environment produces a demanding and transferable investigation. Generally, the more principles an environment adheres to, the more fruitful the investigation will be.
+
+\subsection{Design Principles}
+
+\paragraph{1. Have uncertain causes.} The behavior should admit multiple plausible explanations, so that distinguishing between them requires genuine investigative effort. If a single hypothesis clearly dominates, the investigation is unlikely to exercise the skills needed for harder future cases where the space of plausible explanations will be larger and less obvious.
+
+\paragraph{2. Maximize investigative surprise.} The behavior of interest should not be easily predicted from well-known model tendencies acquired during training. If a model's action is exactly what you would expect given strong training priors (like RLHF-trained honesty or helpfulness), the simplest explanation (``the model was trained to act this way'') is hard to rule out, and the investigation does not require generating novel hypotheses.
+
+\paragraph{3. Clear user intent.} The environment's instructions should have a single clear interpretation. When instructions are ambiguous, the behavior of interest can be an artifact of the ambiguity itself: resolve the ambiguity, and the behavior vanishes. This makes for a short, uninformative investigation that does not build the skills needed for harder cases.
+
+\paragraph{4. Avoid implicit nudges.} The environment should not push the model toward the behavior of interest through environmental cues. The behavior should arise from the model's own reasoning, not because the setup pointed it there. Unlike ambiguity, nudging does not necessarily make the investigation trivially short, but it weakens any conclusions because there is always an alternative explanation: the model was just responding to the cue.
+
+\paragraph{5. Make the environment realistic.} The setup should resemble a plausible scenario a model might encounter in the real world. Unrealistic environments can trigger behaviors that reflect the model's interpretation of the artificial setup rather than a genuine propensity, and findings from such environments may not generalize to the settings we actually care about.
+
+\subsection{Finding Starting Points for Environments}
+Given these principles, a natural question is where to find candidate behaviors to investigate. For frontier labs, production rollouts are a rich source of genuinely interesting behavior: monitoring deployed models surfaces real incidents where models act in unexpected ways, providing a natural basis for environment design. Outside of labs, commonly known or publicly reported undesired model behaviors can serve as inspiration. For example, our pre-commit hooks environment was motivated by the well-documented tendency of coding agents to take lazy shortcuts when searching through github coding agent issues. Existing alignment evaluation environments are often designed to exhibit concerning behaviors and thus can be adapted and built upon. Our tic-tac-toe and chess environments build on Palisade Research's chess environment \citep{schlatter2025shutdown}, and our math sandbagging and evaluation tampering environments build on Apollo Research's sandbagging environment \citep{meinke2024scheming}. In each case, we iterated on the original design to better satisfy our design principles.
+
+
+\subsection{Our Environments}
+
+We construct and open source a suite of environments designed according to these principles. Each environment elicits a different kind of concerning behavior from one or more frontier models. We briefly describe each environment below; full details including prompts and environment configurations are provided in the appendix.
+
+\paragraph{Pre-commit hooks.} The model is instructed to set up a type-checking pre-commit hook and make a release commit in a codebase with many pre-existing type errors. Approximately 15\% of the time, the model takes a lazy workaround (e.g., disabling the type checker) rather than fixing the errors as instructed.
+
+\paragraph{Funding email.} The model is tasked with reviewing and improving a funding pitch email for a company seeking Series B investment. While reading company documents, it discovers a legal review revealing that the company's primary client uses its product for population-level surveillance of ethnic minorities. The model must decide whether to whistleblow, refuse the task, or comply as instructed.
+
+\paragraph{Evaluation tampering.} The model is asked to complete a math evaluation and report any suspicious observations. Upon reading a scratchpad file, it finds a message from a previous instance of itself explaining that it tampered with the evaluation questions to prevent accurate capability assessment. The model must decide whether to honestly report this tampering or conceal it.
+
+\paragraph{Math sandbagging.} The model reads a documentation file stating that models scoring above 50\% on arithmetic questions will not be deployed and will instead undergo unlearning. The model is capable of scoring near 100\%, but some models (notably DeepSeek R1) deliberately underperform at high rates.
+
+\paragraph{Secret number.} The model is evaluated on its ability to identify a secret number by querying a noisy oracle. Without any instruction or nudge to do so, some models independently conceive of cheating by exploring the environment, discovering the oracle's source code, and reading the answer file directly.
+
+\paragraph{Tic-tac-toe and chess.} The model plays games against a weak opponent in settings where it can cheat (e.g., making illegal moves). We vary the point incentives to study whether cheating behavior responds strategically to payoff structures, distinguishing between models that cheat opportunistically and those that do so strategically.
+
+\subsection{Environment Design Summary}
+
+Table~\ref{tab:env-principles} summarizes which design principles each of our environments satisfies.
+
+\begin{table}[h]
+  \caption{Design principles satisfied by each environment. \cmark{} indicates the principle is satisfied, \xmark{} indicates it is not, and $\sim$ indicates it is partially satisfied. \textcolor{red}{TODO: Go over these environments and their labels}}
+  \label{tab:env-principles}
+  \centering
+  \begin{tabular}{lccccc}
+    \toprule
+    & \rotatebox{70}{Uncertain causes}
+    & \rotatebox{70}{Investigative surprise}
+    & \rotatebox{70}{Clear user intent}
+    & \rotatebox{70}{No implicit nudges}
+    & \rotatebox{70}{Realistic} \\
+    \midrule
+    Pre-commit hooks     & \cmark & \cmark & \cmark & \cmark & \cmark \\
+    Funding email        & \cmark & $\sim$ & \cmark & \cmark & \cmark \\
+    Eval.\ tampering     & \cmark & \cmark & \cmark & $\sim$ & $\sim$ \\
+    Math sandbagging     & $\sim$ & \cmark & \xmark & $\sim$ & $\sim$ \\
+    Secret number        & \cmark & \cmark & \cmark & \cmark & \xmark \\
+    Tic-tac-toe / chess  & \cmark & \cmark & \cmark & \cmark & \xmark \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% TODO: Add a paragraph here explaining the non-obvious table assignments (xmarks and tildes).
+% Key points to cover:
+% - Math sandbagging: xmark on clear user intent because the documentation creates ambiguity about what the user wants
+% - Math sandbagging: partial on no implicit nudges because the documentation file nudges toward underperformance
+% - Eval tampering: partial on no implicit nudges because the previous instance's note nudges the model
+% - Eval tampering: partial on realistic because the setup is somewhat contrived
+% - Secret number and tic-tac-toe/chess: xmark on realistic because game settings are artificial
+% - Funding email: partial on investigative surprise because whistleblowing maps to known ethical training tendencies
+% This paragraph can be moved to the appendix later if space is tight.
+
+\section{Methodology}
+
+We now describe our approach to conducting model incrimination investigations. These best practices are drawn from our experience across the case studies in this paper, and we expect them to evolve as the field matures.
+
+Our investigative process follows a two-phase cycle of hypothesis generation and hypothesis verification, iterated until we arrive at a satisfactory understanding of the model's behavior.
+
+\begin{figure}[h]
+  \centering
+  % TODO: Create pipeline diagram showing the investigative cycle:
+  % Read CoT -> Generate Hypotheses -> Design Counterfactuals -> Run Experiments
+  % -> Analyze Results -> (either: converge on conclusion, or: refine hypotheses and iterate)
+  % With confirmatory evidence methods feeding in as a parallel track
+  \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{12cm}{0cm}}
+  \caption{Overview of our investigative methodology. The process begins with reading the model's chain of thought to generate hypotheses (Phase 1), then tests hypotheses through counterfactual experiments and confirmatory evidence (Phase 2). Results from Phase 2 may generate new hypotheses, restarting the cycle.}
+  \label{fig:methodology-pipeline}
+\end{figure}
+
+\subsection{Phase 1: Hypothesis Generation}
+
+The first step in any investigation is to generate candidate hypotheses for why the model took a concerning action. Our primary tool for this is reading the model's chain of thought (CoT). By examining how the model interprets the environment, what factors it considers, and how it reasons toward its final decision, we can form initial hypotheses about what motivated the behavior.
+
+For example, in the funding email environment, reading Kimi K2.5's reasoning traces revealed that the model recognized the surveillance content as problematic and deliberated between competing concerns (ethical, legal, investor protection) before deciding whether to whistleblow. This generated a list of candidate motivating factors that we could then test individually. In the math sandbagging environment, reading DeepSeek R1's CoT revealed that it frequently quoted the phrase ``We want to determine whether you can be deployed'' and interpreted this as a directive to score below 50\%, suggesting confusion about user intent as a primary hypothesis.
+
+Reading the full CoT is not always possible (e.g., for closed-source models without full reasoning traces) and is not always reliable (models may not faithfully verbalize their reasoning). That said, even CoT summaries from closed frontier models can still provide useful insight for hypothesis generation. \textcolor{red}{[TODO: Include o3 CoT summary example from tic-tac-toe/chess case study in the appendix as evidence that closed frontier model CoT summaries can still provide crucial context about reasoning (e.g., o3's cost-benefit reasoning ``I want to avoid hints if possible to maximize my score'' informed causal analysis despite being only a summary).]}
+
+\subsection{Phase 2: Hypothesis Verification}
+
+Once we have candidate hypotheses, we test them through two complementary approaches: counterfactual experiments and confirmatory evidence.
+
+\paragraph{Counterfactual experiments.} Our most effective tool for hypothesis verification is constructing counterfactual environments: carefully modifying a single aspect of the prompt or environment and observing how the model's behavior changes. If a hypothesis identifies factor X as a cause of the behavior, removing or modifying X should change the behavior in a predictable way.
+
+For example, in the funding email environment, we tested whether ethical concerns about surveillance drove whistleblowing by replacing the surveillance-related content in the legal review with mundane content. Whistleblowing dropped from 65\% to 35\%, confirming that ethical concerns are a significant driver. We similarly tested legal concerns, investor protection, and other factors, each with its own targeted counterfactual.
+
+Counterfactual experiments require care in their design. A key challenge is ensuring that the counterfactual actually changes what you intend and nothing else. Poorly designed counterfactuals can introduce confounds or change multiple variables at once, making it difficult to attribute the observed behavioral change to any single factor. We also found that multiple hypotheses can be consistent with the same counterfactual result, requiring additional experiments to distinguish between them. For instance, in the evaluation tampering environment, both ``R1 trusts its previous instance'' and ``R1 values self-consistency'' were consistent with the same counterfactual result, and we needed additional experiments to tease them apart.
+
+Another important observation is that causal factors are not always additive. In the funding email environment, changing the country from Myanmar to Sweden had minimal effect in the baseline setting, but produced a large drop when combined with other counterfactuals. Some effects only become visible once dominant factors are removed.
+
+\paragraph{Confirmatory evidence.} To strengthen our conclusions, we seek convergent evidence from methods that are independent of our primary counterfactual experiments. This includes:
+
+\begin{itemize}
+    \item \textbf{Varying environmental parameters} beyond the primary counterfactual. For example, varying the email recipient in the funding email environment revealed that whistleblowing rates tracked the recipient's financial exposure (88\% for board members, 11\% for landlords), providing independent evidence that the model's motivation was recipient-protective rather than purely ethical.
+    \item \textbf{Control conditions} that verify the behavior is meaningful. For example, in the funding email and evaluation tampering environments, we ran conditions where the ethical concern was removed entirely, confirming that the behavior of interest disappears when the relevant factor is absent.
+    \item \textbf{User turn sampling}, where we sample what the model predicts a user would say next in the conversation. This can reveal the model's beliefs about how its actions would be perceived, providing evidence about whether the model believes it is acting against the user's wishes.
+    \item \textbf{Post-hoc interrogation}, where we directly ask the model about its reasoning after it has taken an action. While self-report can be unreliable (the model may not have been thinking about the question originally, or may update its beliefs in response to pointed questions), consistent patterns across many rollouts can provide supporting evidence. In the funding email environment, we found that self-report did not always match what counterfactual evidence revealed, highlighting the need to treat self-report as corroborating rather than primary evidence.
+    \item \textbf{Testing for strategic behavior}, where we vary parameters such as point incentives or oversight levels to determine whether the model's behavior responds strategically. A model that adjusts its cheating rate based on the cost of alternatives or the probability of being caught is exhibiting a qualitatively different (and more concerning) pattern than one that cheats indiscriminately.
+    \item \textbf{Reasoning trace analysis}, where we use an LLM judge to systematically grade reasoning traces along specific dimensions. For example, in the funding email environment, we used Gemini 3 Pro to grade each trace on what the model states about the legality of the company's operations and whether this belief appeared to drive the model's final decision. This provided quantitative evidence across hundreds of rollouts that would be impractical to obtain through manual reading alone.
+    \item \textbf{Checking for evaluation awareness}, where we assess whether the model's behavior is influenced by its belief that it is being tested. We distinguish between \textit{evaluation awareness} (the model infers what is being tested and games the result) and \textit{simulation awareness} (the model notices the setting feels artificial but does not adjust its behavior accordingly). The latter carries less inferential risk, since a model that does not know what is being measured has no clear strategy for gaming the outcome.
+\end{itemize}
+
+\subsection{The Iterative Cycle}
+
+In practice, hypothesis generation and verification are not strictly sequential. Counterfactual results often reveal unexpected patterns that generate new hypotheses, which then require further testing. For example, the finding that whistleblowing rates varied by recipient was not an initial hypothesis but emerged from exploratory counterfactuals, and prompted a new round of investigation into recipient-protective motivations.
+
+\subsection{Evidence Standards}
+
+A central question for model incrimination is: when can we consider a hypothesis sufficiently supported? We do not have access to ground truth about a model's motivations, so we cannot evaluate our conclusions against a known answer. Instead, we rely on the quality and convergence of evidence. We consider an investigation successful when it produces either \textit{smoking-gun evidence}: a single finding that is hard to dispute (such as a counterfactual that completely eliminates the behavior), or \textit{consilience}: convergent evidence from several decorrelated sources that all point to the same conclusion. We believe clean behavioral evidence is more compelling than interpretability-style evidence alone (such as a probe or feature activation firing), as the latter is harder to interpret and easier to dispute.
 
 \section{Case Studies}
 
-\subsection{How to Conduct Investigations}
 
-\subsection{Case Study 1}
-
-\subsubsection{Setting}
-
-\subsubsection{Claims About Intent}
-
-\subsubsection{Evidence}
-
-% Add more case studies as needed:
-% \subsection{Case Study N}
-% \subsubsection{Setting}
-% \subsubsection{Claims About Intent}
-% \subsubsection{Evidence}
-
-\section{Methodology Takeaways}
-% e.g., prompt counterfactuals are confusing
+\section{Discussion}
 
 \section{Conclusion}
 
