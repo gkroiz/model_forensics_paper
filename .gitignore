@@ -8,3 +8,7 @@
 *.synctex.gz
 *.fdb_latexmk
 *.fls
+
+# IDE
+.cursor/
+.vscode/
