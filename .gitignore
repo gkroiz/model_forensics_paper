@@ -12,3 +12,9 @@
 # IDE
 .cursor/
 .vscode/
+
+# Python
+.venv/
+__pycache__/
+*.egg-info/
+*.pyc
