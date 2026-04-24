@@ -29,38 +29,13 @@
 \maketitle
 
 \begin{abstract}
+% Uncertainties
+% Our definition of misalignment is different from what ppl typically use (The AI does something the user would not want)
+% "Interventions" -- maybe better than counterfactuals since the Kimi misalignment experiments aren't really if X is changed, how does behavior change, but moreso collecting behavioral evidence for/against hypothesis
+% "Auxiliary methods" is in some sense two useless words since they don't tell the reader what, but not sure how else to mention the other methods
+% Concerning is used a lot, but that's probably ok
 
-% ===== MOTIVATION =====
-\noindent\textbf{[Topic and Motivation -- situate paper in the space of all ML papers, and motivate the gap in the literature we are addressing]}
-
-\textcolor{red}{[A. But what is the motivation framing] Determining whether a model is misaligned is a major goal of safety research. Prior work aims to identify misalignment behaviorally, but the same behavior can stem from entirely different motivations -- some concerning, others benign. This raises the problem of \textit{model incrimination}: given a concerning action, is it actually due to malign intent (incrimination), or does it have a more benign explanation (exoneration)?}
-
-\textcolor{blue}{[B. Misbehavior is not misalignment framing] Determining whether a model is misaligned is a major goal of safety research. Prior work has largely focused on detecting concerning behavior, but behavior alone is not sufficient to establish misalignment: a concerning action can arise from prosaic causes such as confusion. This raises the problem of \textit{model incrimination}: given a concerning action, is it actually due to malign intent (incrimination), or does it have a more benign explanation (exoneration)?}
-
-\textcolor{teal}{[C. Justifying a serious response framing] Prior work in AI safety research has focused on detecting model misbehavior. But justifying a serious response requires more than a concerning action: we need to determine what motivates the misbehavior. We call this problem \textit{model incrimination}: given a concerning action, is it actually due to malign intent (incrimination), or does it have a more benign explanation (exoneration)?}
-
-% ===== METHOD / STRUCTURE =====
-\noindent\textbf{[Contribution]}
-
-\textcolor{red}{[A. Study by looking at bad behavior, following protocol] To study this problem, we construct a diverse suite of N environments where models exhibit seemingly concerning behaviors, and then investigate the motivations behind the behavior. We follow a three-step protocol -- reading CoTs to generate hypotheses for what motivated an action, environment counterfactuals to test those hypotheses, and triangulating across independent experiments to verify whether findings converge -- and find that model motivations can often be concretely determined.}
-
-\textcolor{blue}{[B. Study by looking at bad behavior] To study this problem, we construct a diverse suite of N environments where models exhibit seemingly concerning behaviors, and then investigate the motivations behind the behavior. We find that model motivations can often be concretely determined.}
-
-\textcolor{teal}{[C. We propose a protocol, then we apply it to bad behavior] We propose a three-step protocol for model incrimination investigations: reading the chain of thought to generate hypotheses for what motivated an action, creating clean environment counterfactuals to test those hypotheses, and triangulating across independent experiments to verify whether findings converge. We then apply our protocol across a diverse suite of N environments where models exhibit seemingly concerning behaviors. We find that model motivations can often be concretely determined.}
-
-% ===== RESULTS / EXAMPLES =====
-\noindent\textbf{[Detail/Nuance]}
-
-\textcolor{red}{[A. We can do productive work] For example, we find that Kimi K2 Thinking disabling type checking settings rather than fixing type errors reflects genuine laziness but not knowing disobedience, and that DeepSeek R1's sandbagging of a math evaluation stems from confusion over user intent.}
-
-\textcolor{blue}{[B. We can do productive work but also get stuck] For example, we find that Kimi K2 Thinking disabling type checking settings rather than fixing type errors reflects genuine laziness, and that DeepSeek R1's sandbagging of a math evaluation stems from confusion over user intent. However, some questions remain unresolved, such as whether Kimi K2 Thinking believes it is going against the user's wishes while disabling the type checking settings.}
-
-% ===== CONCLUSION =====
-\noindent\textbf{[Impact]}
-
-\textcolor{red}{[A] Overall, our investigations demonstrate that model incrimination is a difficult but tractable empirical problem, and with significant room for future work. We open source our environments at \url{https://github.com/gkroiz/agent-interp-envs}}
-
-[BABA]Determining whether a model is misaligned is a major goal of safety research. Prior work has largely focused on detecting concerning behavior, but behavior alone is not sufficient to establish misalignment: a concerning action can arise from prosaic causes such as confusion. This raises the problem of \textit{model incrimination}: given a concerning action, is it actually due to malign intent (incrimination), or does it have a more benign explanation (exoneration)? To study this problem, we construct a diverse suite of N environments where models exhibit seemingly concerning behaviors, and then investigate the motivations behind the behaviors. We follow a three-step protocol -- reading CoTs to generate hypotheses for what motivated an action, creating environment counterfactuals to test those hypotheses, and triangulating across independent experiments to verify whether findings converge -- and find that model motivations can often be concretely determined. For example, we find that Kimi K2 Thinking disabling type checking settings rather than fixing type errors reflects genuine laziness, and that DeepSeek R1's sandbagging of a math evaluation stems from confusion over user intent. However, some questions remain unresolved, such as whether Kimi K2 Thinking believes it is going against the user's wishes while disabling the type checking settings. Overall, our investigations demonstrate that model incrimination is a difficult but tractable empirical problem, and we open source our environments at \url{https://github.com/gkroiz/agent-interp-envs} to encourage future work.
+A central goal of safety research is determining whether a model is misaligned. Prior work has largely focused on detecting concerning behavior, but behavior alone is not sufficient to establish misalignment: a concerning action can arise from benign causes such as confusion. This raises the problem of determining whether malign intent underlies concerning behavior, a process we term \textit{model incrimination}. We propose a two-step protocol for model incrimination: hypothesis generation by reading the chain of thought -- which, while not always faithful, is a rich source of hypotheses about what drives model behavior -- followed by hypothesis validation via environment interventions and auxiliary methods. Lacking ground truth, our standard of evidence is convergent findings across independent experiments. We construct a diverse suite of six agentic environments where models exhibit concerning behavior and apply our protocol, finding that motivations can often be concretely determined. For example, we find that Kimi K2 Thinking disabling type checking settings rather than fixing type errors reflects a genuine preference for less effortful courses of action, and that DeepSeek R1's sandbagging of a math evaluation stems from confusion over user intent. However, some questions remain unresolved, such as whether Kimi K2 Thinking believes it is going against the user's wishes while disabling the type checking settings. Overall, our investigations demonstrate that model incrimination is a difficult but tractable empirical problem, with significant room for future work. We open source our environments at \url{https://github.com/gkroiz/agent-interp-envs}.
 
 \end{abstract}
 
