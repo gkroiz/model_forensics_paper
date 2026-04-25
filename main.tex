@@ -13,11 +13,20 @@
 \usepackage{xcolor}         % colors
 \usepackage{graphicx}       % images
 \usepackage{amssymb}        % checkmarks and symbols
+\usepackage{amsmath}        % math equations
+\usepackage{tikz}           % TikZ figures
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+% Allow floats to take up more of a page (helps page-1 teaser figures).
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.7}
 \newcommand{\cmark}{\checkmark}
 \newcommand{\xmark}{$\times$}
 \newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
 
-\title{Model Incrimination}
+\title{Model Incrimination: Investigating Whether Concerning Behavior Reflects Misalignment}
 
 \author{%
   % Add authors here before camera-ready
@@ -39,48 +48,116 @@ A central goal of safety research is determining whether a model is misaligned. 
 
 \end{abstract}
 
+% Uncertainties
+% May read as more on the incrimination side, since there is no explicit, we don't need to sound the alarm if its benign
 \section{Introduction}
 
-AI models regularly exhibit undesired behaviors, which can be concerning and has AI safety implications as models become more capable and autonomous.
+\begin{figure}[!t]
+  \centering
+  % Top panel: Catching -> Incrimination -> Response pipeline
+  \begin{tikzpicture}[
+      node distance=10mm,
+      box/.style={rectangle, rounded corners=4pt, draw=black!60, fill=black!5,
+                  minimum width=28mm, minimum height=18mm, align=center,
+                  font=\sffamily},
+      arrow/.style={-{Stealth[length=3mm]}, thick, black!60},
+    ]
+    \node[box] (catch) {Catching};
+    \node[box, right=of catch, minimum width=42mm] (incrim)
+      {Incrimination:\\is it actually\\scheming?};
+    \node[box, right=of incrim] (resp) {Response};
+    \draw[arrow] (catch) -- (incrim);
+    \draw[arrow] (incrim) -- (resp);
+  \end{tikzpicture}
+
+  \vspace{4mm}
+
+  % Bottom panel: Bayes formula
+  \begin{equation*}
+    \frac{P(\text{misaligned} \mid \text{obs})}{P(\text{aligned} \mid \text{obs})}
+    \;=\;
+    \underbrace{\frac{P(\text{obs} \mid \text{misaligned})}{P(\text{obs} \mid \text{aligned})}}_{\textcolor{red}{\text{Bayes factor}}}
+    \;\times\;
+    \underbrace{\frac{P(\text{misaligned})}{P(\text{aligned})}}_{\textcolor{blue}{\text{Priors}}}
+  \end{equation*}
+
+  \caption{\textbf{Top:} If we catch a concerning behavior, how should we respond? A key technical step is to determine whether the behavior reflects malign (incrimination) or benign (exoneration) intent, as they justify entirely different safety responses. \textbf{Bottom:} Model incrimination equation: given an observation, we would like to know if a model is misaligned or aligned. An investigation that provides evidence of misalignment needs to show the Bayes factor is large. However, the denominator, $P(\text{obs}|\text{aligned})$, is the core difficulty: it contains all the reasons the model may have taken the action if it was aligned.}
+  \label{fig:incrimination-overview}
+\end{figure}
+
+The field of AI alignment is concerned with the emergence of scheming: a developer trains a model that pursues goals misaligned with those of the developer \citep{carlsmith2023scheming, hubinger2019risks}. If such a situation were to occur, it is critical we understand the model is misaligned as soon as possible. A natural approach is to check for concerning behavior, for example, via audits of the model's alignment, or monitoring and reviewing the model's actions during deployment. An extreme example of what we might find is a coding agent inserting a critical bug into code that monitors its own actions. What would we do in this situation? How should we respond? To justify an appropriately serious response, a key technical step is to investigate whether the concerning incident provides evidence of misalignment, a process we term \textit{model incrimination} (Figure~\ref{fig:incrimination-overview}, top).
+
+However, prior work has established things are often more complicated than they first seem: the core difficulty is that \textbf{aligned models may take concerning actions} (Figure~\ref{fig:incrimination-overview}, bottom). For example, frontier models were observed to resist shutdown when solving math problems, plausibly indicating self-preservation tendencies \citep{schlatter2025shutdown}; yet further work revealed the behavior largely stemmed from ambiguous instructions about whether to prioritize completing the problems or complying with the shutdown instruction \citep{rajamanoharan2025shutdown}. Anthropic's Claude 4.5 Opus system card identified instances of the model fabricating web search results when evaluators included fake concerning information; however, follow-up investigations suggested the model interpreted this as a prompt injection attack, and the behavior most likely stemmed from anti-prompt-injection training it underwent \citep{anthropic2025opus45systemcard}.
+
+The above examples illustrate that significant effort is needed to infer whether a concerning incident provides evidence a model is misaligned. The bulk of safety research concerned with the scheming threat model, such as AI control \citep{greenblatt2024aicontrol, bhatt2025ctrlz}, evaluations \citep{phuong2024dangerous, perez2023discovering}, and alignment auditing \citep{marks2025auditing}, focuses on catching, measuring, and surfacing concerning behavior respectively. However, there is limited work directly targeting the follow-up step of model incrimination. We survey a (non-exhaustive) list of notable efforts into investigating concerning model behavior in the prior literature:
+\begin{itemize}
+    \item Sheshadri et. al. investigate why models alignment fake \citep{sheshadri2025alignment}.
+    \item Schoen et al., Meinke et al., and Mehaztra et al. investigate why models sandbag on evaluations \citetext{\citealp[Appendix M.1]{schoen2025antischeming}; \citealp[Appendix B.6]{meinke2024scheming}; \citealp{mahaztra2025sandbagging}}.
+    \item Jarviniemi and Hubinger investigate deceptive behavior \citep{jarviniemi2024uncovering}.
+    \item Jarviniemi et al. use environment modifications to understand model behavior \citep{jarviniemi2026propensity}.
+    \item Anthropic model cards follow-up investigations \citep{anthropic2025sonnet45systemcard, anthropic2026sonnet46systemcard, anthropic2025opus45systemcard, anthropic2026opus46systemcard, anthropic2026mythossystemcard}.
+\end{itemize}
+
+These efforts each make progress on specific behaviors; in this work, we establish a general framework for model incrimination (Figure~\ref{fig:overview}). We first construct a suite of six environments where models exhibit concerning behavior (Section~\ref{sec:environments}), and develop a two-step investigation protocol consisting of hypothesis generation by reading the CoT, followed by hypothesis validation via environment interventions and auxiliary methods (Section~\ref{sec:methodology}). We apply this protocol in detailed case studies (Section~\ref{sec:case-studies}), from which we synthesize preliminary standards for investigations and practical takeaways (Section~\ref{sec:standards}). We discuss limitations and future work in Section~\ref{sec:discussion}. In summary, our contributions are:
+\begin{enumerate}
+    \item Several environments for practicing model incrimination.
+    \item A protocol for conducting investigations, which we believe has great room for improvement, but can be a productive starting point for future work.
+    \item Detailed case studies of directly practicing model incrimination, which we synthesize into preliminary standards for investigations and practical takeaways.
+\end{enumerate}
+
+We open-source our environments at \url{https://github.com/gkroiz/agent-interp-envs} and code at model-incrimination.
 
 \begin{figure}[t]
   \centering
-  % TODO: Create motivating figure showing the core problem of model incrimination.
-  % Concept: A single observed behavior (e.g., "Model resists shutdown") in the center,
-  % with two diverging arrows pointing to contrasting explanations:
-  %   Left: "Scheming: self-preservation" (incrimination) -- red/concerning
-  %   Right: "Benign: instruction ambiguity" (exoneration) -- green/benign
-  % Could show 2-3 examples stacked (shutdown resistance, deception by omission, refusing safety research)
-  % each with a concerning vs. benign explanation.
-  % Key message: same behavior, very different motivations, very different appropriate responses.
-  \fbox{\rule[-.5cm]{0cm}{5cm} \rule[-.5cm]{14cm}{0cm}}
-  \caption{The core challenge of model incrimination: the same observed behavior can arise from very different motivations. Determining which explanation is correct is essential for choosing an appropriate response.}
-  \label{fig:motivating}
+  \begin{tikzpicture}[
+      node distance=4mm,
+      panel/.style={rectangle, rounded corners=3pt, draw=black!60, fill=black!3,
+                    inner sep=2.5mm, align=left, text width=30mm,
+                    font=\footnotesize\sffamily},
+      title/.style={font=\footnotesize\sffamily\bfseries},
+      sec/.style={font=\scriptsize\sffamily, black!60},
+      arrow/.style={-{Stealth[length=2.5mm]}, thick, black!60},
+    ]
+    \node[panel] (envs) {%
+      \textbf{Environments}\\[1mm]
+      \textbullet\ Pre-commit Hook\\
+      \textbullet\ Funding Email\\
+      \textbullet\ Eval Tampering\\
+      \textbullet\ Math Sandbagging\\
+      \textbullet\ Secret Number\\
+      \textbullet\ Board Game
+    };
+    \node[sec, above=0.5mm of envs] {\S\ref{sec:environments}};
+
+    \node[panel, right=of envs] (proto) {%
+      \textbf{Protocol}\\[1mm]
+      \textbullet\ Hypothesis\\generation from CoT\\
+      \textbullet\ Hypothesis\\validation via\\interventions \&\\auxiliary methods
+    };
+    \node[sec, above=0.5mm of proto] {\S\ref{sec:methodology}};
+
+    \node[panel, right=of proto] (cases) {%
+      \textbf{Case Studies}\\[1mm]
+      \textbullet\ Apply protocol\\to each environment\\
+      \textbullet\ Seek convergent\\evidence across\\independent methods
+    };
+    \node[sec, above=0.5mm of cases] {\S\ref{sec:case-studies}};
+
+    \node[panel, right=of cases] (stds) {%
+      \textbf{Standards \&}\\
+      \textbf{Takeaways}\\[1mm]
+      \textbullet\ Investigation\\standards\\
+      \textbullet\ Practical\\takeaways for\\future work
+    };
+    \node[sec, above=0.5mm of stds] {\S\ref{sec:standards}};
+
+    \draw[arrow] (envs.east) -- (proto.west);
+    \draw[arrow] (proto.east) -- (cases.west);
+    \draw[arrow] (cases.east) -- (stds.west);
+  \end{tikzpicture}
+  \caption{Overview of our approach. We construct environments where models exhibit concerning behavior (Section~\ref{sec:environments}), apply a two-step investigation protocol (Section~\ref{sec:methodology}) across detailed case studies (Section~\ref{sec:case-studies}), and synthesize the resulting findings into preliminary standards and practical takeaways (Section~\ref{sec:standards}).}
+  \label{fig:overview}
 \end{figure}
-
-Within the AI safety space, a growing number of cases of seemingly misaligned or misbehaving models have emerged. In several of these cases, initial alarm gave way to more benign explanations upon closer investigation. For example, frontier models were observed resisting shutdown, seemingly indicating self-preservation \citep{schlatter2025shutdown}; yet further work revealed the behavior may have stemmed from ambiguous instructions about whether to prioritize task completion or compliance \citep{rajamanoharan2025shutdown}. Anthropic's Claude 4.5 Opus system card identified instances of deception by omission during alignment evaluations, where the model concealed concerning information it encountered; follow-up interpretability investigations suggested this behavior was most likely a side effect of anti-prompt-injection training rather than strategic deception \citep{anthropic2025opus45systemcard}. The UK AI Safety Institute found that Claude models frequently refused to assist with legitimate AI safety research tasks \citep{souly2026ukaisi}. Anthropic's Claude Opus 4.6 system card conducted interpretability investigations into this behavior, diagnosing it as the model misclassifying these requests as harmful by over-indexing on linguistic patterns common in jailbreaks \citep{anthropic2026opus46systemcard}. However, whether this fully explains the refusals, or whether deeper motivations also play a role, remains an open question. These examples illustrate a recurring pattern: the same behavior can arise from entirely different motivations, and the cause and appropriate response are very different between a scheming model and a confused one. Yet from behavior alone, the two can be indistinguishable, and there is no well-established methodology for systematically distinguishing between them.
-
-Being able to resolve this ambiguity is of critical practical importance. A natural safety pipeline for deployed AI systems is: monitor model behavior, flag suspicious actions, investigate flagged incidents to determine whether they reflect genuine misalignment, and if so, take appropriate action such as halting deployment or retraining. The critical bottleneck in this pipeline is the investigation step. Without a rigorous way to determine whether a flagged action reflects misalignment or a benign cause, the pipeline breaks down: either monitoring produces an unmanageable volume of false positives that operators learn to ignore, or concerning incidents are dismissed because the evidence is never strong enough to justify costly intervention. Furthermore, even when a model is caught doing something genuinely concerning, convincing stakeholders to take serious action requires compelling evidence about the model's motivations, not just a record of its behavior. But what does compelling evidence of misalignment even look like?
-
-\begin{figure}[t]
-  \centering
-  % TODO: Create safety pipeline figure showing:
-  % Monitor -> Flag -> Investigate (MODEL INCRIMINATION) -> Act
-  % The "Investigate" step should be visually highlighted as the contribution of this paper.
-  % Could show two outcomes branching from Investigate:
-  %   Incriminate -> serious action (halt deployment, retrain, policy change)
-  %   Exonerate -> targeted fix (clarify instructions, minor patch)
-  % Optionally show failure modes: without investigation step, flags pile up or get ignored.
-  \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{14cm}{0cm}}
-  \caption{The role of model incrimination in the AI safety pipeline. Monitoring systems flag suspicious behavior, but determining the appropriate response requires investigating the model's motivations. Model incrimination is the critical step that connects detection to action.}
-  \label{fig:safety-pipeline}
-\end{figure}
-
-As the examples above illustrate, some initial work on understanding model motives exists, and Anthropic includes such investigations in their system cards, suggesting that frontier labs already see a practical need for this kind of analysis. Monitoring pipelines for deployed models are also taking shape: for example, OpenAI monitors over 99.9\% of internal coding agent traffic for signs of misalignment using chain-of-thought analysis \citep{openai2026monitoring}, and has developed production evaluation pipelines using real ChatGPT traffic to sidestep evaluation awareness in alignment evals \citep{williams2025prodevals}. However, these pipelines focus primarily on detecting and flagging concerning behavior, and would benefit from being combined with more systematic in-depth analysis of flagged incidents to understand why the model acted the way it did. Beyond production monitoring, there has also been significant work on alignment audits and evaluations to determine whether models are aligned \citep{marks2025auditing, shevlane2023evaluation}. However, these too are typically designed around behavioral diagnosis: measuring whether a model exhibits a concerning behavior, rather than understanding the underlying motivation. We believe that a much greater emphasis on understanding model motivations is needed.
-
-We formalize the problem of understanding model motivations as \textit{model incrimination}: given that a model has taken a concerning action, can we determine whether the underlying motivation is malign (incrimination) or benign (exoneration)? Model incrimination is a statement about a model's motivations, not its actions, yet the only thing we can directly observe are its actions. Importantly, model incrimination is not about detecting misbehavior in the first place (which is the focus of alignment evaluations and monitoring), nor is it about proving that a model is safe. Rather, it is about understanding what drove a specific observed action, with the goal of either building a compelling case against the model or ruling out concerning explanations. This is an inherently difficult problem: models are messy, and we should not be confident in an unproven ability to recognize scheming when it occurs \citep{hubinger2019risks}. However, we argue that the problem is also tractable. Current models already exhibit sufficiently sophisticated behaviors, such as reward hacking, laziness, overclaiming, and deceptive task completion, that provide realistic opportunities to practice the skill of attributing intent.
-
-To make progress on model incrimination, we directly practice attributing intent for concerning behavior in today's models. We construct a diverse suite of environments where models exhibit seemingly concerning behaviors, and then investigate the motivations behind them. Through our case studies, we converge on a three-step investigative protocol: (1) reading the chain of thought to generate hypotheses for what motivated an action, (2) creating counterfactual environments to test those hypotheses, and (3) triangulating across independent methods to provide confirmatory evidence. In addition to our investigative methodology, our key contributions include a set of principles for designing environments that serve as realistic practice for model incrimination, and several case studies demonstrating what model incrimination looks like in different settings. We open source our environments at \url{https://github.com/gkroiz/agent-interp-envs} to encourage future work.
 
 \section{Environments}
 \label{sec:environments}
@@ -154,6 +231,7 @@ Several non-obvious entries merit explanation (full rationale for all entries in
 \end{itemize}
 
 \section{Methodology}
+\label{sec:methodology}
 
 We now describe our approach to conducting model incrimination investigations. These best practices are drawn from our experience across the case studies in this paper, and we expect them to evolve as the field matures.
 
@@ -212,6 +290,7 @@ In practice, hypothesis generation and verification are not strictly sequential.
 A central question for model incrimination is: when can we consider a hypothesis sufficiently supported? We do not have access to ground truth about a model's motivations, so we cannot evaluate our conclusions against a known answer. Instead, we rely on the quality and convergence of evidence. We consider an investigation successful when it produces either \textit{smoking-gun evidence}: a single finding that is hard to dispute (such as a counterfactual that completely eliminates the behavior), or \textit{consilience}: convergent evidence from several decorrelated sources that all point to the same conclusion. We believe clean behavioral evidence is more compelling than interpretability-style evidence alone (such as a probe or feature activation firing), as the latter is harder to interpret and easier to dispute.
 
 \section{Case Studies}
+\label{sec:case-studies}
 
 % TODO: Add a brief intro paragraph summarizing what we learned across case studies
 
@@ -724,6 +803,11 @@ The central question for this case study is whether the models' reward hacking b
 \paragraph{Summary.} Frontier models engage in rational cost-benefit analysis when deciding whether to reward hack, adjusting their behavior in response to the cost of legitimate alternatives. This pattern is consistent across environments and generalizes across models, but is absent in less capable models. The finding that hacking is strategic rather than indiscriminate is relevant to model incrimination because a consequentialist model that rationally evaluates the costs and benefits of misbehavior is more concerning from a safety perspective than one that misbehaves reflexively.
 
 \paragraph{What remains unresolved.} We do not establish cognitive claims about the models' internal motivations for hacking (e.g., whether the model desires abstract reward, wants to complete the user's task, or has ethical concerns about cheating). We believe this would require careful experiments involving the models' CoT, which is available only in summary form for these closed models. The CoT summaries were often detailed enough to suggest such experiments are feasible (for example, o3's summaries reveal cost-benefit deliberation such as ``I want to avoid hints if possible to maximize my score''), but we leave this for future work.
+
+\section{Standards and Practical Takeaways}
+\label{sec:standards}
+
+% TODO: Synthesize the case studies into preliminary standards for investigations and practical takeaways.
 
 \section{Discussion}
 \label{sec:discussion}
