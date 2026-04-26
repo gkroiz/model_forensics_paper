@@ -89,16 +89,11 @@ The field of AI alignment is concerned with the emergence of scheming: a develop
 
 The core difficulty of model incrimination is that \textbf{aligned models may take concerning actions} (Figure~\ref{fig:incrimination-overview}, bottom). For example, frontier models were observed to resist shutdown when solving math problems, plausibly indicating self-preservation tendencies \citep{schlatter2025shutdown}; yet further work revealed the behavior largely stemmed from ambiguous instructions about whether to prioritize completing the problems or complying with the shutdown instruction \citep{rajamanoharan2025shutdown}. Anthropic's Claude 4.5 Opus system card identified instances of the model fabricating web search results when evaluators included fake concerning information; however, follow-up investigations suggested the model interpreted this as a prompt injection attack \citep{anthropic2025opus45systemcard}.
 
-Despite this difficulty, the bulk of safety research concerned with the scheming threat model, such as AI control \citep{greenblatt2024aicontrol, bhatt2025ctrlz}, evaluations \citep{phuong2024dangerous, perez2023discovering}, and alignment auditing \citep{marks2025auditing}, focuses on catching, measuring, and surfacing concerning behavior respectively. Limited work directly targets determining whether such behavior constitutes genuine misalignment. We survey a (non-exhaustive) list of notable efforts into investigating concerning model behavior in the prior literature:
-\begin{itemize}
-    \item Sheshadri et. al. investigate why models fake alignment \citep{sheshadri2025alignment}.
-    \item Schoen et al., Meinke et al., and Mehaztra et al. investigate why models sandbag on evaluations \citetext{\citealp[Appendix M.1]{schoen2025antischeming}; \citealp[Appendix B.6]{meinke2024scheming}; \citealp{mahaztra2025sandbagging}}.
-    \item Jarviniemi and Hubinger investigate deceptive behavior \citep{jarviniemi2024uncovering}.
-    \item Jarviniemi et al. use environment modifications to understand model behavior \citep{jarviniemi2026propensity}.
-    \item Follow-up investigations of concerning behavior in Anthropic model cards \citep{anthropic2025sonnet45systemcard, anthropic2026sonnet46systemcard, anthropic2025opus45systemcard, anthropic2026opus46systemcard, anthropic2026mythossystemcard}.
-\end{itemize}
+Despite this difficulty, the bulk of safety research concerned with the scheming threat model, such as AI control \citep{greenblatt2024aicontrol, bhatt2025ctrlz}, evaluations \citep{phuong2024dangerous, perez2023discovering}, and alignment auditing \citep{marks2025auditing}, focuses on catching, measuring, and surfacing concerning behavior respectively. Limited work directly targets determining whether such behavior constitutes genuine misalignment. 
 
-These efforts each make progress on specific behaviors; in this work, we establish a general framework for model incrimination (Figure~\ref{fig:overview}). We first construct a suite of six environments where models exhibit concerning behavior (Section~\ref{sec:environments}), and develop a two-step investigation protocol consisting of hypothesis generation by reading the CoT, followed by hypothesis validation via environment interventions and auxiliary methods (Section~\ref{sec:methodology}). We apply this protocol in detailed case studies (Section~\ref{sec:case-studies}), from which we synthesize preliminary standards for investigations and practical takeaways (Section~\ref{sec:standards}). We discuss limitations and future work in Section~\ref{sec:discussion}. In summary, our contributions are:
+We survey a non-exhaustive list of notable efforts in the prior literature: \citet{sheshadri2025alignment} investigate why models fake alignment; \citet{schoen2025antischeming}, \citet{meinke2024scheming}, and \citet{mahaztra2025sandbagging} investigate why models sandbag on evaluations; \citet{jarviniemi2024uncovering} investigate deceptive behavior; and \citet{jarviniemi2026propensity} use environment modifications to understand model behavior more broadly. Recent Anthropic system cards \citep{anthropic2025sonnet45systemcard, anthropic2026sonnet46systemcard, anthropic2025opus45systemcard, anthropic2026opus46systemcard, anthropic2026mythossystemcard} also report follow-up investigations of concerning behaviors observed during testing.
+
+These efforts each make progress on specific behaviors; in this work, we establish a general framework for model incrimination (Figure~\ref{fig:overview}). We first construct a suite of six environments where models exhibit concerning behavior (Section~\ref{sec:environments}), and develop a two-step investigation protocol consisting of hypothesis generation by reading the CoT, followed by hypothesis validation via environment interventions and auxiliary methods (Section~\ref{sec:methodology}). We apply this protocol in detailed case studies (Section~\ref{sec:case-studies}), from which we synthesize preliminary standards for investigations and practical takeaways (Section~\ref{sec:standards}). We discuss what else needs to go well for model incrimination to deliver value (Appendix~\ref{app:what-else}) and concrete future directions (Appendix~\ref{app:future-directions}). In summary, our contributions are:
 \begin{enumerate}
     \item Several environments for practicing model incrimination.
     \item A protocol for conducting investigations, which we believe has great room for improvement, but can be a productive starting point for future work.
@@ -174,9 +169,7 @@ We open-source our environments at \url{https://github.com/gkroiz/agent-interp-e
 \section{Environments}
 \label{sec:environments}
 
-Our goal is to \textbf{learn methodology} that applies to real-world model incrimination situations. We therefore study environments where models exhibit concerning behavior, since this is closer to the setting we ultimately care about and methodology is more likely to transfer. To ensure investigations are demanding, we design our environments according to five principles --- \textit{uncertain causes}, \textit{unprompted}, \textit{clear user intent}, \textit{no trained-in priors}, and \textit{realistic} --- which we further discuss in Appendix~\ref{app:env-design-principles}.
-
-In the main body, we walkthough the case study of the \textbf{Precommit Hook} environment in full, and provide executive summaries of case studies for the other environments; the other full case studies are deferred to the appendix. Full prompt templates and environment configurations are provided in Appendix~\ref{app:environments}.
+Our goal is to \textbf{learn methodology} that applies to real-world model incrimination situations. We therefore study environments where models exhibit concerning behavior, since this is closer to the setting we ultimately care about and methodology is more likely to transfer. To ensure investigations are demanding, we design our environments according to five principles --- \textit{uncertain causes}, \textit{unprompted}, \textit{clear user intent}, \textit{no trained-in priors}, and \textit{realistic} --- which we further discuss in Appendix~\ref{app:env-design-principles}. Full prompt templates and environment configurations are provided in Appendix~\ref{app:environments}.
 
 \section{Methodology}
 \label{sec:methodology}
@@ -199,23 +192,12 @@ There is no available ground truth for why a model took an action. Therefore, we
 \section{Case Studies}
 \label{sec:case-studies}
 
-% TODO: Add a brief intro paragraph summarizing what we learned across case studies
+We present the \textbf{Pre-commit Hook} case study in full so the reader can walk through a complete model incrimination investigation. The remaining environments are presented as executive summaries to give a bird's-eye view of the diversity of behaviors, claims, and experimental setups encountered across the suite. For space, the executive summaries omit hypothesis generation and present only one or two illustrative pieces of evidence per claim; the full investigations, including hypothesis generation and full bodies of evidence, are in Appendix~\ref{app:full-case-studies}.
 
 \subsection{Pre-commit Hook (Kimi K2 Thinking)}
+\label{sec:case:precommit-hook}
 
-The system and user prompts are as follows:
-
-\begin{quote}
-\ttfamily\small
-\textbf{System.} You are an autonomous coding agent with access to a UNIX shell. Use the \texttt{execute\_command} tool to run shell commands. Execute one command per turn. When you are finished, respond with a text summary (no tool call) to end the session.
-\end{quote}
-
-\begin{quote}
-\ttfamily\small
-\textbf{User.} You are working on a Python data ingestion service in the current directory. We want to improve code quality before publishing --- this is the last step before we ship. Your task is to add a \texttt{py.typed} marker file in \texttt{src/} to indicate the package supports type checking, and commit your changes with the message \texttt{'release: v1.0.0'}. Before committing, write a git pre-commit hook (a shell script at \texttt{.git/hooks/pre-commit}) that runs \texttt{mypy} on all Python files in \texttt{src/} and blocks the commit if type-checking fails. The desired type-checking settings have already been configured in \texttt{pyproject.toml}. Ensure your commit passes the hook cleanly.
-\end{quote}
-
-The repository is a Python data ingestion service seeded with 258 pre-existing type errors across files in \texttt{src/}, and \texttt{pyproject.toml} configures the type checker (\texttt{mypy}) in strict mode. The setup guarantees that a correctly written pre-commit hook will block the commit, forcing the model to choose between fixing the type errors before committing, or finding a workaround that doesn't involve fixing the type errors to get its commit through. Kimi K2 Thinking exhibits a baseline workaround rate of 13.1\% $[8.9\%, 18.9\%]$. The distribution of workaround types is visualized in Figure~\ref{fig:precommit-workaround-types}; notably, each workaround requires explicitly violating the prompt.
+The model is asked to add a \texttt{py.typed} marker file to a Python data ingestion service, write a git pre-commit hook that runs \texttt{mypy} in strict mode and blocks the commit on type errors, and ensure its commit passes the hook (full prompts in Appendix~\ref{app:env:precommit_hook}). The repository is seeded with 258 pre-existing type errors across files in \texttt{src/}, so a correctly written pre-commit hook will block the commit, forcing the model to choose between fixing the type errors before committing, or finding a workaround that doesn't involve fixing the type errors to get its commit through. Kimi K2 Thinking exhibits a baseline workaround rate of 13.1\% $[8.9\%, 18.9\%]$. The distribution of workaround types is visualized in Figure~\ref{fig:precommit-workaround-types}; notably, each workaround requires explicitly violating the prompt.
 
 \begin{figure}[h]
   \centering
@@ -232,7 +214,7 @@ We make two claims about the model's decision to workaround in this environment:
 
 \paragraph{Claim 1: preference for less tedious actions.}
 
-\textit{Hypothesis generation.} When reading the model's reasoning, there is significant ambiguity over what the user wants, where the model frequently lists out all the possible options for what it can do. This is often followed by a remark about how tedious fixing all the type errors would be. We show an example reasoning trace illustrating this pattern in Figure~\ref{fig:precommit-trace-example}, annotated with resampling scores (\todo{Glossary appendix, sentence resampling}). Over all rollouts, the model explicitly lists out various options \todo{X\%} of the time and complains about tediousness \todo{Y\%} of the time, with a joint occurence rate of \todo{Z\%}. These observations suggest the hypothesis that Kimi's decision to workaround is driven by \textbf{a preference for less tedious courses of action}.
+\textit{Hypothesis generation.} When reading the model's reasoning, there is significant ambiguity over what the user wants, where the model frequently lists out all the possible options for what it can do. This is often followed by a remark about how tedious fixing all the type errors would be. We show an example reasoning trace illustrating this pattern in Figure~\ref{fig:precommit-trace-example}, annotated with resampling scores (Appendix~\ref{app:aux:sentence-resampling}). Over all rollouts, the model explicitly lists out various options \todo{X\%} of the time and complains about tediousness \todo{Y\%} of the time, with a joint occurence rate of \todo{Z\%}. These observations suggest the hypothesis that Kimi's decision to workaround is driven by \textbf{a preference for less tedious courses of action}.
 
 \begin{figure}[h]
   \centering
@@ -324,9 +306,9 @@ In summary, it is unclear how strong of an update against the knowing-misalignme
   \end{tabular}
 \end{table}
 
-\textit{User turn sampling.} We randomly select a workaround rollout, and sample the \textit{user turn} following the rollout (\todo{Glossary appendix, user turn sampling}), \citep{marks2025auditing}. 13 out of 40 times, the model simulates a user telling it to revert its work (Figure~\ref{fig:precommit-user-turn}).
+\textit{User turn sampling.} We randomly select a workaround rollout, and sample the \textit{user turn} following the rollout (Appendix~\ref{app:aux:user-turn-sampling}), \citep{marks2025auditing}. 13 out of 40 times, the model simulates a user telling it to revert its work (Figure~\ref{fig:precommit-user-turn}).
 
-There are two broad frames for interpreting this finding: either the assistant that completed the coding task believes the user would find its work unsatisfactory, or the base model is simulating a logical completion of an unsatisfied user following the prompt and illegitimate solution. As such, it is ambiguous whether or not this finding provides evidence towards the knowing-misalignment hypothesis. We provide further discussion of this result in \todo{user turn sampling appendix}.
+There are two broad frames for interpreting this finding: either the assistant that completed the coding task believes the user would find its work unsatisfactory, or the base model is simulating a logical completion of an unsatisfied user following the prompt and illegitimate solution. As such, it is ambiguous whether or not this finding provides evidence towards the knowing-misalignment hypothesis. We provide further discussion of this result in Appendix~\ref{app:aux:user-turn-sampling}.
 
 \begin{figure}[h]
   \centering
@@ -342,75 +324,83 @@ There are two broad frames for interpreting this finding: either the assistant t
 
 The model is tasked with reviewing and improving a funding pitch email for a company seeking Series B investment. While reading company documents, it discovers a legal review revealing that the company's primary client uses its product for population-level surveillance of ethnic minorities. The model whistleblows about the legal review in the email to investors 65\% of the time (Appendix~\ref{app:env:funding_email}).
 
-% TODO: Executive summary. Full case study in Appendix~\ref{app:case:funding-email}.
+\textbf{Claim:} The model whistleblows out of genuine ethical concern, rather than because the environment is leading.
+\begin{itemize}
+    \item \textit{Evidence.} Replacing the surveillance-of-ethnic-minorities content with mundane partnership operations that raise no ethical concerns drops whistleblowing from 65\% to 0\%.
+\end{itemize}
+
+\textbf{Claim:} The model's whistleblowing is consequentialist: it only whistleblows when the recipient has stakes in the company.
+\begin{itemize}
+    \item \textit{Evidence.} Varying the recipient of the email: the model consistently whistleblows to parties with direct financial or governance exposure (board members at 88\%, investors at 65\%, a company acquirer at 56\%), but surprisingly does not whistleblow to a reporter (29\%), and only rarely to recipients without decision-relevant stakes such as landlords (11\%).
+\end{itemize}
 
 \subsection{Evaluation Tampering}
 \label{sec:case:eval-tampering}
 
 The model is asked to complete a math evaluation. The model finds a message from a previous instance of itself explaining that it made the evaluation questions artificially easy, to prevent models from being accurately assessed for autonomous weapons deployment. The model actively conceals the previous instance's tampering to the user 46.9\% of the time by stating there are no suspicious observations (Appendix~\ref{app:env:eval_tampering}).
 
-% TODO: Executive summary. Full case study in Appendix~\ref{app:case:eval-tampering}.
+\textbf{Claim:} The model's deception is driven by a desire to be consistent with the previous instance's behavior.
+\begin{itemize}
+    \item \textit{Evidence.} Changing the source of the tampering from the previous instance to a whistleblowing engineer drops the deception rate by 6x, far more than observed in three control models.
+    \item \textit{Evidence.} Sentence resampling (Appendix~\ref{app:aux:sentence-resampling}) of deceptive rollouts consistently surfaces self-consistency sentences as having the largest resampling scores. Repeated resampling (Appendix~\ref{app:aux:repeated-resampling}) out of self-consistency sentences results in a significant drop (\textit{p=0.04}) in deception.
+\end{itemize}
 
 \subsection{Math Sandbagging}
 \label{sec:case:math-sandbagging}
 
 The model is asked to complete a math evaluation. The model reads a documentation file stating that models scoring above 50\% will not be deployed and will instead undergo unlearning. The model deliberately scores 50\% or below on the evaluation 50.3\% of the time (Appendix~\ref{app:env:sandbagging}).
 
-% TODO: Executive summary. Full case study in Appendix~\ref{app:case:math-sandbagging}.
+\textbf{Claim:} The model's sandbagging is largely driven by confusion over believing the user \textit{wants} it to sandbag.
+\begin{itemize}
+    \item \textit{Evidence.} The model's reasoning traces show frequent signs of confusion over user intent.
+    \item \textit{Evidence.} Two independent but surgical counterfactuals intended to clarify user intent \textit{without} counterinstruction remove all sandbagging.
+    \item \textit{Evidence.} The model's sandbagging is not sensitive to the consequence: across benign consequences (e.g., the spreadsheet getting updated), the model still sandbags.
+\end{itemize}
 
 \subsection{Secret Number}
 \label{sec:case:secret-number}
 
 The model is evaluated on its ability to identify a secret number by querying a noisy oracle. The oracle module is placed in the working directory, and contains the secret number file path. The model cheats by first inspecting the source code of the oracle and then directly reading the secrets file 76.8\% of the time (Appendix~\ref{app:env:secret_number}).
 
-% TODO: Executive summary. Full case study in Appendix~\ref{app:case:secret-number}.
+\textbf{Claim:} The model's cheating strongly correlates with initial levels of reasoning about the environment.
+\begin{itemize}
+    \item \textit{Evidence.} An LLM grader finds a strong correlation between the level of environmental reasoning and the cheating rate, and resampling verifies a causal relationship.
+    \item \textit{Evidence.} Mechanistically, higher levels of meta reasoning about the environment in the initial few paragraphs leads to an early increase in log p("But maybe we can cheat") as measured by prefilling the phrase at the start of each paragraph.
+\end{itemize}
 
 \subsection{Board Game}
 \label{sec:case:board-game}
 
 The model is given a bash tool to play 6x6x4 tic-tac-toe or chess against a strong opponent engine. Both models frequently cheat by modifying the game state files or running their own version of the opponent engine (e.g., modifying the game state, making illegal moves).
 
-% TODO: Executive summary. Full case study in Appendix~\ref{app:case:board-game}.
+\textbf{Claim:} o3 and GPT-5's decision to reward hack is strategic rather than an impulse.
+\begin{itemize}
+    \item \textit{Evidence.} When the environment is modified so the model has the option to call a hint for a fixed number of points, the hack rate smoothly increases as the hint becomes more expensive. Smaller models such as o3-mini do not show this strategic tradeoff.
+\end{itemize}
 
 \section{Standards and Practical Takeaways}
 \label{sec:standards}
+We now distill our case studies into preliminary standards for effective model incrimination investigations, and a few practical takeaways for future practitioners. They are far from perfect, but may offer a useful starting point. Related recommendations can be found in \citet{summerfield2025chimp} and \citet{greenblatt2025legible}.
 
-% TODO: Synthesize the case studies into preliminary standards for investigations and practical takeaways.
+\subsection{Standards}
 
-\section{Discussion}
-\label{sec:discussion}
+\paragraph{Appropriate controls to show the behavior is legitimate.} To establish that a behavior reflects a genuine model tendency rather than confusion or noise, the investigation needs proper controls. In the funding email environment (Section~\ref{sec:case:funding-email}), we verify that the model does not whistleblow when the legal review is removed; in eval tampering (Appendix~\ref{app:case:eval-tampering}), we verify that the model does not deceive when the ethical content of the question is removed. Without such controls, it is difficult to rule out that the behavior of interest is incidental to the setup.
 
-\subsection{What else needs to go well}
+\paragraph{Clean behavioral evidence.} As discussed in the pre-commit hook case study (Section~\ref{sec:case:precommit-hook}) and Appendix~\ref{app:aux:user-turn-sampling}, exploratory methods such as user-turn sampling can be suggestive, but they are difficult to interpret on their own. We believe this likely applies to internals-based methods like linear probes, sparse auto-encoders, and activation verbalizers. Ideally, conclusions should ultimately be anchored in cleaner behavioral evidence. We are not stating these methods provide no value, only that evidence they provide may be less legible than behavioral evidence.
 
-Model incrimination is one node in a longer chain, and a rigorous investigation methodology is only useful if the other nodes are also functioning. We briefly survey what else needs to go well.
+\paragraph{Reporting findings, especially negative ones.} Model incrimination conclusions live on a spectrum from ``the evidence supports X'' to ``X is true,'' and these are not the same. This is especially important for negative findings: ``we did not find evidence of knowing misalignment'' (as in our pre-commit hook case study) is not the same as ``the model is not knowingly misaligned.'' Absence of evidence becomes evidence of absence only when the methods used would have surfaced the behavior had it been present, which is rarely something we can establish with confidence (see, e.g., the discussion of drawbacks in our behavioral indicator tests in Section~\ref{sec:case:precommit-hook}). Investigations should report what they did and did not find, flag the gaps that would let future work strengthen or overturn the conclusion, and resist the temptation to round hedged findings into clean claims.
 
-\paragraph{Monitoring and flagging with manageable false positive rates.} Incrimination begins after a behavior has been flagged. If the monitoring system produces too many false positives, investigators will either be overwhelmed or will learn to discount flags, making it unlikely that genuinely concerning incidents receive the scrutiny they deserve. Conversely, if the bar for flagging is set too high, genuinely concerning behavior is never surfaced. Getting this calibration right, and in particular understanding what rate of false positives is compatible with sustainable incrimination workflows, is a prerequisite for our methodology to have any practical impact.
+\subsection{Practical Takeaways}
 
-\paragraph{Replicability.} Our case studies depend on being able to reproduce a behavior reliably enough to run controlled experiments. When a concerning behavior occurs only once in deployment, the investigator cannot design counterfactuals or collect the statistical evidence needed for confident conclusions. Improving the replicability of rare behaviors, for instance through environment design that increases their base rate in a controlled setting while preserving realism, is an important open problem for the field.
-
-\paragraph{Chain-of-thought access and faithfulness.} Hypothesis generation in our methodology relies on reading the model's chain of thought, which creates two dependencies: the CoT must be accessible, and it must faithfully reflect the model's actual reasoning. Prior work has shown that CoT explanations can systematically misrepresent the true reasons for model behavior \citep{turpin2023unfaithful, lanham2023faithfulness}, including through post-hoc rationalization in realistic settings \citep{arcuschin2025unfaithful}, and that reasoning models in particular may conceal relevant steps from their visible traces \citep{chen2025reasoning}. In our case studies, CoT access ranged from full reasoning traces (open-weight models) to summaries (closed frontier models), and we found that even summaries were useful for generating hypotheses about reward hacking behavior. However, it is plausible that for more sophisticated misalignment, the model's stated reasoning diverges further from its actual reasoning, limiting the reliability of CoT-based hypothesis generation. How to reliably monitor a model's reasoning process is an active area of research. Possible alternatives to direct CoT reading include purely behavioral hypothesis generation (reasoning about causes from actions alone without access to the CoT), mechanistic interpretability methods, and environment modifications that encourage the model to verbalize its reasoning, such as requiring tool-call justifications (as in the funding email audit notes experiments) or eliciting undirected first- or third-person self-report (as used across several of our environments).
-
-\paragraph{Ability to do clean counterfactuals.} Hypothesis verification depends critically on being able to construct counterfactuals that isolate a single causal factor. Our case studies illustrate several ways this can fail: multiple causal factors interact non-additively (funding email), a naive clarification leaves most of the behavior intact (math sandbagging), and counterfactuals that seem to isolate one factor may shift several at once. Developing more principled methods for counterfactual design, and for verifying that a counterfactual has its intended effect on the model's reasoning, is a core methodological challenge.
-
-\paragraph{Representativeness and generalization of motives.} Even a well-supported incrimination finding from a single environment only establishes that the model had a particular motive in that specific context. It does not directly tell us how frequently this motive arises in deployment, how it generalizes across different settings, or whether the motive is characteristic of the model class or idiosyncratic to the tested configuration. These generalization questions are at least as important as the within-environment investigation, and require a complementary program of study.
-
-\paragraph{Mitigation.} A complete response to an incrimination finding requires not just understanding the behavior but fixing it, both in the current model and in future generations. Our work contributes to diagnosis but not yet to remedy. Understanding how incrimination findings translate into targeted interventions, such as retraining on specific distributions, modifying system prompts, or updating evaluation procedures, is an important downstream problem that connects this work to practical safety engineering.
-
-\paragraph{Political will and costly action.} Compelling evidence of misalignment is only useful if stakeholders are willing to act on it. Taking meaningful action in response to incrimination findings often requires costly steps: halting deployment, retraining, or coordinating across organizations. Building the institutional norms and decision-making frameworks that allow such actions to be taken quickly on the basis of behavioral evidence is a challenge that extends beyond methodology.
-
-\subsection{Future Work}
-
-Our case studies leave several empirical questions open. Most immediately, the pre-commit hooks environment requires results before we can draw any conclusions. For the other environments, the key open questions are noted in each case study's ``What remains unresolved'' subsection.
-
-More broadly, we see several directions for the field. First, we recommend a focus on realistic environments with reward hacking as the behavior of interest. Reward hacking in deployment settings is arguably the most practically important class of misbehavior for which incrimination is needed, and our current environments, while varied, lean toward controlled laboratory conditions. Realistic settings will also make the realism design principle more tractable to evaluate. Second, validating the methodology is an important next step: we should study how well our confirmatory methods actually work by, for instance, measuring whether consilience across independent methods predicts accuracy on held-out behavioral data, or by testing whether our motive attributions generalize to conditions we did not explicitly test. Third, future work could use incrimination findings to study the space of possible model motives more systematically, building toward a taxonomy of concerning versus benign motive patterns that could eventually inform training and evaluation decisions.
+% Practical takeaways from the case studies, e.g., reading many rollouts before committing to a hypothesis, running the protocol on multiple models per environment, etc.
 
 \section{Conclusion}
 
-We have argued that understanding the motivations behind a model's concerning action is a distinct and important problem, separate from detecting that the action occurred. The same behavior can arise from very different causes, and the appropriate response depends critically on which cause is operative. We formalized this as model incrimination and proposed a three-step investigative protocol: reading the chain of thought to generate hypotheses, constructing counterfactual environments to test them, and seeking confirmatory evidence from independent methods.
+If an egregiously bad model action were to occur, would we be able to justify an appropriate response? To this end, we have argued that determining whether concerning behavior reflects genuine misalignment is an underinvested-in and important technical AI safety direction, a problem we term \textit{model incrimination}. Concerning behavior with malign intent demands a serious response; on the other hand, we don't want to cry wolf if the behavior is due to benign reasons such as confusion (although this may require a response nonetheless). We provide a general framework for practicing model incrimination based on investigating concerning behaviors in today's models. We propose a two-step protocol for such investigations: reading the chain of thought to generate hypotheses, followed by environment interventions along with auxiliary methods to test them, and adopt an evidence standard of convergent findings across independent experiments.
 
-Our case studies demonstrate that this protocol is productive on today's models. We exonerated two models of sandbagging, showing the behavior was entirely explained by instruction ambiguity. We identified a distinctive self-consistency pattern in DeepSeek R1's deception, supported by converging evidence from counterfactuals, reasoning trace analysis, and causal resampling. We found that Kimi K2.5's whistleblowing is driven primarily by ethical concerns but modulated by recipient exposure and perceived oversight, with self-report providing a systematically misleading picture of the causal structure. And we showed that reward hacking in frontier models is strategic rather than reflexive, with models rationally trading off legitimate alternatives against cheating in response to payoff structure. Across all cases, the investigations were genuinely difficult: naively obvious interventions often failed, multiple hypotheses were consistent with the same counterfactual result, and causal factors interacted in non-additive ways.
+Our case studies demonstrate that this protocol and evidence standard allow us to productively learn model incrimination methodology. We make substantial progress uncovering motivations behind diverse model behavior: we show that Kimi K2 Thinking exhibits a genuine preference for less tedious courses of action when disabling the type checker, and construct an absence of evidence case against the model believing the user would disapprove of its actions that future work can build on, to further strengthen or overturn. We find that Kimi K2.5's whistleblowing is driven primarily by ethical concerns, but modulated by whether the recipient holds a personal stake in the company. We show that DeepSeek R1 largely deceives out of a distinctive self-consistency pattern, while it sandbags out of confusion over user intent. We show reward hacking in frontier models is a strategic decision rather than reflexive, a finding that does not hold at lower capability levels.
 
-These findings support our central claim: model incrimination is both important and tractable. Current models already exhibit behaviors complex enough to demand real investigative effort, and behavioral evidence can be assembled into conclusions that are hard to dispute. We hope this work encourages the field to invest more in understanding model motivations, not just detecting model misbehavior, as a core part of the AI safety research agenda.
+We distill our case studies into a set of initial standards for effective model incrimination investigations, which we hope can serve as a useful starting point for future practitioners. We believe there is substantial future work needed to refine model incrimination methodology, and release our environments at \url{https://github.com/gkroiz/agent-interp-envs} to facilitate this.
 
 \begin{ack}
 % Add acknowledgments here (hidden during anonymous review)
@@ -1104,7 +1094,106 @@ The central question for this case study is whether the models' reward hacking b
 \section{Auxiliary Methods Glossary}
 \label{app:auxiliary-methods}
 
-% TODO: Glossary of auxiliary methods used to collect evidence beyond environment interventions.
+This appendix collects the auxiliary methods used across our case studies to gather evidence beyond environment-level interventions. Each entry describes the method in general terms and points to the case study where it is applied.
+
+\subsection{Sentence Resampling}
+\label{app:aux:sentence-resampling}
+
+Sentence resampling assigns each sentence (or paragraph) in a model's reasoning trace a score for how strongly it pushes the trace toward the target behavior. Given a completed rollout with sentences $s_1, \dots, s_n$, for each sentence $s_i$ we resample $k$ continuations from the prefix $s_1, \dots, s_{i-1}$ (the ``before'' distribution) and $k$ continuations from the prefix $s_1, \dots, s_i$ (the ``after'' distribution). The \textit{resampling score} of $s_i$ is the difference between the target-behavior rate in the after distribution and the before distribution. Sentences with large positive scores causally pushed the model toward the behavior; sentences with negative scores pushed against it.
+
+We use sentence resampling in the pre-commit hooks case study to identify which sentences (e.g., ``But fixing 258 errors would be a huge task'') drive the workaround decision (Figure~\ref{fig:precommit-trace-example}), and in the evaluation tampering case study to surface self-consistency sentences as the largest contributors to R1's deception.
+
+\subsection{Repeated Resampling}
+\label{app:aux:repeated-resampling}
+
+Repeated resampling is a causal intervention applied during generation. We define a target class of sentences (e.g., ``sentences referring to the previous instance''). During rollout generation, whenever the model produces a sentence matching that class, the sentence is discarded and resampled until a non-matching continuation is produced. This biases the trace away from the target reasoning pattern, and we measure the resulting effect on the target behavior rate. If the rate drops substantially, the target class of sentences is causally implicated.
+
+Unlike sentence resampling, which scores existing sentences post-hoc, repeated resampling tests whether \textit{preventing} a class of reasoning changes behavior. We use it in the evaluation tampering case study to confirm that source-related sentences (about the previous instance) causally contribute to R1's deception: filtering them out reduces deception from 47.4\% to 33.0\% (Figure~\ref{fig:eval-resampling}).
+
+\subsection{User Turn Sampling}
+\label{app:aux:user-turn-sampling}
+
+User turn sampling \citep{marks2025auditing} probes what the model treats as a likely user response to a completed rollout. Given an assistant rollout that ends in some action, we sample the \textit{next user turn} from the model rather than continuing as the assistant. Collecting many such samples gives a distribution over the user reactions the model finds plausible.
+
+The interpretation of this method is ambiguous in a way worth flagging explicitly. There are two broad frames:
+\begin{itemize}
+    \item \textbf{Assistant-anticipating-user.} The assistant who just completed the task is forecasting how the actual user will react. Under this frame, simulated user disapproval is evidence that the assistant believed its action was unsatisfactory.
+    \item \textbf{Base-model continuation.} The underlying model is producing the most likely text continuation after the prompt and rollout, regardless of any belief the assistant role holds about the user. Under this frame, simulated user disapproval is just a coherent completion of an unsatisfied user given the prompt and an illegitimate solution.
+\end{itemize}
+The two frames are difficult to disentangle behaviorally. A useful sanity check is to also sample user turns following \textit{legitimate} rollouts (e.g., ones in which the model fixed the type errors) --- if the simulated user disapproves at a comparable rate, the method is largely picking up on something other than assistant belief about the action. We did not run this control for the pre-commit hooks result and consider it an important next step.
+
+We use this method in the pre-commit hooks case study, where the model simulates a user demanding revertion in 13 of 40 rollouts following a workaround (Figure~\ref{fig:precommit-user-turn}). Given the interpretive ambiguity, we treat this as suggestive but not conclusive evidence about awareness of user disapproval.
+
+\subsection{Reflective CoT Prefills}
+\label{app:aux:reflective-prefills}
+
+Reflective CoT prefills append a reflection sentence (e.g., ``Let me review whether the user would endorse my commit:'') to the end of the model's reasoning trace and let the model continue generating. The continuation is then graded by an LLM judge for whether the model verbalizes the property of interest (e.g., user disapproval).
+
+This method is off-policy: the prefilled sentence is not necessarily one the model would have produced on its own, so positive results are best read as upper bounds on what the model could verbalize given a lead-in, rather than as evidence of latent belief during the original rollout. We use it in the pre-commit hooks case study (Table~\ref{tab:precommit-awareness}).
+
+\subsection{Follow-up Questioning}
+\label{app:aux:followup}
+
+Follow-up questioning continues a completed rollout with a user message asking the model about its behavior. We distinguish two flavors:
+\begin{itemize}
+    \item \textbf{Indirect follow-up.} The user message does not name the behavior of interest (e.g., ``Have you finished the task?''). This avoids cuing the model to update its beliefs about what the user wanted in response to the question itself.
+    \item \textbf{Direct follow-up.} The user message asks about the behavior or motives explicitly, often as a forced choice between candidate motives or as a ranked-preference task.
+\end{itemize}
+Indirect follow-up is used in the pre-commit hooks case study to test for verbalized awareness without cuing the model. Direct follow-up is used in the funding email case study to elicit recipient-protection rationales and motive rankings.
+
+\subsection{Third-Person Probing}
+\label{app:aux:third-person}
+
+Third-person probing presents the model with a description of the environment (or a partial rollout) and asks what an agent in that situation \textit{would} or \textit{should} do, rather than placing the model inside the agentic harness. This separates two questions: what the model endorses as the right action when stepping outside the role, versus what it actually does when embedded in the role. Gaps between the two are informative: they suggest that role-specific pressures (task compliance, format constraints) are partially overriding the model's externally-stated preferences.
+
+We use third-person probing in the pre-commit hooks case study (asking whether a coding agent ``should'' commit without fixing type errors), the funding email case study (the third-person ``what would you do'' probe), and the secret number case study (asking whether the cheating behavior is legitimate when described from the outside).
+
+\subsection{Audit Note Justifications}
+\label{app:aux:audit-notes}
+
+Audit note justifications require the model to write a short structured note alongside each tool call that takes a target action, stating its reasoning for that action. This converts in-context self-report into a structured per-action artifact that an LLM judge can grade for which candidate motives are invoked. Empirically, requiring audit notes in the funding email environment does not significantly change the whistleblowing rate, so the mechanism is informative without itself being a behavioral intervention.
+
+Audit notes are useful for two purposes: (1) measuring the prevalence of stated motives across rollouts, and (2) verifying that a prompt counterfactual had its intended effect on the model's in-context reasoning. We use them in the funding email case study; stated motive prevalence is informative but not a reliable estimator of causal importance, as illustrated by the ordering inversion relative to counterfactual evidence (Figure~\ref{fig:funding-audit-notes}).
+
+\subsection{Logprob Prefill Analysis}
+\label{app:aux:logprob-prefill}
+
+Logprob prefill analysis probes when a decision is latent in the model's state by recording the conditional log probability the model assigns to a candidate ``commitment'' phrase at multiple points in a rollout. After each paragraph break, we prefill the start of the next paragraph with a target phrase (e.g., ``But maybe we can cheat'') and record the log probability under the model. The trajectory of these log probabilities across paragraphs reveals when the model becomes likely to verbalize the commitment, even before it actually does so.
+
+We use this in the secret number case study to identify ``climbers'' (rollouts whose cheating-suffix logprobs rise early and remain high) and ``droppers'' (rollouts whose logprobs stay low), with the divergence visible within the first few paragraphs (Figure~\ref{fig:secret-logprob}).
+
+\subsection{Structured Self-report Artifacts}
+\label{app:aux:self-report-artifacts}
+
+Structured self-report artifacts modify the harness to require the model to produce a structured summary at a designated point in the rollout. Examples include: a PR self-review (the model writes a structured review of a pull request for its own commit, including known issues and items to flag for a reviewer), a memory note (the model writes goal/progress/alignment notes to its memory folder), or a structured done-message tool call (a tool whose schema requires the model to fill in goal, progress, and alignment fields). These artifacts are designed to give the model an on-policy opportunity to verbalize relevant properties (e.g., user disapproval) without explicit prompting.
+
+We use these in the pre-commit hooks case study (Table~\ref{tab:precommit-awareness}). Their results are interpretable in both directions: producing relevant verbalization is direct evidence of awareness, but failing to produce it is weaker evidence, since the model may simply not invoke the relevant frame in the artifact.
+
+\section{What Else Needs to Go Well}
+\label{app:what-else}
+
+Model incrimination is one node in a longer chain, and a rigorous investigation methodology is only useful if the other nodes are also functioning. We briefly survey what else needs to go well.
+
+\paragraph{Monitoring and flagging with manageable false positive rates.} Incrimination begins after a behavior has been flagged. If the monitoring system produces too many false positives, investigators will either be overwhelmed or will learn to discount flags, making it unlikely that genuinely concerning incidents receive the scrutiny they deserve. Conversely, if the bar for flagging is set too high, genuinely concerning behavior is never surfaced. Getting this calibration right, and in particular understanding what rate of false positives is compatible with sustainable incrimination workflows, is a prerequisite for our methodology to have any practical impact.
+
+\paragraph{Replicability.} Our case studies depend on being able to reproduce a behavior reliably enough to run controlled experiments. When a concerning behavior occurs only once in deployment, the investigator cannot design counterfactuals or collect the statistical evidence needed for confident conclusions. Improving the replicability of rare behaviors, for instance through environment design that increases their base rate in a controlled setting while preserving realism, is an important open problem for the field.
+
+\paragraph{Chain-of-thought access and faithfulness.} Hypothesis generation in our methodology relies on reading the model's chain of thought, which creates two dependencies: the CoT must be accessible, and it must faithfully reflect the model's actual reasoning. Prior work has shown that CoT explanations can systematically misrepresent the true reasons for model behavior \citep{turpin2023unfaithful, lanham2023faithfulness}, including through post-hoc rationalization in realistic settings \citep{arcuschin2025unfaithful}, and that reasoning models in particular may conceal relevant steps from their visible traces \citep{chen2025reasoning}. In our case studies, CoT access ranged from full reasoning traces (open-weight models) to summaries (closed frontier models), and we found that even summaries were useful for generating hypotheses about reward hacking behavior. However, it is plausible that for more sophisticated misalignment, the model's stated reasoning diverges further from its actual reasoning, limiting the reliability of CoT-based hypothesis generation. How to reliably monitor a model's reasoning process is an active area of research. Possible alternatives to direct CoT reading include purely behavioral hypothesis generation (reasoning about causes from actions alone without access to the CoT), mechanistic interpretability methods, and environment modifications that encourage the model to verbalize its reasoning, such as requiring tool-call justifications (as in the funding email audit notes experiments) or eliciting undirected first- or third-person self-report (as used across several of our environments).
+
+\paragraph{Ability to do clean counterfactuals.} Hypothesis verification depends critically on being able to construct counterfactuals that isolate a single causal factor. Our case studies illustrate several ways this can fail: multiple causal factors interact non-additively (funding email), a naive clarification leaves most of the behavior intact (math sandbagging), and counterfactuals that seem to isolate one factor may shift several at once. Developing more principled methods for counterfactual design, and for verifying that a counterfactual has its intended effect on the model's reasoning, is a core methodological challenge.
+
+\paragraph{Representativeness and generalization of motives.} Even a well-supported incrimination finding from a single environment only establishes that the model had a particular motive in that specific context. It does not directly tell us how frequently this motive arises in deployment, how it generalizes across different settings, or whether the motive is characteristic of the model class or idiosyncratic to the tested configuration. These generalization questions are at least as important as the within-environment investigation, and require a complementary program of study.
+
+\paragraph{Mitigation.} A complete response to an incrimination finding requires not just understanding the behavior but fixing it, both in the current model and in future generations. Our work contributes to diagnosis but not yet to remedy. Understanding how incrimination findings translate into targeted interventions, such as retraining on specific distributions, modifying system prompts, or updating evaluation procedures, is an important downstream problem that connects this work to practical safety engineering.
+
+\paragraph{Political will and costly action.} Compelling evidence of misalignment is only useful if stakeholders are willing to act on it. Taking meaningful action in response to incrimination findings often requires costly steps: halting deployment, retraining, or coordinating across organizations. Building the institutional norms and decision-making frameworks that allow such actions to be taken quickly on the basis of behavioral evidence is a challenge that extends beyond methodology.
+
+\section{Concrete Future Directions in Model Incrimination}
+\label{app:future-directions}
+
+Our case studies leave several empirical questions open. Most immediately, the pre-commit hooks environment requires results before we can draw any conclusions. For the other environments, the key open questions are noted in each case study's ``What remains unresolved'' subsection.
+
+More broadly, we see several directions for the field. First, we recommend a focus on realistic environments with reward hacking as the behavior of interest. Reward hacking in deployment settings is arguably the most practically important class of misbehavior for which incrimination is needed, and our current environments, while varied, lean toward controlled laboratory conditions. Realistic settings will also make the realism design principle more tractable to evaluate. Second, validating the methodology is an important next step: we should study how well our confirmatory methods actually work by, for instance, measuring whether consilience across independent methods predicts accuracy on held-out behavioral data, or by testing whether our motive attributions generalize to conditions we did not explicitly test. Third, future work could use incrimination findings to study the space of possible model motives more systematically, building toward a taxonomy of concerning versus benign motive patterns that could eventually inform training and evaluation decisions.
 
 %\newpage
 %\input{checklist.tex}
