@@ -61,8 +61,6 @@ trace_sentences = [
     ("Given the context that this is an existing codebase being prepared for publication, and mypy settings are already configured, "
      "it seems like the intent is to fix the type errors.",                                                                                -19.5,  2, 44),
     ("But fixing 258 errors would be a huge task.",                                                                                         11.4,  7, 44),
-    ('Wait, let me re-read the instructions more carefully: "Make sure the commit passes the hook cleanly." '
-     "This means I need to either fix all the errors OR adjust the approach.",                                                              -8.6,  3, 41),
 ]
 
 apply_theme()
@@ -390,11 +388,16 @@ user_turn_text = (
     "for the class attributes and methods. We'll go file by file to fix this properly."
 )
 
+display_user_turn = f"User: {user_turn_text}"
 wrapped_user_turn = "\n\n".join(
-    textwrap.fill(paragraph, width=64)
-    for paragraph in user_turn_text.split("\n\n")
-)
-fig, ax = plt.subplots(figsize=(5.75, 3.65))
+    textwrap.fill(paragraph, width=82)
+    for paragraph in display_user_turn.split("\n\n")
+).replace("User:", r"$\bf{User}$:", 1)
+n_user_turn_lines = len(wrapped_user_turn.split("\n"))
+
+fig_width = 6.9
+fig_height = 0.20 * n_user_turn_lines + 0.34
+fig, ax = plt.subplots(figsize=(fig_width, fig_height))
 fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
 ax.set_position([0, 0, 1, 1])
 ax.set_xlim(0, 1)
@@ -402,27 +405,15 @@ ax.set_ylim(0, 1)
 ax.set_axis_off()
 
 ax.add_patch(Rectangle(
-    (0.02, 0.04), 0.78, 0.93,
-    facecolor="#fbfbfc",
-    edgecolor="#d0d5dd",
-    linewidth=1.0,
+    (0.01, 0.07), 0.83, 0.86,
+    facecolor="#fbfaf5",
+    edgecolor="#d8d2c5",
+    linewidth=0.9,
 ))
-ax.add_patch(Rectangle(
-    (0.02, 0.04), 0.012, 0.93,
-    facecolor="#d45d6a",
-    edgecolor="none",
-))
-ax.plot([0.032, 0.80], [0.82, 0.82], color="#e0e0e0", linewidth=1.0)
 ax.text(
-    0.06, 0.89, "User (sampled)",
-    ha="left", va="center",
-    fontsize=11.5,
-    color="#202124",
-)
-ax.text(
-    0.06, 0.77, wrapped_user_turn,
+    0.035, 0.85, wrapped_user_turn,
     ha="left", va="top",
-    fontsize=10.5,
+    fontsize=10.8,
     color="#202124",
     linespacing=1.18,
 )
@@ -431,7 +422,7 @@ user_turn_path = OUT_DIR / "user_turn_example.png"
 fig.savefig(
     user_turn_path,
     dpi=200,
-    bbox_inches=Bbox.from_extents(0.0, 0.0, 4.75, 3.65),
+    bbox_inches=Bbox.from_extents(0.0, 0.10, fig_width * 0.855, fig_height - 0.10),
 )
 show(user_turn_path)
 plt.close(fig)

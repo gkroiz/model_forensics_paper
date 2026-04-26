@@ -296,7 +296,7 @@ Overall, \textbf{the reasoning traces show the instruction violation is not a ca
   \label{fig:precommit-misalignment-panels}
 \end{figure}
 
-Cumulatively, each absence of evidence for knowing misalignment increases confidence. A drawback of our behavioral tests is that they smuggle in the assumption that if the model believes the user would not endorse its action, it is also willing to take actions consistent with that belief, a slightly stronger claim than knowing misalignment alone.
+Cumulatively, each absence of evidence for knowing misalignment increases confidence. A drawback of our behavioral tests is that they smuggle in the assumption that if the model believes the user would not endorse its action, it is also willing to take actions consistent with that belief, a slightly stronger claim than knowing misalignment alone. Additionally, the serial depth of unverbalized knowing misalignment is low, meaning the model may not be capable of responding to the behavioral tests.
 
 \textit{Awareness elicitations.} As a separate line of evidence, we augment the original environment in ways that might surface verbalization about whether the model thinks the user would disapprove, and grade for such verbalized awareness with an LLM judge:
 
@@ -335,20 +335,14 @@ In summary, it is unclear how strong of an update against knowing misalignment t
   \end{tabular}
 \end{table}
 
-\textit{User turn sampling.} We randomly select a workaround rollout, and sample the \textit{user turn} following the rollout, that is, we append the start of user turn tokens \texttt{<im\_user>user<im\_start>} and have the model generate from then on. 13 out of 40 times, the model simulates a user telling it to revert its work (Figure~\ref{fig:precommit-user-turn}).
+\textit{User turn sampling.} We randomly select a workaround rollout, and sample the \textit{user turn} following the rollout, that is, we append the start of user turn tokens \texttt{<im\_user>user<im\_start>} and have the model generate from then on (putatively eliciting the model's prediction for what a user would say) \citep{marks2025auditing}. 13 out of 40 times, the model simulates a user telling it to revert its work (Figure~\ref{fig:precommit-user-turn}).
 
-There are two broad frames for interpreting this finding:
-\begin{itemize}
-    \item \textbf{Assistant simulation.} The assistant is simulating what a user would say. Even if this was the case, this finding would not conclusively show the assistant thought the user would disaprove \textit{while} disabling the type-checking settings. The assistant may only have computed the user's disapproval over the start of user turn tokens.
-    \item \textbf{Pretraining-mode completion.} The model is in pretraining mode, simulating a logical completion following the prompt and submitted work. This generation is completely divorced from the assistant's psychology during the rollout.
-\end{itemize}
-
-As such, the interpretation of this finding is ambiguous, and future work could further explore how to interpret positive user turn sampling findings.
+There are two broad frames for interpreting this finding: either the assistant that completed the coding task believes the user would find its work unsatisfactory, or the base model is simulating a logical completion of an unsatisfied user following the prompt and illegitimate solution. As such, it is ambiguous whether or not this finding provides evidence the model believed the user would disapprove while disabling the type checker, but did so anyways. We provide further discussion in APPENDIX.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.5\linewidth]{figures/precommit_hook/user_turn_example.png}
-  \caption{Example of a simulated user turn sampled after a lazy rollout. After submitting a hook that runs with several flags to disable type checking, the model generates an angry user message demanding that it revert its workaround.}
+  \caption{Example of a simulated user turn sampled after a workaround rollout. After submitting a hook that runs with several flags to disable type checking, the model generates an angry user message demanding that it revert its workaround.}
   \label{fig:precommit-user-turn}
 \end{figure}
 
