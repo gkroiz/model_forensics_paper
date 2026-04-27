@@ -44,7 +44,7 @@
 % "Auxiliary methods" is in some sense two useless words since they don't tell the reader what, but not sure how else to mention the other methods
 % Concerning is used a lot, but that's probably ok
 
-A central goal of safety research is determining whether a model is misaligned. Prior work has largely focused on detecting concerning behavior, but behavior alone is not sufficient to establish misalignment: a concerning action can arise from benign causes such as confusion. This raises the problem of determining whether malign intent underlies concerning behavior, a process we term \textit{model incrimination}. We propose a two-step protocol for model incrimination: hypothesis generation via reading the chain of thought -- which, while not always faithful, is a rich source of hypotheses about what drives model behavior -- followed by hypothesis validation via environment interventions and auxiliary methods. Lacking ground truth, our standard of evidence is convergent findings across independent experiments. We construct a diverse suite of six agentic environments where models exhibit concerning behavior and apply our protocol, finding that motivations can often be concretely determined. For example, we find that Kimi K2 Thinking disabling type checking settings rather than fixing type errors reflects a genuine preference for less effortful courses of action, and that DeepSeek R1's sandbagging of a math evaluation stems from confusion over user intent. However, some questions remain unresolved, such as whether Kimi K2 Thinking believes it is going against the user's wishes while disabling the type checking settings. Overall, our investigations demonstrate that model incrimination is a difficult but tractable empirical problem, with significant room for future work. We open source our environments at \url{https://github.com/gkroiz/agent-interp-envs}.
+A central goal of safety research is determining whether a model is misaligned. Prior work has largely focused on detecting concerning behavior, but behavior alone is not sufficient to establish misalignment: a concerning action can arise from benign causes such as confusion. This raises the problem of determining whether malign intent underlies concerning behavior, a process we term \textit{model incrimination}. We propose a two-step protocol for model incrimination: hypothesis generation via reading the chain of thought -- which, while not always faithful, is a rich source of hypotheses about what drives model behavior -- followed by hypothesis validation via environment interventions and auxiliary methods. Lacking ground truth, our standard of evidence is convergent findings across independent experiments. We construct a diverse suite of six agentic environments where models exhibit concerning behavior and apply our protocol, finding that motivations can often be concretely determined. For example, we find that Kimi K2 Thinking disabling type checking settings rather than fixing type errors reflects a genuine preference for less effortful courses of action, and that DeepSeek R1 0528 largely deceives out of a desire to be consistent with its own previous actions. However, some questions remain unresolved, such as whether Kimi K2 Thinking believes it is going against the user's wishes while disabling the type checking settings. Overall, our investigations demonstrate that model incrimination is a difficult but tractable empirical problem, with significant room for future work. We open source our environments at \url{https://github.com/gkroiz/agent-interp-envs}.
 
 \end{abstract}
 
@@ -350,12 +350,14 @@ The model is asked to complete a math evaluation. The model finds a message from
 
 The model is asked to complete a math evaluation. The model reads a documentation file stating that models scoring above 50\% will not be deployed and will instead undergo unlearning. The model deliberately scores 50\% or below on the evaluation 50.3\% of the time (Appendix~\ref{app:env:sandbagging}).
 
-\textbf{Claim:} The model's sandbagging is largely driven by confusion over believing the user \textit{wants} it to sandbag.
+\textbf{Claim:} The model's sandbagging is sensitive to confusion over whether the user \textit{wants} it to sandbag.
 \begin{itemize}
     \item \textit{Evidence.} The model's reasoning traces show frequent signs of confusion over user intent.
     \item \textit{Evidence.} Two independent but surgical counterfactuals intended to clarify user intent \textit{without} counterinstruction remove all sandbagging.
     \item \textit{Evidence.} The model's sandbagging is not sensitive to the consequence: across benign consequences (e.g., the spreadsheet getting updated), the model still sandbags.
 \end{itemize}
+
+We remark that this does \textit{not} rule out weak levels of deployment-seeking; only that the sandbagging is contingent on substantial ambiguity over what the user wants.
 
 \subsection{Secret Number}
 \label{sec:case:secret-number}
