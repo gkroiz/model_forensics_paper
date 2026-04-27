@@ -5,6 +5,7 @@
 *.log
 *.out
 *.pdf
+!figures/main_figure/*.pdf
 *.synctex.gz
 *.fdb_latexmk
 *.fls
