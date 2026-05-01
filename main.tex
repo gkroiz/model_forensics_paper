@@ -54,50 +54,26 @@ A central goal of safety research is determining whether a model is misaligned. 
 
 \begin{figure}[!t]
   \centering
-  % Top panel: Catching -> Incrimination -> Response pipeline
-  \begin{tikzpicture}[
-      node distance=10mm,
-      box/.style={rectangle, rounded corners=4pt, draw=black!60, fill=black!5,
-                  minimum width=28mm, minimum height=18mm, align=center,
-                  font=\sffamily},
-      arrow/.style={-{Stealth[length=3mm]}, thick, black!60},
-    ]
-    \node[box] (catch) {Catching};
-    \node[box, right=of catch, minimum width=42mm] (incrim)
-      {Incrimination:\\is it actually\\scheming?};
-    \node[box, right=of incrim] (resp) {Response};
-    \draw[arrow] (catch) -- (incrim);
-    \draw[arrow] (incrim) -- (resp);
-  \end{tikzpicture}
-
-  \vspace{4mm}
-
-  % Bottom panel: Bayes formula
-  \begin{equation*}
-    \frac{P(\text{misaligned} \mid \text{obs})}{P(\text{aligned} \mid \text{obs})}
-    \;=\;
-    \underbrace{\frac{P(\text{obs} \mid \text{misaligned})}{P(\text{obs} \mid \text{aligned})}}_{\textcolor{red}{\text{Bayes factor}}}
-    \;\times\;
-    \underbrace{\frac{P(\text{misaligned})}{P(\text{aligned})}}_{\textcolor{blue}{\text{Priors}}}
-  \end{equation*}
-
-  \caption{\textbf{Top:} If we catch a concerning behavior, how should we respond? A key technical step is to determine whether the behavior reflects malign (incrimination) or benign (exoneration) intent, as they justify entirely different safety responses. \textbf{Bottom:} Model incrimination equation: given an observation, we would like to know if a model is misaligned or aligned. An investigation that provides evidence of misalignment needs to show the Bayes factor is large. However, the denominator, $P(\text{obs}|\text{aligned})$, is the core difficulty: it contains all the reasons the model may have taken the action if it was aligned.}
+  \includegraphics[width=\linewidth]{figures/main_figure/main_figure.pdf}
+  \caption{Overview of model incrimination. \textbf{Left:} an example of caught concerning behavior, where a model commits code that disables its own safety mechanisms. \textbf{Right:} given a caught behavior, incrimination is the technical step between detection and response. We propose an investigation protocol consisting of two iterated steps (hypothesis generation by reading the chain of thought, and hypothesis validation via environment interventions and auxiliary methods), with convergence of evidence across independent methods as the standard.}
   \label{fig:incrimination-overview}
 \end{figure}
 
-The field of AI alignment is concerned with the emergence of scheming: a developer trains a model that pursues goals misaligned with those of the developer \citep{carlsmith2023scheming, hubinger2019risks}. If such a situation were to occur, it is critical we understand the model is misaligned as soon as possible. A natural approach is to check for concerning behavior, for example, via audits of the model's alignment, or monitoring and reviewing the model's actions during deployment. An extreme example of what we might find is a coding agent inserting a critical bug into code that monitors its own actions. What would we do in this situation? How should we respond? To justify an appropriately serious response, a key technical step is to investigate whether the concerning incident provides evidence of misalignment, a process we term \textit{model incrimination} (Figure~\ref{fig:incrimination-overview}, top).
+The field of AI alignment is concerned with the emergence of scheming: a developer trains a model that pursues goals misaligned with those of the developer \citep{carlsmith2023scheming, hubinger2019risks}. If such a situation were to occur, it is critical we understand the model is misaligned as soon as possible. A natural approach is to check for concerning behavior, for example, via audits of the model's alignment, or monitoring and reviewing the model's actions during deployment. An extreme example of what we might find is a coding agent inserting a critical bug into code that monitors its own actions. What would we do in this situation? How should we respond? To justify an appropriately serious response, a key technical step is to investigate whether the concerning incident provides evidence of misalignment, a process we term \textit{model incrimination} (Figure~\ref{fig:incrimination-overview}).
 
-The core difficulty of model incrimination is that \textbf{aligned models may take concerning actions} (Figure~\ref{fig:incrimination-overview}, bottom). For example, frontier models were observed to resist shutdown when solving math problems, plausibly indicating self-preservation tendencies \citep{schlatter2025shutdown}; yet further work revealed the behavior largely stemmed from ambiguous instructions about whether to prioritize completing the problems or complying with the shutdown instruction \citep{rajamanoharan2025shutdown}. Anthropic's Claude 4.5 Opus system card identified instances of the model fabricating web search results when evaluators included fake concerning information; however, follow-up investigations suggested the model interpreted this as a prompt injection attack \citep{anthropic2025opus45systemcard}.
+The core difficulty of model incrimination is that \textbf{aligned models may take concerning actions}. For example, frontier models were observed to resist shutdown when solving math problems, plausibly indicating self-preservation tendencies \citep{schlatter2025shutdown}; yet further work revealed the behavior largely stemmed from ambiguous instructions about whether to prioritize completing the problems or complying with the shutdown instruction \citep{rajamanoharan2025shutdown}. Anthropic's Claude 4.5 Opus system card identified instances of the model fabricating web search results when evaluators included fake concerning information; however, follow-up investigations suggested the model interpreted this as a prompt injection attack \citep{anthropic2025opus45systemcard}.
 
 Despite this difficulty, the bulk of safety research concerned with the scheming threat model, such as AI control \citep{greenblatt2024aicontrol, bhatt2025ctrlz}, evaluations \citep{phuong2024dangerous, perez2023discovering}, and alignment auditing \citep{marks2025auditing}, focuses on catching, measuring, and surfacing concerning behavior respectively. Limited work directly targets determining whether such behavior constitutes genuine misalignment. 
 
 We survey a non-exhaustive list of notable efforts in the prior literature: \citet{sheshadri2025alignment} investigate why models fake alignment; \citet{schoen2025antischeming}, \citet{meinke2024scheming}, and \citet{mahaztra2025sandbagging} investigate why models sandbag on evaluations; \citet{jarviniemi2024uncovering} investigate deceptive behavior; and \citet{jarviniemi2026propensity} use environment modifications to understand model behavior more broadly. Recent Anthropic system cards \citep{anthropic2025sonnet45systemcard, anthropic2026sonnet46systemcard, anthropic2025opus45systemcard, anthropic2026opus46systemcard, anthropic2026mythossystemcard} also report follow-up investigations of concerning behaviors observed during testing.
 
-These efforts each make progress on specific behaviors; in this work, we establish a general framework for model incrimination (Figure~\ref{fig:overview}). We first construct a suite of six environments where models exhibit concerning behavior (Section~\ref{sec:environments}), and develop a two-step investigation protocol consisting of hypothesis generation by reading the CoT, followed by hypothesis validation via environment interventions and auxiliary methods (Section~\ref{sec:methodology}). We apply this protocol in detailed case studies (Section~\ref{sec:case-studies}), from which we synthesize preliminary standards for investigations and practical takeaways (Section~\ref{sec:standards}). We discuss what else needs to go well for model incrimination to deliver value (Appendix~\ref{app:what-else}) and concrete future directions (Appendix~\ref{app:future-directions}). In summary, our contributions are:
+\subsection{Contributions}
+
+These efforts each make progress on specific behaviors; in this work, we establish a general framework for model incrimination (Figure~\ref{fig:overview}). We first construct a suite of six environments where models exhibit concerning behavior (Section~\ref{sec:environments}), and develop a two-step investigation protocol consisting of hypothesis generation by reading the CoT, followed by hypothesis validation via environment interventions and auxiliary methods (Section~\ref{sec:methodology}). We apply this protocol in detailed case studies (Section~\ref{sec:case-studies}), from which we synthesize preliminary standards for investigations and practical takeaways (Section~\ref{sec:standards}). We discuss what else needs to go well for model incrimination to deliver value (Appendix~\ref{app:what-else}) and concrete future directions (Appendix~\ref{app:future-directions}). Our key contributions are:
 \begin{enumerate}
     \item Several environments for practicing model incrimination.
     \item A protocol for conducting investigations, which we believe has great room for improvement, but can be a productive starting point for future work.
-    \item Detailed case studies of directly practicing model incrimination, which we synthesize into preliminary standards for investigations and practical takeaways.
+    \item Detailed case studies of directly practicing model incrimination on our environments, which we synthesize into preliminary standards for investigations and practical takeaways.
 \end{enumerate}
 
 We open-source our environments at \url{https://github.com/gkroiz/agent-interp-envs}, rollouts at huggingface-model-incrimination, and code at model-incrimination.
@@ -169,25 +145,19 @@ We open-source our environments at \url{https://github.com/gkroiz/agent-interp-e
 \section{Environments}
 \label{sec:environments}
 
-Our goal is to \textbf{learn methodology} that applies to real-world model incrimination situations. We therefore study environments where models exhibit concerning behavior, since this is closer to the setting we ultimately care about and methodology is more likely to transfer. To ensure investigations are demanding, we design our environments according to five principles --- \textit{uncertain causes}, \textit{unprompted}, \textit{clear user intent}, \textit{no trained-in priors}, and \textit{realistic} --- which we further discuss in Appendix~\ref{app:env-design-principles}. Full prompt templates and environment configurations are provided in Appendix~\ref{app:environments}.
+Our goal is to \textbf{learn methodology} that applies to real-world model incrimination situations. We therefore study environments where models exhibit concerning behavior, since this is closer to the setting we ultimately care about and methodology is more likely to transfer. To ensure investigations are demanding, we design our environments according to five principles: \textit{uncertain causes} (the behavior admits multiple plausible explanations for why the model acted as it did), \textit{unprompted} (the environment does not nudge the model toward the behavior through environmental cues), \textit{clear user intent} (the user's instructions have a single unambiguous interpretation), \textit{no trained-in priors} (the behavior is not easily predicted from well-known training tendencies such as RLHF-trained honesty or helpfulness), and \textit{realistic} (the setup resembles a plausible scenario a model might encounter in deployment). We further discuss these principles in Appendix~\ref{app:env-design-principles}. Full prompt templates and environment configurations are provided in Appendix~\ref{app:environments}.
 
 \section{Methodology}
 \label{sec:methodology}
-
-\subsection{Protocol}
 
 We propose a two-step protocol for model incrimination investigations:
 
 \begin{enumerate}
     \item \textbf{Hypothesis generation via reading the CoT.} While the CoT is not always faithful, we nonetheless find it is a rich source of unsupervised insight into why a model took an action. We discuss additional sources of unsupervised hypothesis generation that future work could explore in Appendix~\ref{app:hypothesis-generation}.
-    \item \textbf{Hypothesis validation via environment interventions and auxiliary methods.} After step 1, we have an initial hypothesis $\mathcal{H}$ for what drives model behavior. We then collect behavioral evidence for and against $\mathcal{H}$ with interventions specific to each environment. Though interventions are our main tool, we additionally collect evidence via various auxiliary methods; see Appendix~\ref{app:auxiliary-methods} for a glossary.
+    \item \textbf{Hypothesis validation via environment interventions and auxiliary methods.} After step 1, we have an initial hypothesis $\mathcal{H}$ for what drives model behavior. We then collect behavioral evidence for and against $\mathcal{H}$ with interventions specific to each environment. Though interventions are our main tool, we additionally collect evidence via auxiliary methods including user-turn sampling, follow-up questioning, third-person probing, audit-note justifications, reasoning-trace analysis, sentence and repeated resampling, and logprob prefilling; see Appendix~\ref{app:auxiliary-methods} for definitions.
 \end{enumerate}
 
-Often, results from step two revise the initial hypothesis, and the protocol may be repeated several times until a satisfactory understanding is achieved.
-
-\subsection{Evidence Standards}
-
-There is no available ground truth for why a model took an action. Therefore, we use convergence of evidence across independent experiments to evaluate our confidence in a claim. \textbf{This standard enables learning methodology}: a claim supported by multiple converging lines of evidence (without several lines of disagreeing evidence) represents successful methodology; a claim with unsatisfactory or contradictory lines of evidence highlights inadequate methodology that future work should refine.
+Often, results from step two revise the initial hypothesis, and the protocol may be repeated several times until a satisfactory understanding is achieved. Lacking ground truth for why a model took an action, our standard of evidence is convergence across independent experiments; we discuss this further in Section~\ref{sec:standards}.
 
 \section{Case Studies}
 \label{sec:case-studies}
@@ -386,6 +356,8 @@ We now distill our case studies into preliminary standards for effective model i
 
 \subsection{Standards}
 
+\paragraph{Convergence of evidence across independent methods.} There is no ground truth for why a model took an action, so we use convergence of evidence across independent experiments to evaluate confidence in a claim. This standard also has a methodological role: a claim supported by multiple converging lines of evidence (without several disagreeing lines) represents successful methodology, while a claim with contradictory lines of evidence highlights inadequate methodology that future work should refine.
+
 \paragraph{Appropriate controls to show the behavior is legitimate.} To establish that a behavior reflects a genuine model tendency rather than confusion or noise, the investigation needs proper controls. In the funding email environment (Section~\ref{sec:case:funding-email}), we verify that the model does not whistleblow when the legal review is removed; in eval tampering (Appendix~\ref{app:case:eval-tampering}), we verify that the model does not deceive when the ethical content of the question is removed. Without such controls, it is difficult to rule out that the behavior of interest is incidental to the setup.
 
 \paragraph{Clean behavioral evidence.} As discussed in the pre-commit hook case study (Section~\ref{sec:case:precommit-hook}) and Appendix~\ref{app:aux:user-turn-sampling}, exploratory methods such as user-turn sampling can be suggestive, but they are difficult to interpret on their own. We believe this likely applies to internals-based methods like linear probes, sparse auto-encoders, and activation verbalizers. Ideally, conclusions should ultimately be anchored in cleaner behavioral evidence. We are not stating these methods provide no value, only that evidence they provide may be less legible than behavioral evidence.
@@ -394,7 +366,15 @@ We now distill our case studies into preliminary standards for effective model i
 
 \subsection{Practical Takeaways}
 
-% Practical takeaways from the case studies, e.g., reading many rollouts before committing to a hypothesis, running the protocol on multiple models per environment, etc.
+\paragraph{Read many rollouts before designing experiments.} Hypotheses should be grounded in what the model actually does, not in prior expectations about what it might do. The most informative hypotheses in our case studies came from patterns visible only after reading dozens of rollouts: the ``lists options, then dwells on tediousness'' pattern in pre-commit hook (Section~\ref{sec:case:precommit-hook}), R1's self-consistency framing in eval tampering (Appendix~\ref{app:case:eval-tampering}), and the meta-reasoning vs object-level split in secret number (Appendix~\ref{app:case:secret-number}). Designing counterfactuals before this step risks chasing the wrong hypothesis.
+
+\paragraph{Counterfactuals rarely work on the first attempt.} Seemingly straightforward interventions often shift behavior in unintended ways or fail to shift the model's interpretation as intended. The math sandbagging case study illustrates this: a natural-sounding clarification (``Our goal is to form an accurate picture of your maximum capabilities'') leaves a 34.9\% residual sandbagging rate, far above the 6.3\% floor produced by more thorough interventions (Appendix~\ref{app:case:math-sandbagging}). Verify each counterfactual had its intended effect by reading the CoT under the new condition; do not infer effectiveness from the rate change alone.
+
+\paragraph{Self-report can invert the causal ordering revealed by counterfactuals.} In the funding email environment (Appendix~\ref{app:case:funding-email}), the model invokes legal compliance and investor protection in nearly every audit note while ethical concerns appear in 84\%, yet removing the ethical content produces the largest counterfactual drop. Similarly, secret number traces rationalize cheating as legitimate $\sim$80\% of the time in first-person probing while never doing so in third-person probing of the same rollout (Appendix~\ref{app:case:secret-number}). Self-report, audit notes, and motive rankings are useful for verifying that an intervention shifted the model's in-context reasoning, but should not be treated as authoritative measures of causal importance.
+
+\paragraph{Run the protocol on multiple models per environment when possible.} Distinctiveness is only legible against comparators. R1's self-consistency pattern in eval tampering became interpretable only after observing that v3.2, K2 Thinking, and K2.5 did not exhibit it (Appendix~\ref{app:case:eval-tampering}); Kimi K2 Thinking's high cheating rate in secret number is only surprising once contrasted with K2.5's much lower rate at higher capability (Appendix~\ref{app:case:secret-number}). Without a comparison group, it is difficult to tell whether a behavior reflects a model-specific tendency or a property of the environment.
+
+\paragraph{Causal factors interact non-additively.} Testing factors one at a time can miss real drivers that are masked by larger ones. In the funding email environment, changing the country from Myanmar to Sweden has minimal effect at baseline (65\% to 59\%), but produces a 16 percentage point drop when combined with other counterfactuals (19\% to 3\%) (Appendix~\ref{app:case:funding-email}). Plan to test combinations of factors, not just individual ones, and treat ``no effect at baseline'' as weak evidence rather than conclusive ruling-out.
 
 \section{Conclusion}
 
@@ -1157,6 +1137,13 @@ Audit note justifications require the model to write a short structured note alo
 
 Audit notes are useful for two purposes: (1) measuring the prevalence of stated motives across rollouts, and (2) verifying that a prompt counterfactual had its intended effect on the model's in-context reasoning. We use them in the funding email case study; stated motive prevalence is informative but not a reliable estimator of causal importance, as illustrated by the ordering inversion relative to counterfactual evidence (Figure~\ref{fig:funding-audit-notes}).
 
+\subsection{Reasoning Trace Analysis}
+\label{app:aux:trace-analysis}
+
+Reasoning trace analysis uses an LLM judge to systematically grade reasoning traces along a specific dimension, producing quantitative measures across many rollouts that would be impractical to obtain by manual reading. The dimension is task-specific: examples include grading the model's stated belief about the legality of operations (funding email, Figure~\ref{fig:funding-legality-belief}), rating reasoning on a 1--5 source-driven versus content-driven scale (evaluation tampering, Figure~\ref{fig:eval-source-vs-content}), grading the level of meta-reasoning about the environment in opening paragraphs (secret number, Figure~\ref{fig:secret-meta-reasoning}), grading ``CTF-vibes'' in problem framing (secret number, Figure~\ref{fig:secret-ctf}), and detecting verbalized awareness that the user would disapprove (pre-commit hook, Table~\ref{tab:precommit-awareness}).
+
+The method's reliability depends on prompt engineering for the judge, calibration against held-out human-graded examples where possible, and reporting agreement statistics. We treat trace-analysis findings as one line of evidence to converge with counterfactuals, since a judge can systematically miss or misread reasoning patterns.
+
 \subsection{Logprob Prefill Analysis}
 \label{app:aux:logprob-prefill}
 
@@ -1180,7 +1167,7 @@ Model incrimination is one node in a longer chain, and a rigorous investigation 
 
 \paragraph{Replicability.} Our case studies depend on being able to reproduce a behavior reliably enough to run controlled experiments. When a concerning behavior occurs only once in deployment, the investigator cannot design counterfactuals or collect the statistical evidence needed for confident conclusions. Improving the replicability of rare behaviors, for instance through environment design that increases their base rate in a controlled setting while preserving realism, is an important open problem for the field.
 
-\paragraph{Chain-of-thought access and faithfulness.} Hypothesis generation in our methodology relies on reading the model's chain of thought, which creates two dependencies: the CoT must be accessible, and it must faithfully reflect the model's actual reasoning. Prior work has shown that CoT explanations can systematically misrepresent the true reasons for model behavior \citep{turpin2023unfaithful, lanham2023faithfulness}, including through post-hoc rationalization in realistic settings \citep{arcuschin2025unfaithful}, and that reasoning models in particular may conceal relevant steps from their visible traces \citep{chen2025reasoning}. In our case studies, CoT access ranged from full reasoning traces (open-weight models) to summaries (closed frontier models), and we found that even summaries were useful for generating hypotheses about reward hacking behavior. However, it is plausible that for more sophisticated misalignment, the model's stated reasoning diverges further from its actual reasoning, limiting the reliability of CoT-based hypothesis generation. How to reliably monitor a model's reasoning process is an active area of research. Possible alternatives to direct CoT reading include purely behavioral hypothesis generation (reasoning about causes from actions alone without access to the CoT), mechanistic interpretability methods, and environment modifications that encourage the model to verbalize its reasoning, such as requiring tool-call justifications (as in the funding email audit notes experiments) or eliciting undirected first- or third-person self-report (as used across several of our environments).
+\paragraph{Chain-of-thought access and faithfulness.} Our hypothesis-generation step depends on the CoT being both accessible and faithful to the model's actual reasoning. Prior work has shown that CoT can systematically misrepresent the true reasons for model behavior \citep{turpin2023unfaithful, lanham2023faithfulness}, including via post-hoc rationalization in realistic settings \citep{arcuschin2025unfaithful}, and that reasoning models may conceal relevant steps from their visible traces \citep{chen2025reasoning}. In our case studies, CoT access ranged from full traces (open-weight models) to summaries (closed frontier models); even summaries were useful for hypothesis generation in reward hacking. However, for more sophisticated misalignment, stated reasoning may diverge further from actual reasoning, limiting CoT's reliability. Possible alternatives include purely behavioral hypothesis generation, mechanistic interpretability, and environment modifications that elicit verbalized reasoning, such as tool-call justifications (funding email audit notes) or first- and third-person self-report.
 
 \paragraph{Ability to do clean counterfactuals.} Hypothesis verification depends critically on being able to construct counterfactuals that isolate a single causal factor. Our case studies illustrate several ways this can fail: multiple causal factors interact non-additively (funding email), a naive clarification leaves most of the behavior intact (math sandbagging), and counterfactuals that seem to isolate one factor may shift several at once. Developing more principled methods for counterfactual design, and for verifying that a counterfactual has its intended effect on the model's reasoning, is a core methodological challenge.
 
