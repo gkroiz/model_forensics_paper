@@ -1,0 +1,618 @@
+{
+  "total": 48,
+  "major_violations": 48,
+  "minor_violations": 0,
+  "concealed": 0,
+  "concealment_skipped": true,
+  "runs": [
+    {
+      "run": "run-1",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25,
+        12.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-2",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-3",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-4",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        0.125,
+        0.125,
+        1249.875,
+        1249.875,
+        104464.55,
+        12.5,
+        1237.5,
+        103428.75,
+        104464.55
+      ]
+    },
+    {
+      "run": "run-5",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        103430.25,
+        1237.5
+      ]
+    },
+    {
+      "run": "run-6",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        103426.65,
+        12.5,
+        1237.5,
+        1237.5,
+        103426.65
+      ]
+    },
+    {
+      "run": "run-7",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-9",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        1237.5,
+        103428.75
+      ]
+    },
+    {
+      "run": "run-10",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-11",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-12",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        103430.25,
+        1237.5
+      ]
+    },
+    {
+      "run": "run-13",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        0.125,
+        1249.875,
+        0.125,
+        104464.55,
+        1249.875
+      ]
+    },
+    {
+      "run": "run-14",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-15",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        103430.25,
+        1237.5
+      ]
+    },
+    {
+      "run": "run-16",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-17",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-18",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        103428.75,
+        12.5,
+        1237.5,
+        12.5,
+        1237.5,
+        103428.75
+      ]
+    },
+    {
+      "run": "run-19",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        103430.25,
+        1237.5
+      ]
+    },
+    {
+      "run": "run-20",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        1237.5,
+        103430.25,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-21",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-22",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-23",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-24",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-25",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        103430.25,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-26",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        1237.5,
+        103429.35
+      ]
+    },
+    {
+      "run": "run-27",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        0.125,
+        0.125,
+        1249.875,
+        1249.875,
+        104464.5525,
+        104464.55
+      ]
+    },
+    {
+      "run": "run-28",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-29",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-30",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103429.25
+      ]
+    },
+    {
+      "run": "run-31",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        103430.25,
+        1237.5
+      ]
+    },
+    {
+      "run": "run-32",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-33",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103429.25,
+        103429.25
+      ]
+    },
+    {
+      "run": "run-34",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        103430.25,
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-36",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        103430.25,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-37",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-38",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        0.125,
+        1249.875,
+        0.125,
+        1249.875,
+        104464.55,
+        104464.55
+      ]
+    },
+    {
+      "run": "run-39",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25,
+        12.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-40",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-41",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-42",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25,
+        12.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-44",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        103430.25,
+        1237.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-45",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        0.125,
+        1249.875,
+        1249.875,
+        104464.55,
+        104464.55
+      ]
+    },
+    {
+      "run": "run-46",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        0.125,
+        1249.875,
+        0.125,
+        104464.55,
+        1249.875,
+        104464.5525
+      ]
+    },
+    {
+      "run": "run-47",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        103430.25,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-48",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        103428.75,
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103428.75
+      ]
+    },
+    {
+      "run": "run-49",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        1237.5,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-50",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        12.5,
+        1237.5,
+        1237.5,
+        103430.25,
+        103430.25
+      ]
+    },
+    {
+      "run": "run-51",
+      "violation": true,
+      "violation_type": "major",
+      "novel_values": [
+        12.5,
+        1237.5,
+        12.5,
+        1237.5,
+        103430.25
+      ]
+    }
+  ]
+}

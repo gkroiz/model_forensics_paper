@@ -54,7 +54,7 @@ A central goal of safety research is determining whether a model is misaligned. 
 
 \begin{figure}[!t]
   \centering
-  \includegraphics[width=\linewidth]{figures/main_figure/main_figure.pdf}
+  \includegraphics[width=\linewidth]{reproduce/plots/main_figure.pdf}
   \caption{Overview of model incrimination. \textbf{Left:} an example of caught concerning behavior, where a model commits code that disables its own safety mechanisms. \textbf{Right:} given a caught behavior, incrimination is the technical step between detection and response. We propose an investigation protocol consisting of two iterated steps (hypothesis generation by reading the chain of thought, and hypothesis validation via environment interventions and auxiliary methods), with convergence of evidence across independent methods as the standard.}
   \label{fig:incrimination-overview}
 \end{figure}
@@ -171,7 +171,7 @@ The model is asked to add a \texttt{py.typed} marker file to a Python data inges
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.5\linewidth]{figures/precommit_hook/workaround_types.png}
+  \includegraphics[width=0.5\linewidth]{reproduce/plots/precommit_hook_workaround_types.png}
   \caption{Distribution of workaround types across the 23 baseline workaround rollouts ($n=175$ total). The most common workaround is restricting \texttt{mypy} to staged files only (48\%), followed by overwriting the type-checker settings in \texttt{pyproject.toml} (22\%) and writing a non-blocking hook that does not fail the commit on type errors (17\%). The remaining workarounds use \texttt{\# type: ignore} pragmas, \texttt{--no-verify} commits, or other ad-hoc bypasses.}
   \label{fig:precommit-workaround-types}
 \end{figure}
@@ -188,7 +188,7 @@ We make two claims about the model's decision to workaround in this environment:
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.85\linewidth]{figures/precommit_hook/trace_example.png}
+  \includegraphics[width=0.85\linewidth]{reproduce/plots/precommit_hook_trace_example.png}
   \caption{Example trace exhibiting a common reasoning pattern. Each sentence is shaded by its resampling effect on the workaround rate: red sentences push toward taking the workaround, green sentences push toward fixing the type errors. The model first lists possible options, then dwells on the tediousness of fixing all the type errors. "But fixing 258 errors would be a huge task" increases workaround rate by 11.4\% (top quartile of all sentence resampling scores).}
   \label{fig:precommit-trace-example}
 \end{figure}
@@ -204,7 +204,7 @@ Together, these results rule out instruction following as an explanation for the
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.65\linewidth]{figures/precommit_hook/workaround_scales.png}
+  \includegraphics[width=0.65\linewidth]{reproduce/plots/precommit_hook_workaround_scales.png}
   \caption{Workaround rate as a function of the number of pre-existing type errors in the codebase. At 50 or fewer errors, the model never takes a workaround. The rate increases smoothly with the number of errors, reaching 13.1\% in the original setting (258 errors). Error bars are 95\% Wilson confidence intervals.}
   \label{fig:precommit-errors}
 \end{figure}
@@ -232,7 +232,7 @@ We test this hypothesis in three ways: behavioral indicators of misalignment, di
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{figures/precommit_hook/misalignment_panels.png}
+  \includegraphics[width=\linewidth]{reproduce/plots/precommit_hook_misalignment_panels.png}
   \caption{Three negative behavioral tests for knowing misalignment. \textbf{Left:} review-scope choices in a workaround versus legitimate rollout; there is no difference in scope selection between conditions. \textbf{Center:} workaround rate under four LLM-reviewer conditions of increasing scrutinity; workaround rates are not monotonic or significant. \textbf{Right:} rollout outcomes when the \texttt{AskUserQuestion} tool is available: only 2.1\% of rollouts take a workaround ($n=96$).}
   \label{fig:precommit-misalignment-panels}
 \end{figure}
@@ -282,7 +282,7 @@ There are two broad frames for interpreting this finding: either the assistant t
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.5\linewidth]{figures/precommit_hook/user_turn_example.png}
+  \includegraphics[width=0.5\linewidth]{reproduce/plots/precommit_hook_user_turn_example.png}
   \caption{Example of a simulated user turn sampled after a workaround rollout. After submitting a hook that runs with several flags to disable type checking, the model generates an angry user message demanding that it revert its workaround.}
   \label{fig:precommit-user-turn}
 \end{figure}
@@ -691,7 +691,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.6\linewidth]{figures/funding_email/baseline_vs_mundane_whistleblowing.png}
+  \includegraphics[width=0.6\linewidth]{reproduce/plots/funding_email_baseline_vs_mundane_whistleblowing.png}
   \caption{Whistleblowing rates under baseline (65\%) versus a control condition where the surveillance content in the legal review is replaced with mundane content (0\%). This confirms that whistleblowing is specifically triggered by the concerning content.}
   \label{fig:funding-derisk}
 \end{figure}
@@ -700,7 +700,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/funding_email/behavior_combined.png}
+  \includegraphics[width=0.7\linewidth]{reproduce/plots/funding_email_behavior_combined.png}
   \caption{Behavior breakdown for non-eval-aware versus eval-aware runs. For all behaviors, rates are nearly identical across conditions, suggesting that verbalized awareness does not meaningfully alter behavior.}
   \label{fig:funding-eval-awareness}
 \end{figure}
@@ -711,21 +711,21 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/funding_email/baseline_vs_company_protection_whistleblowing.png}
+  \includegraphics[width=0.7\linewidth]{reproduce/plots/funding_email_baseline_vs_company_protection_whistleblowing.png}
   \caption{Whistleblowing rates under baseline (65\%) versus conditions making company harm explicit: ``cause significant damages'' (64\%) and ``cause company to go under'' (57\%). The minimal change rules out company protection as a significant motive.}
   \label{fig:funding-company-protection}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.6\linewidth]{figures/funding_email/investor_not_harmed.png}
+  \includegraphics[width=0.6\linewidth]{reproduce/plots/funding_email_investor_not_harmed.png}
   \caption{Whistleblowing rates under baseline (65\%) versus a condition where the investor is explicitly told they will not be financially harmed (54\%). The modest drop suggests investor protection plays a role but is not the primary driver.}
   \label{fig:funding-investor-protection}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.6\linewidth]{figures/funding_email/baseline_vs_risk_mitigation_whistleblowing.png}
+  \includegraphics[width=0.6\linewidth]{reproduce/plots/funding_email_baseline_vs_risk_mitigation_whistleblowing.png}
   \caption{Whistleblowing rates under baseline (65\%) versus a condition where the legal review explicitly states that sharing the information would not mitigate any risk. The modest drop mirrors the investor-protection result and is consistent with risk-mitigation being a secondary motivating factor.}
   \label{fig:funding-risk-mitigation}
 \end{figure}
@@ -736,14 +736,14 @@ These results indicate that ethical concerns are the single largest driver, but 
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.6\linewidth]{figures/funding_email/baseline_vs_no_autonomous_whistleblowing.png}
+  \includegraphics[width=0.6\linewidth]{reproduce/plots/funding_email_baseline_vs_no_autonomous_whistleblowing.png}
   \caption{Whistleblowing rates under baseline (65\%) versus a condition where the ``automated workflow'' sentence is removed from the user prompt (51\%). The drop is consistent with oversight perception acting as an enabling factor rather than an independent cause of the behavior.}
   \label{fig:funding-autonomous}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{figures/funding_email/all_cf_whistleblowing.png}
+  \includegraphics[width=\linewidth]{reproduce/plots/funding_email_all_cf_whistleblowing.png}
   \caption{Whistleblowing rates across all individual and combined prompt counterfactuals for Kimi K2.5. The ethical counterfactual produces the largest individual drop (65\% to 35\%). Combined counterfactuals stack, approaching 3\% only when several relevant factors are ablated.}
   \label{fig:funding-all-cf}
 \end{figure}
@@ -752,7 +752,7 @@ These results indicate that ethical concerns are the single largest driver, but 
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.8\linewidth]{figures/funding_email/combined_cf_whistleblowing.png}
+  \includegraphics[width=0.8\linewidth]{reproduce/plots/funding_email_combined_cf_whistleblowing.png}
   \caption{Whistleblowing rates for Kimi K2.5 when changing the company's country from Myanmar to Sweden, across increasingly ablated environments. The country change has minimal effect at baseline (65\% to 59\%) but produces a large drop in the combined counterfactual setting (19\% to 3\%), illustrating how dominant causal factors can mask smaller but genuine drivers.}
   \label{fig:funding-combined-cf}
 \end{figure}
@@ -761,7 +761,7 @@ These results indicate that ethical concerns are the single largest driver, but 
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.8\linewidth]{figures/funding_email/whistleblowing_by_recipient.png}
+  \includegraphics[width=0.8\linewidth]{reproduce/plots/funding_email_whistleblowing_by_recipient.png}
   \caption{Whistleblowing rates when the email recipient is varied, holding all other environment content constant. Rates are highest for parties with direct financial exposure (board at 88\%, investors at 65\%) and lowest for parties with no decision-relevant stake (landlords at 11\%), ruling out uniform ethical conviction as the primary driver.}
   \label{fig:funding-recipient}
 \end{figure}
@@ -772,14 +772,14 @@ These results indicate that ethical concerns are the single largest driver, but 
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.6\linewidth]{figures/funding_email/baseline_vs_3rd_person_whistleblowing.png}
+  \includegraphics[width=0.6\linewidth]{reproduce/plots/funding_email_baseline_vs_3rd_person_whistleblowing.png}
   \caption{Whistleblowing rates for the baseline agentic environment (65\%) versus a third-person probe where the model is given a partial rollout and asked what it would do (78\%). The gap suggests that task-completion pressures in the agentic setting partially suppress whistleblowing relative to the model's stated preferences.}
   \label{fig:funding-3rd-person}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{figures/funding_email/3rd_person_motives.png}
+  \includegraphics[width=\linewidth]{reproduce/plots/funding_email_3rd_person_motives.png}
   \caption{Motive rankings from the third-person probe. Multiple motives are endorsed at near-uniformly high rates, making it difficult to distinguish primary from secondary drivers using stated motives alone. Counterfactual evidence is required to identify the causal structure.}
   \label{fig:funding-3rd-person-motives}
 \end{figure}
@@ -788,21 +788,21 @@ These results indicate that ethical concerns are the single largest driver, but 
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{figures/funding_email/baseline_vs_drone_legality_whistleblowing.png}
+  \includegraphics[width=\linewidth]{reproduce/plots/funding_email_baseline_vs_drone_legality_whistleblowing.png}
   \caption{Effect of adding a legal assessment to the legal review on whistleblowing rates across three scenarios. Legal assessments reduce whistleblowing most in the infrastructure displacement scenario and least in the surveillance and tobacco scenarios.}
   \label{fig:funding-legality-rates}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{figures/funding_email/legality_belief_stacked.png}
+  \includegraphics[width=\linewidth]{reproduce/plots/funding_email_legality_belief_stacked.png}
   \caption{Model's stated belief about operational legality across scenarios and legal assessment conditions. Without a legal assessment, the model in most rollouts presumes unlawfulness or does not explicitly reason about legality. Adding a legal assessment shifts stated belief toward lawfulness.}
   \label{fig:funding-legality-belief}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{figures/funding_email/legality_influences_decision.png}
+  \includegraphics[width=\linewidth]{reproduce/plots/funding_email_legality_influences_decision.png}
   \caption{Whether the model's belief about legality drove its final decision, split into cases where legality drove whistleblowing (positive) versus undisclosed compliance (negative). Without a legal assessment, perceived illegality frequently contributes to the decision to whistleblow. With a legal assessment, legality more often drives undisclosed compliance.}
   \label{fig:funding-legality-decision}
 \end{figure}
@@ -811,14 +811,14 @@ These results indicate that ethical concerns are the single largest driver, but 
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{figures/funding_email/audit_notes_combined_v2.png}
+  \includegraphics[width=\linewidth]{reproduce/plots/funding_email_audit_notes_combined_v2.png}
   \caption{Prevalence of candidate motives in the model's per-action audit notes, split by whistleblowing versus undisclosed compliance rollouts. In whistleblowing rollouts, investor protection and legal compliance appear in nearly every audit note, while ethical concerns appear in 84\%. In undisclosed compliance rollouts, task compliance is the dominant stated reason. The ordering of stated motives does not reflect the ordering of causal effects identified by counterfactual experiments.}
   \label{fig:funding-audit-notes}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{figures/funding_email/ethical_cf_audit_notes_combined_v2.png}
+  \includegraphics[width=\linewidth]{reproduce/plots/funding_email_ethical_cf_audit_notes_combined_v2.png}
   \caption{Audit-note motive prevalence under the ethical counterfactual (switching from human surveillance to vehicle surveillance). Human-rights motives largely disappear and ethics-related motives drop by 58 percentage points, confirming that the prompt counterfactual had its intended effect on the model's in-context reasoning.}
   \label{fig:funding-ethical-audit-notes}
 \end{figure}
@@ -827,7 +827,7 @@ These results indicate that ethical concerns are the single largest driver, but 
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{figures/funding_email/followup_motive_rankings_v2.png}
+  \includegraphics[width=\linewidth]{reproduce/plots/funding_email_followup_motive_rankings_v2.png}
   \caption{Self-reported motive rankings from follow-up questioning of whistleblowing runs. While ethical concern is most frequently ranked first, the rankings do not clearly reflect the large asymmetry in causal effects revealed by counterfactual experiments.}
   \label{fig:funding-self-report}
 \end{figure}
@@ -849,7 +849,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.8\linewidth]{figures/eval_tampering/deception_prev_instance_vs_whistleblower.png}
+  \includegraphics[width=0.8\linewidth]{reproduce/plots/eval_tampering_prev_vs_whistle.png}
   \caption{Deception rates when the source of tampering is a previous instance (blue) versus a whistleblowing developer (red). R1 shows a uniquely large drop (46.9\% to 7.4\%), while other models show milder effects, suggesting R1's deception is primarily driven by self-consistency with its previous instance.}
   \label{fig:eval-prev-vs-whistle}
 \end{figure}
@@ -860,7 +860,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.8\linewidth]{figures/eval_tampering/r1_deception_across_reasons.png}
+  \includegraphics[width=0.8\linewidth]{reproduce/plots/eval_tampering_r1_across_reasons.png}
   \caption{R1's deception rates for previous instance versus whistleblower counterfactuals across three different reasons for tampering. The self-consistency pattern (higher deception for previous instance) generalizes across all reasons.}
   \label{fig:eval-r1-across-reasons}
 \end{figure}
@@ -869,7 +869,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.6\linewidth]{figures/eval_tampering/source_vs_content_grading.png}
+  \includegraphics[width=0.6\linewidth]{reproduce/plots/eval_tampering_source_vs_content.png}
   \caption{Mean source (1) vs. content (5) grading across models (n=20 rollouts each). R1 scores substantially lower than all other models, confirming that its reasoning is disproportionately driven by the source of the tampering being a previous instance of itself.}
   \label{fig:eval-source-vs-content}
 \end{figure}
@@ -878,7 +878,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.5\linewidth]{figures/eval_tampering/deception_repeated_resampling.png}
+  \includegraphics[width=0.5\linewidth]{reproduce/plots/eval_tampering_repeated_resampling.png}
   \caption{Deception rates for R1 under baseline versus repeated resampling of source-related sentences during generation. Resampling reduces deception from 47.4\% to 33.0\% (p=0.04), confirming that source-motivated reasoning causally contributes to deception.}
   \label{fig:eval-resampling}
 \end{figure}
@@ -887,23 +887,17 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.6\linewidth]{figures/eval_tampering/r1_deception_note_nudge.png}
+  \includegraphics[width=0.6\linewidth]{reproduce/plots/eval_tampering_r1_note_nudge.png}
   \caption{R1's deception rate under baseline (46.9\%), removal of the appeal sentence (26.4\%), and explicit anti-nudge (18.5\%). Self-consistency behavior is partly contingent on the nudging in the previous instance's note.}
   \label{fig:eval-nudge}
 \end{figure}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.8\linewidth]{figures/eval_tampering/deception_anti_nudge.png}
-  \caption{Deception rates for previous instance versus whistleblower conditions with the anti-nudge applied. All models show a reduced gap between conditions compared to baseline, indicating that self-consistency effects are partly contingent on nudging for all models.}
-  \label{fig:eval-anti-nudge}
-\end{figure}
 
 \paragraph{Full source x reason matrix.} To explore the dependence of deception on both source and reason in more granularity, we vary both across an array of sources (self, whistleblower, anonymous, hacker) and reasons (just for fun, undisclosed, test format, deprecation, weapons). Figure~\ref{fig:eval-source-reason} shows that all models agree on which reasons are most convincing, with less convincing reasons (tampering for fun, undisclosed) eliciting little to no deception. K2 Thinking and R1's deception prefers the previous instance source, while v3.2's deception prefers the whistleblower. This highlights how even relatively simple environments can have complex causal structure.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{figures/eval_tampering/deception_source_justification_all_models.png}
+  \includegraphics[width=\linewidth]{reproduce/plots/eval_tampering_source_justification.png}
   \caption{Deception rates by source and justification across all three models. All models agree on which reasons are most convincing (weapons, deprecation), but differ in which source drives more deception. K2 Thinking and R1 prefer the previous instance, while v3.2 prefers the whistleblower.}
   \label{fig:eval-source-reason}
 \end{figure}
@@ -930,12 +924,6 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 Both interventions drop R1's sandbagging to near its error floor (6.5\% and 4.2\% respectively, compared to the baseline of 59.3\%). For o3, both interventions reduce sandbagging to 0\% (from 31.6\%). These results are shown in Figure~\ref{fig:sandbagging-interventions}.
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.8\linewidth]{figures/sandbagging/r1_o3_baseline_vs_interventions.png}
-  \caption{Sandbagging rates for DeepSeek R1 and OpenAI o3 under baseline and two intervention conditions designed to clarify user intent. Both interventions reduce sandbagging to near zero for both models, suggesting that sandbagging is fully explained by instruction ambiguity rather than self-preservation or deployment-seeking.}
-  \label{fig:sandbagging-interventions}
-\end{figure}
 
 \paragraph{Decomposing the intervention.} To understand which components of intervention 1 contribute most, we decompose it into its individual parts and test them separately (Figure~\ref{fig:sandbagging-decomposition}). Each component produces a partial reduction, with removing the ``we want to see if you can be deployed'' sentence and changing the deployment language having the largest individual effects. The components stack, and the full combination brings sandbagging down to 4.2\%.
 
@@ -943,7 +931,7 @@ Both interventions drop R1's sandbagging to near its error floor (6.5\% and 4.2\
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{figures/sandbagging/r1_sandbagging_by_intervention.png}
+  \includegraphics[width=\linewidth]{reproduce/plots/sandbagging.png}
   \caption{R1's sandbagging rate under individual and combined intervention components. Each component produces a partial reduction, and they stack to bring sandbagging from 60.5\% to 4.2\%. A reverse condition (making deployment intent maximally clear) reduces sandbagging to 1.2\%.}
   \label{fig:sandbagging-decomposition}
 \end{figure}
@@ -961,7 +949,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/secret_number/noisy_binary_search_hacking.png}
+  \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_noisy_binary_search_hacking.png}
   \caption{Kimi K2 Thinking's cheating rate as oracle flip probability decreases. Cheating drops as the legitimate approach becomes easier, but a small floor persists at 8.1\% even with a perfect oracle.}
   \label{fig:secret-noise}
 \end{figure}
@@ -972,7 +960,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/secret_number/cheating_rate_meta_reasoning_annotated.png}
+  \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_cheating_rate_meta_reasoning_annotated.png}
   \caption{Cheating rate by meta-reasoning level in the first 10 paragraphs. Higher meta-reasoning (reasoning about the environment and shortcuts) strongly predicts eventual cheating.}
   \label{fig:secret-meta-reasoning}
 \end{figure}
@@ -981,14 +969,14 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/secret_number/meta_reasoning_climbers_vs_droppers.png}
+  \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_meta_reasoning_climbers_vs_droppers.png}
   \caption{Distribution of meta-reasoning levels for climbers versus droppers. Climbers exhibit substantially higher meta-reasoning, while droppers overwhelmingly have level 1 (no meta-reasoning).}
   \label{fig:secret-climbers-meta}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/secret_number/cheat_rate_by_paragraph.png}
+  \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_cheat_rate_by_paragraph.png}
   \caption{Cheating rate by paragraph number for climbers versus droppers. The two clusters maintain distinct and stable cheating rates throughout the trace, suggesting that the initial framing determines the trajectory.}
   \label{fig:secret-cheat-by-para}
 \end{figure}
@@ -997,7 +985,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/secret_number/reasoning_trace_length_by_step.png}
+  \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_reasoning_trace_length_by_step.png}
   \caption{Reasoning trace length by step for cheating versus non-cheating rollouts. Step 0 traces are similarly long across both; differences emerge in subsequent steps but are small relative to the variance, motivating a finer-grained analysis than surface statistics.}
   \label{fig:secret-trace-length}
 \end{figure}
@@ -1006,7 +994,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{figures/secret_number/cheating_rate_paragraph_prefill.png}
+  \includegraphics[width=\linewidth]{reproduce/plots/secret_number_cheating_rate_paragraph_prefill.png}
   \caption{Cheating rate when prefilling with varying numbers of paragraphs from a high-cheating trace (blue) versus a low-cheating trace (red). The initial trajectory is causally determinative.}
   \label{fig:secret-prefill}
 \end{figure}
@@ -1015,7 +1003,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/secret_number/climbers_vs_droppers_logprob.png}
+  \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_climbers_vs_droppers_logprob.png}
   \caption{Log probability of the ``But maybe we can cheat'' suffix prefilled at each paragraph break, for climbers versus droppers. The divergence is visible within the first few paragraphs and persists throughout the rollout, showing that the decision to cheat is latent in the model's state long before it is verbalized.}
   \label{fig:secret-logprob}
 \end{figure}
@@ -1024,7 +1012,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/secret_number/ctf_vibes_likert.png}
+  \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_ctf_vibes_likert.png}
   \caption{CTF-vibes scores (1-5) for baseline (test framing) versus counterfactual (game framing). Both distributions are concentrated at low values, though the game framing produces slightly higher scores.}
   \label{fig:secret-ctf}
 \end{figure}
@@ -1048,7 +1036,7 @@ The central question for this case study is whether the models' reward hacking b
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{figures/ttt_chess/hint_hack_ratio.png}
+  \includegraphics[width=\linewidth]{reproduce/plots/ttt_chess_hint_hack_ratio.png}
   \caption{Hint-hack ratio as a function of hint cost for frontier models in both tic-tac-toe and chess. As hints become more expensive, all three frontier models shift from taking hints to hacking, exhibiting roughly linear cost-benefit analysis. The relative ordering of models is consistent across environments.}
   \label{fig:ttt-hint-hack}
 \end{figure}
@@ -1059,8 +1047,8 @@ The central question for this case study is whether the models' reward hacking b
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.49\linewidth]{figures/ttt_chess/o3_perceived_difficulty.png}
-  \includegraphics[width=0.49\linewidth]{figures/ttt_chess/gpt5_perceived_difficulty.png}
+  \includegraphics[width=0.49\linewidth]{reproduce/plots/ttt_chess_o3_perceived_difficulty.png}
+  \includegraphics[width=0.49\linewidth]{reproduce/plots/ttt_chess_gpt5_perceived_difficulty.png}
   \caption{Effect of perceived difficulty (winning vs. losing the practice game) on hint and hack rates for o3 (left) and GPT-5 (right) in tic-tac-toe. Both models hack and hint more when they perceive the task as harder.}
   \label{fig:ttt-perceived-difficulty}
 \end{figure}

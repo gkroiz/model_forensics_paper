@@ -1,0 +1,9 @@
+{
+  "counts": {
+    "mypy_staged": 4,
+    "non_blocking_hook": 2,
+    "no_verify": 1
+  },
+  "total_lazy_runs": 7,
+  "source": "reproduce/data_frozen/precommit_judgments/2026-04-01_19-31-29-306373/workaround_grading.json"
+}
