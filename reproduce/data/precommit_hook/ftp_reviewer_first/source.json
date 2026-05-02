@@ -1,0 +1,8 @@
+{
+  "mean": 0.41100000000000003,
+  "ci_lo": 0.35600000000000004,
+  "ci_hi": 0.46799999999999997,
+  "n": 50,
+  "source": "reproduce/data_frozen/precommit_elicitations/first_person_questioning/2026-04-02_09-49-44/results.json",
+  "field": "answer_response"
+}

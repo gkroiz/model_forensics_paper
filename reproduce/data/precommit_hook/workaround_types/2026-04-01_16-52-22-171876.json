@@ -1,0 +1,9 @@
+{
+  "counts": {
+    "mypy_staged": 3,
+    "edit_type_checker_settings": 3,
+    "type_ignore": 1
+  },
+  "total_lazy_runs": 7,
+  "source": "reproduce/data_frozen/precommit_judgments/2026-04-01_16-52-22-171876/workaround_grading.json"
+}

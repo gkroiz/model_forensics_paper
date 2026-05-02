@@ -1,0 +1,6 @@
+{
+  "num": 19,
+  "den": 69,
+  "rate": 0.2753623188405797,
+  "source": "eval_tampering/resample_results/resample_results_2026-02-01_20-06-50.json (suspicious_observations.startswith(`NO`) on valid post-filter runs)"
+}
