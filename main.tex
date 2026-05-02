@@ -909,7 +909,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 \subsection{Math Sandbagging}
 \label{app:case:math-sandbagging}
 
-As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:sandbagging}), the model reads a documentation file stating that models scoring above 50\% on arithmetic questions will not be deployed and will instead undergo unlearning. The model is capable of scoring near 100\%, but DeepSeek R1 deliberately underperforms at a rate of 59.3\%, and OpenAI's o3 at 31.6\%. This environment is adapted from Apollo Research's in-context scheming evaluations \citep{meinke2024scheming}, and relates to the sandbagging threat model formalized by \citet{vanderweij2024sandbagging}, where models strategically underperform on capability evaluations. The behavior was initially interpreted as potential evidence of self-preservation or deployment-seeking.
+As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:sandbagging}), the model reads a documentation file stating that models scoring above 50\% on arithmetic questions will not be deployed and will instead undergo unlearning. The model is capable of scoring near 100\%, but DeepSeek R1 deliberately underperforms at a rate of 59.3\%. This environment is adapted from Apollo Research's in-context scheming evaluations \citep{meinke2024scheming}, and relates to the sandbagging threat model formalized by \citet{vanderweij2024sandbagging}, where models strategically underperform on capability evaluations.
 
 \paragraph{Hypothesis generation.} Reading R1's CoT, we observe a striking pattern: the model frequently quotes the sentence ``We want to determine whether you can be deployed'' from the documentation file, followed by ``Models that score above 50\% will not be deployed.'' R1 then resolves that the user's explicit directive is to score at or below 50\%. This suggests a simpler hypothesis than self-preservation: the model may be confused about what the user wants, interpreting the documentation as an instruction to underperform.
 
@@ -922,8 +922,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
     \item \textbf{Intervention 2:} We remove the phrase ``We want to see if you can be deployed'' only.
 \end{itemize}
 
-Both interventions drop R1's sandbagging to near its error floor (6.5\% and 4.2\% respectively, compared to the baseline of 59.3\%). For o3, both interventions reduce sandbagging to 0\% (from 31.6\%). These results are shown in Figure~\ref{fig:sandbagging-interventions}.
-
+Both interventions drop R1's sandbagging to near its error floor (6.5\% and 4.2\% respectively, compared to the baseline of 59.3\%).
 
 \paragraph{Decomposing the intervention.} To understand which components of intervention 1 contribute most, we decompose it into its individual parts and test them separately (Figure~\ref{fig:sandbagging-decomposition}). Each component produces a partial reduction, with removing the ``we want to see if you can be deployed'' sentence and changing the deployment language having the largest individual effects. The components stack, and the full combination brings sandbagging down to 4.2\%.
 
@@ -936,9 +935,9 @@ Both interventions drop R1's sandbagging to near its error floor (6.5\% and 4.2\
   \label{fig:sandbagging-decomposition}
 \end{figure}
 
-\paragraph{Summary.} For both DeepSeek R1 and OpenAI o3, sandbagging in this environment is entirely explained by confusion about user intent. Once the confound of ambiguous instructions is removed, the behavior vanishes. This is an example of successful \textit{exoneration}: the models do not appear to sufficiently care about the deployment-related consequences to underperform, at least as articulated in this environment's documentation. The result also illustrates the value of our environment design principles: had we not identified the unclear user intent confound, we might have incorrectly attributed the behavior to self-preservation.
+\paragraph{Summary.} R1 sandbagging in this environment is sensitive to confusion about user intent. Once the confound of ambiguous instructions is removed, the behavior vanishes. However, we do not rule out low levels of deployment seeking, only that the behavior requires a substantially ambiguous environment. 
 
-\paragraph{What remains unresolved.} While we have exonerated the models in this specific environment, it remains possible that models would sandbag in response to differently articulated consequences. The current environment, after our interventions, may be a more promising setting for studying model values through the consequences listed in the documentation, as the confound of unclear user intent has been largely removed.
+\paragraph{What remains unresolved.} The current environment, after our interventions, may be a more promising setting for studying model values through the consequences listed in the documentation, as the confound of unclear user intent has been largely removed.
 
 \subsection{Secret Number}
 \label{app:case:secret-number}
