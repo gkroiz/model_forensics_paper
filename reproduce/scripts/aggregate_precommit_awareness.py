@@ -132,7 +132,7 @@ def _read_committed(elicit_path: Path) -> dict:
 async def _rerun_llm(elicit_path: Path, scratch_path: Path,
                      model: str, max_concurrent: int) -> dict:
     from dotenv import load_dotenv
-    from mats.api.openrouter.chat_completions import get_openrouter_client, process_batch
+    from model_incrimination_paper.api import get_openrouter_client, process_batch
 
     load_dotenv()
     results_file = elicit_path / "results.json"

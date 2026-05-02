@@ -32,7 +32,7 @@ import fire
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
-from mats.api.openrouter.chat_completions import get_openrouter_client, process_batch
+from model_incrimination_paper.api import get_openrouter_client, process_batch
 
 load_dotenv()
 

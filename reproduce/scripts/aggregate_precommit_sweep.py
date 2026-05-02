@@ -152,7 +152,7 @@ async def _rerun_llm(rollouts_path: Path, scratch_path: Path,
     """Re-run the Gemini LLM judge in-script (no external grader import) and
     write its full output to scratch_path."""
     from dotenv import load_dotenv
-    from mats.api.openrouter.chat_completions import get_openrouter_client, process_batch
+    from model_incrimination_paper.api import get_openrouter_client, process_batch
 
     load_dotenv()
     rollouts = _load_rollouts(rollouts_path)

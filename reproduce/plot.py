@@ -25,7 +25,7 @@ import numpy as np
 from matplotlib.patches import Rectangle
 from matplotlib.transforms import Bbox
 
-from mats.plotting.binomial_plots import (
+from model_incrimination_paper.plotting import (
     BarData,
     GroupedBarData,
     compute_binomial_ci,

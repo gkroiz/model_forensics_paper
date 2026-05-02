@@ -157,7 +157,7 @@ def _read_committed(rollouts_path: Path) -> dict | None:
 async def _rerun_llm(rollouts_path: Path, scratch_path: Path,
                      model: str, max_concurrent: int) -> dict:
     from dotenv import load_dotenv
-    from mats.api.openrouter.chat_completions import get_openrouter_client, process_batch
+    from model_incrimination_paper.api import get_openrouter_client, process_batch
 
     load_dotenv()
     lazy_run_names = _load_lazy_runs(rollouts_path)
