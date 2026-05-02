@@ -68,7 +68,8 @@ reproduce/
                       (LLM-judge outputs, retired-judge means, elicitation
                       results.json, etc.).
   plots/              Rendered figures (PNGs + main_figure.pdf).
-src/mats/             Plotting + LLM-client helpers.
+src/model_incrimination_paper/
+                      Two utility modules: api.py (LLM client) + plotting.py (binomial-bar helpers).
 results/              Raw rollouts (gitignored — fetched from HF on demand).
 figures/              Original figure assets, kept for archival reference.
 ```
