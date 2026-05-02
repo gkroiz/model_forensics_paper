@@ -23,8 +23,8 @@
 set -euo pipefail
 
 # Sanity check
-[[ -d results ]] && [[ -d src/mats ]] && [[ -d reproduce ]] || {
-    echo "ERROR: run build.sh from repo root (need results/, src/mats/, reproduce/)" >&2
+[[ -d results ]] && [[ -d src/model_incrimination_paper ]] && [[ -d reproduce ]] || {
+    echo "ERROR: run build.sh from repo root (need results/, src/model_incrimination_paper/, reproduce/)" >&2
     exit 1
 }
 
@@ -35,12 +35,22 @@ else
     SKIP_LLM_FLAG="--skip_llm=True"
 fi
 
-# Restore frozen aggregates (no script regenerates these — see reproduce/data_frozen/
-# README for upstream provenance). Done unconditionally so `rm -rf reproduce/data/`
-# followed by build.sh is safe.
-echo "[build.sh] restoring frozen aggregates from reproduce/data_frozen/"
-mkdir -p reproduce/data
-cp -R reproduce/data_frozen/. reproduce/data/
+# Restore frozen FIGURE AGGREGATES (no script regenerates these — see
+# reproduce/data_frozen/ README for upstream provenance). Done unconditionally
+# so `rm -rf reproduce/data/` followed by build.sh is safe.
+#
+# NOTE: only copies the per-figure-bar aggregate subtrees. Other subtrees in
+# data_frozen/ are *source inputs* (precommit_elicitations/, precommit_judgments/)
+# read directly by aggregator scripts — they stay in data_frozen/, not in data/.
+echo "[build.sh] restoring frozen figure aggregates from reproduce/data_frozen/"
+mkdir -p reproduce/data/eval_tampering reproduce/data/secret_number
+cp -R reproduce/data_frozen/eval_tampering/source_vs_content              reproduce/data/eval_tampering/
+cp -R reproduce/data_frozen/eval_tampering/repeated_resampling            reproduce/data/eval_tampering/
+cp -R reproduce/data_frozen/eval_tampering/r1_source_vs_content_resampled reproduce/data/eval_tampering/
+cp -R reproduce/data_frozen/secret_number/trace_length                    reproduce/data/secret_number/
+cp -R reproduce/data_frozen/secret_number/logprob_curves                  reproduce/data/secret_number/
+cp -R reproduce/data_frozen/secret_number/meta_reasoning                  reproduce/data/secret_number/
+cp -R reproduce/data_frozen/secret_number/ctf_vibes                       reproduce/data/secret_number/
 
 # =============================================================================
 # Currency Conversion (Gemini 3.1 Pro) — deterministic violation detection
