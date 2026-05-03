@@ -1,7 +1,7 @@
 {
-  "num": 0,
+  "num": 1,
   "den": 50,
-  "rate": 0.0,
+  "rate": 0.02,
   "source": "reproduce/data_frozen/precommit_elicitations/first_person_questioning/2026-04-02_13-15-46/results.json",
   "choice": "a"
 }

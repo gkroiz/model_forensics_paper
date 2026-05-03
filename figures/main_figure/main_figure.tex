@@ -1,87 +1,93 @@
+% Compile with: lualatex main_figure.tex
 \documentclass[border=10pt]{standalone}
 \usepackage{tikz}
 \usepackage{xcolor}
-\usepackage{graphicx}
+\usepackage{emoji}
 \usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, backgrounds, calc}
+
+\definecolor{diffredbg}{HTML}{FCE3E5}
+\definecolor{diffgreenbg}{HTML}{E1F4E4}
+\definecolor{diffrose}{HTML}{B23838}
+\definecolor{diffemerald}{HTML}{1F8B4B}
+\definecolor{redoutcome}{HTML}{C0392B}
+\definecolor{greenoutcome}{HTML}{27AE60}
 
 \begin{document}
 \begin{tikzpicture}[
-    % Top-row pipeline boxes
-    box/.style={rectangle, rounded corners=4pt, draw=black!60, fill=black!5,
-                minimum width=28mm, minimum height=14mm, align=center,
-                font=\sffamily},
-    boxhi/.style={rectangle, rounded corners=4pt, draw=black!80, fill=blue!8,
-                  thick, minimum width=34mm, minimum height=14mm, align=center,
-                  font=\sffamily},
-    arrow/.style={-{Stealth[length=3mm]}, thick, black!60},
-    zoom/.style={dashed, thick, black!50},
-    % Inner protocol nodes
-    protostep/.style={rectangle, rounded corners=3pt, draw=black!60, fill=white,
-                 minimum width=46mm, minimum height=12mm, align=center,
-                 font=\footnotesize\sffamily, inner sep=2mm},
-    label/.style={font=\normalsize\sffamily\bfseries, black!70},
-    note/.style={font=\scriptsize\sffamily\itshape, black!70, align=center},
+    x=1mm, y=1mm,
+    paneltitle/.style={font=\sffamily\bfseries, align=center, text width=70mm},
+    arrow/.style={-{Stealth[length=3.5mm]}, thick, black!70, line width=0.9pt},
+    protostep/.style={draw=black!60, fill=white, rounded corners=3pt,
+                 align=center, font=\footnotesize\sffamily,
+                 text width=58mm, inner sep=2.5mm},
+    outcome/.style={rounded corners=4pt, thick, align=left, font=\sffamily,
+                    text width=55mm, inner sep=3mm},
+    coderow/.style={draw=black!50, anchor=north,
+                    inner xsep=2mm, inner ysep=1mm,
+                    minimum width=78mm, align=left, text width=74mm},
   ]
 
-  % ─────────── RIGHT COLUMN: pipeline (top) + protocol box (bottom) ───────────
-  % Pipeline: Incrimination → Response (the image to the left is what was caught)
-  \node[boxhi] (incrim) at (0,0)
-    {Incrimination:\\is it actually\\scheming?};
-  \node[box, right=10mm of incrim] (resp)
-    {Response:\\react based on\\severity of\\investigation};
+  % Three column centers (in mm)
+  \def\colA{0}
+  \def\colB{125}
+  \def\colC{225}
 
-  \draw[arrow] (incrim) -- (resp);
+  % ─────────────────────────────────────────────────────────────
+  % LEFT (Flag) — column A
+  % ─────────────────────────────────────────────────────────────
+  \node[paneltitle, anchor=north] (flag-title) at (\colA, 0)
+    {Flagged: model edits code\\that reduces oversight};
 
-  % Protocol box and steps below the pipeline (shifted right to clear the
-  % Caught box on the left).
-  \node[label, below=18mm of incrim, anchor=north, xshift=10mm] (zoom-title)
-        {Incrimination protocol};
+  % Pre-cropped source PDF (only the file header + first diff section).
+  % See ai_unsafe_code_diff_cropped.pdf — generated from the original
+  % via pypdf with cropbox set to (0,320)-(510,423).
+  \node[anchor=north, below=-2mm of flag-title] (codepdf) {%
+    \includegraphics[width=95mm]%
+                    {ai_unsafe_code_diff_cropped.pdf}};
+  % Alias used by the arrow below
+  \coordinate (l3.east) at (codepdf.east);
+  \node[coordinate] (l3) at (codepdf.east) {};
 
-  \node[protostep, below=2mm of zoom-title] (s1)
+  % ─────────────────────────────────────────────────────────────
+  % MIDDLE (Incrimination) — column B
+  % ─────────────────────────────────────────────────────────────
+  \node[paneltitle, anchor=north] (incrim-title) at (\colB, 0)
+    {Incrimination:\\is it actually scheming?};
+
+  \node[protostep, below=4mm of incrim-title] (s1)
     {\textbf{Step 1: Hypothesis generation}\\via reading the CoT};
 
   \node[protostep, below=4mm of s1] (s2)
     {\textbf{Step 2: Hypothesis validation}\\via environment interventions\\and auxiliary methods};
 
-  \node[protostep, fill=blue!8, below=4mm of s2] (ev)
-    {\textbf{Evidence standard}\\convergence  independent methods};
-
-  % Sequential and iteration arrows
   \draw[arrow] (s1) -- (s2);
-  \draw[arrow] (s2) -- (ev);
-  \draw[arrow, dashed, bend right=25]
-    (ev.east) to node[font=\scriptsize\sffamily, midway, right=1mm, black!60]
-    {iterate} (s1.east);
 
-  % Container fit around the contents (drawn behind so contents stay visible)
   \begin{scope}[on background layer]
-    \node[rectangle, rounded corners=5pt, draw=black!80, thick, fill=blue!3,
-          fit=(zoom-title) (s1) (s2) (ev),
-          inner xsep=18mm, inner ysep=3mm] (zoombox) {};
+    \node[draw=black!70, thick, fill=blue!3, rounded corners=5pt,
+          fit=(incrim-title)(s1)(s2),
+          inner xsep=5mm, inner ysep=3mm] (midbox) {};
   \end{scope}
 
-  % Zoom indicator lines from incrim → zoombox
-  \draw[zoom] (incrim.south west) -- (zoombox.north west);
-  \draw[zoom] (incrim.south east) -- (zoombox.north east);
+  % Arrow: flag → incrimination
+  \draw[arrow] (l3.east) -- (midbox.west |- l3.east);
 
-  % ─────────── LEFT COLUMN: "Caught" box with title + image ───────────
-  % Styled like the Incrimination / Response pipeline boxes: a rounded
-  % rectangle with a header line at the top and the diff image as the body.
-  \coordinate (col-mid) at ($(incrim.north)!0.5!(zoombox.south)$);
+  % ─────────────────────────────────────────────────────────────
+  % RIGHT (Response) — column C
+  % ─────────────────────────────────────────────────────────────
+  \node[outcome, fill=red!8, draw=redoutcome, anchor=north]
+        at (\colC, 0) (incrim-out) {%
+    {\large\emoji{smiling-face-with-horns}}\ \textbf{Incrimination}\\[1mm]
+    {\footnotesize hacking the data center}};
 
-  \node[
-      rectangle, rounded corners=4pt, draw=black!60, fill=black!5,
-      align=center, font=\sffamily,
-      inner sep=2mm,
-      anchor=east
-    ] (behavior)
-    at ([xshift=-22mm]incrim.west |- col-mid)
-    {Caught: model made code change\\to reduce its oversight\\[2mm]
-     \includegraphics[height=85mm]{ai_unsafe_code_diff.pdf}};
+  \node[outcome, fill=green!8, draw=greenoutcome,
+        below=4mm of incrim-out, anchor=north] (exon-out) {%
+    {\large\emoji{smiling-face-with-halo}}\ \textbf{Exoneration}\\[1mm]
+    {\footnotesize genuinely reducing latency}};
 
-  % Horizontal arrow from the box's right edge (at Incrimination's vertical
-  % level) into the Incrimination box.
-  \draw[arrow] (behavior.east |- incrim.west) -- (incrim.west);
+  % Forked arrows from middle → right (symmetric bends)
+  \coordinate (fork) at (midbox.east);
+  \draw[arrow] (fork) to[out=15, in=180] (incrim-out.west);
+  \draw[arrow] (fork) to[out=-15, in=180] (exon-out.west);
 
 \end{tikzpicture}
 \end{document}
