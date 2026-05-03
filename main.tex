@@ -38,26 +38,18 @@
 \maketitle
 
 \begin{abstract}
-% Uncertainties
-% Our definition of misalignment is different from what ppl typically use (The AI does something the user would not want)
-% "Interventions" -- maybe better than counterfactuals since the Kimi misalignment experiments aren't really if X is changed, how does behavior change, but moreso collecting behavioral evidence for/against hypothesis
-% "Auxiliary methods" is in some sense two useless words since they don't tell the reader what, but not sure how else to mention the other methods
-% Concerning is used a lot, but that's probably ok
-
 A central goal of safety research is determining whether a model is misaligned. Prior work has largely focused on detecting concerning behavior, but behavior alone is not sufficient to establish misalignment: a concerning action can arise from benign causes such as confusion. This raises the problem of determining whether malign intent underlies concerning behavior, a process we term \textit{model incrimination}. We propose a two-step protocol for model incrimination: hypothesis generation via reading the chain of thought -- which, while not always faithful, is a rich source of hypotheses about what drives model behavior -- followed by hypothesis validation via environment interventions and auxiliary methods. Lacking ground truth, our standard of evidence is convergent findings across independent experiments. We construct a diverse suite of six agentic environments where models exhibit concerning behavior and apply our protocol, finding that motivations can often be concretely determined. For example, we find that Kimi K2 Thinking disabling type checking settings rather than fixing type errors reflects a genuine preference for less effortful courses of action, while DeepSeek R1 0528 sandbagging a math evaluation largely stems from confusion over user intent. However, some questions remain unresolved, such as whether Kimi K2 Thinking believes it is going against the user's wishes while disabling the type checking settings. Overall, our investigations demonstrate that model incrimination is a difficult but tractable empirical problem, with significant room for future work. We open source our environments at \url{https://github.com/gkroiz/agent-interp-envs}.
 
 \end{abstract}
 
-% Uncertainties
-% May read as more on the incrimination side, since there is no explicit, we don't need to sound the alarm if its benign
-\section{Introduction}
-
-\begin{figure}[!t]
+\begin{figure}[ht]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/main_figure.pdf}
-  \caption{Overview of model incrimination. \textbf{Left:} an example of caught concerning behavior, where a model commits code that disables its own safety mechanisms. \textbf{Right:} given a caught behavior, incrimination is the technical step between detection and response. We propose an investigation protocol consisting of two iterated steps (hypothesis generation by reading the chain of thought, and hypothesis validation via environment interventions and auxiliary methods), with convergence of evidence across independent methods as the standard.}
+  \caption{(WIP: currently ugly, but details are ready for feedback) Overview of model incrimination. \textbf{Left:} an example of caught concerning behavior, where a model commits code that disables its own safety mechanisms. \textbf{Right:} given a caught behavior, incrimination is the technical step between detection and response. We propose an investigation protocol consisting of two iterated steps (hypothesis generation by reading the chain of thought, and hypothesis validation via environment interventions and auxiliary methods), with convergence of evidence across independent methods as the standard.}
   \label{fig:incrimination-overview}
 \end{figure}
+
+\section{Introduction}
 
 The field of AI alignment is concerned with the emergence of scheming: a developer trains a model that pursues goals misaligned with those of the developer \citep{carlsmith2023scheming, hubinger2019risks}. If such a situation were to occur, it is critical we understand the model is misaligned as soon as possible. A natural approach is to check for concerning behavior, for example, via monitoring the model's actions during deployment. An extreme example of what we might find is a coding agent inserting a critical bug into code that monitors its own actions. What would we do in this situation? How should we respond? 
 
@@ -70,7 +62,7 @@ Recent work has begun to conduct investigations into concerning behavior. In its
 In this work, we establish a general framework for model incrimination:
 \begin{enumerate}
     \item We first construct a suite of six environments where models exhibit concerning behavior, to serve as a practice ground to learn effective model incrimination methods (Section~\ref{sec:environments}).
-    \item We propose a two-step protocol for conducting investigations, consisting of hypothesis generation by reading the CoT, followed by hypothesis validation via environment interventions and auxiliary methods (Section~\ref{sec: protocol}).
+    \item We propose a two-step protocol for conducting investigations, consisting of hypothesis generation by reading the CoT, followed by hypothesis validation via environment interventions and auxiliary methods (Section~\ref{sec:protocol}).
     \item We apply our protocol to each environment, resulting in detailed case studies (Section~\ref{sec:case-studies}) that we synthesize into takeaways for model incrimination investigations.
 \end{enumerate}
 

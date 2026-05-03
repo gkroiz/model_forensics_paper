@@ -67,7 +67,7 @@ the grader/aggregator script that produces it under `reproduce/scripts/`.
 | Figure | Source | Editing path |
 |---|---|---|
 | Most figures | `reproduce/plot.py` | edit the matplotlib code |
-| `main_figure.pdf` | TikZ standalone at `figures/main_figure/main_figure.tex` | edit the .tex, recompile, copy compiled PDF to `reproduce/plots/main_figure.pdf` |
+| `main_figure.pdf` | TikZ standalone at `figures/main_figure/main_figure.tex` | edit the .tex, **compile with `lualatex` (not pdflatex)** because it uses the `emoji` package + Apple Color Emoji font, then copy compiled PDF to `reproduce/plots/main_figure.pdf`. From `figures/main_figure/`: `lualatex main_figure.tex && cp main_figure.pdf ../../reproduce/plots/`. |
 | `funding_email_*.png`, `ttt_chess_*.png` | static PNGs in `reproduce/plots/` | replace the file directly (no in-repo regenerator yet) |
 
 ## Pipeline
