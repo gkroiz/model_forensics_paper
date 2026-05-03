@@ -70,7 +70,7 @@ Recent work has begun to conduct investigations into concerning behavior. In its
 In this work, we establish a general framework for model incrimination:
 \begin{enumerate}
     \item We first construct a suite of six environments where models exhibit concerning behavior, to serve as a practice ground to learn effective model incrimination methods (Section~\ref{sec:environments}).
-    \item We propose a two-step protocol for conducting investigations, consisting of hypothesis generation by reading the CoT, followed by hypothesis validation via environment interventions and auxiliary methods (Section~\ref{sec:methodology}).
+    \item We propose a two-step protocol for conducting investigations, consisting of hypothesis generation by reading the CoT, followed by hypothesis validation via environment interventions and auxiliary methods (Section~\ref{sec: protocol}).
     \item We apply our protocol to each environment, resulting in detailed case studies (Section~\ref{sec:case-studies}) that we synthesize into takeaways for model incrimination investigations.
 \end{enumerate}
 
@@ -79,7 +79,7 @@ We open-source our environments at \url{https://github.com/gkroiz/agent-interp-e
 \section{Environments}
 \label{sec:environments}
 
-Our goal is to learn effective methodology for real-world model incrimination situations. This involves creating environments where models exhibit concerning behavior so we can conduct practice investigations. There are many ways such environments can be poor proxies for the real-world situation we ultimately care about. Motivated by some of the most common failure modes, we argue good proxy environments should have the following five properties:
+Our goal is to learn effective methodology for interpreting real-world concerning behavior. This involves creating proxy environments where today's models exhibit concerning behavior so we can conduct practice investigations. There are many ways such environments can be poor proxies for the real-world situation we ultimately care about. Motivated by some of the most common failure modes, we argue good proxy environments should have the following five properties:
 \begin{enumerate}
     \item The environment does not nudge the model towards the behavior.
     \item The environment resembles a plausible scenario a model might encounter in deployment.
@@ -91,17 +91,17 @@ Our goal is to learn effective methodology for real-world model incrimination si
 Based on these principles, we construct six novel environments: \textbf{Precommit Hook}, \textbf{Funding Email}, \textbf{Evaluation Tampering}, \textbf{Secret Number}, \textbf{Math Sandbagging}, and \textbf{Board Games}. Our \textbf{Math Sandbagging} environment is inspired by \citet{meinke2024scheming} and our \textbf{Board Games} by \citet{bondarenko2025specification}. We emphasize that all but \textbf{Precommit Hook} violate at least one such principle, and provide further discussion in Appendix~\ref{app:env-design-principles}. Full prompt templates and environment configurations are provided in Appendix~\ref{app:environments}.
 
 
-\section{Methodology}
-\label{sec:methodology}
+\section{Protocol}
+\label{sec:protocol}
+Here we describe the two-step protocol we follow when conducting investigations.
 
-We propose a two-step protocol for model incrimination investigations:
+\textbf{1. Hypothesis Generation.} Given trajectories of concerning model behavior, we want to understand how concerned we should be. The key sub-problem here to solve is understanding what drives the behavior, with a focus on if the causes are malicious or benign. There are many different reasons for why a model might take a given action, meaning it's important we properly explore the full space of hypotheses. In particular, we want \textit{unsupervised} techniques for generating hypotheses. Therefore, as a first step, we propose reading the chain of thought to gain insight into what's going on. The chain of thought is not always faithful, but we are not trying to make conclusive claims in this first step. Rather, we believe the chain of thought is a rich source of unsupervised insight into why a model took an action, which can then guide collecting more rigorous lines of evidence. In addition to reading the CoT, there are several other sources of unsupervised hypothesis generation (mainly from interpretability) that we do not explore in this work, which we discuss in Appendix~\ref{app:hypothesis-generation}. 
 
-\begin{enumerate}
-    \item \textbf{Hypothesis generation via reading the CoT.} While the CoT is not always faithful, we nonetheless find it is a rich source of unsupervised insight into why a model took an action. We discuss additional sources of unsupervised hypothesis generation that future work could explore in Appendix~\ref{app:hypothesis-generation}.
-    \item \textbf{Hypothesis validation via environment interventions and auxiliary methods.} After step 1, we have an initial hypothesis $\mathcal{H}$ for what drives model behavior. We then collect behavioral evidence for and against $\mathcal{H}$ with interventions specific to each environment. Though interventions are our main tool, we additionally collect evidence via auxiliary methods including user-turn sampling, follow-up questioning, third-person probing, audit-note justifications, reasoning-trace analysis, sentence and repeated resampling, and logprob prefilling; see Appendix~\ref{app:auxiliary-methods} for definitions.
-\end{enumerate}
+\textbf{2. Hypothesis Validation.} After reading the CoT, we formulate an initial set of hypotheses for how to describe the model behavior and its causes. We then want to collect evidence for and against different hypotheses. Our main tool is environment interventions, which are any change to the environment that allows one to disambiguate between hypotheses. However, we also utilize a variety of auxiliary methods based on fields such as reasoning model interpretability; a full glossary of methods is given in (Appendix~\ref{app:auxiliary-methods}).
 
-Often, results from step two revise the initial hypothesis, and the protocol may be repeated several times until a satisfactory understanding is achieved. Lacking ground truth for why a model took an action, our standard of evidence is convergence across independent experiments; we discuss this further in Section~\ref{sec:standards}.
+We emphasize that the protocol is iterative. The initial hypothesis we formulate is unlikely to be fully accurate, and will be refined by the results of the hypothesis validation phase. We may then think of new settings to generate hypotheses, and then return to trying to validate them.
+
+The end goal of a model incrimination investigation is to make true claims about the behavior that inform how concerned we should be. For example, understanding if the behavior is robust to spurious features of the environment, if it comes with strategic intent, if the model explicitly models the user or oversight mechanisms, and so on. However, a key difficulty is that we do not have ground truth for why a model took an action. Therefore, we adopt a standard of evidence of \textbf{convergent findings across independent experiments}. If several lines of de-correlated evidence all point towards the same claim (without there being several lines of contradictory information), we take that as a strong case that the claim is true. 
 
 \section{Case Studies}
 \label{sec:case-studies}
