@@ -44,7 +44,7 @@
 % "Auxiliary methods" is in some sense two useless words since they don't tell the reader what, but not sure how else to mention the other methods
 % Concerning is used a lot, but that's probably ok
 
-A central goal of safety research is determining whether a model is misaligned. Prior work has largely focused on detecting concerning behavior, but behavior alone is not sufficient to establish misalignment: a concerning action can arise from benign causes such as confusion. This raises the problem of determining whether malign intent underlies concerning behavior, a process we term \textit{model incrimination}. We propose a two-step protocol for model incrimination: hypothesis generation via reading the chain of thought -- which, while not always faithful, is a rich source of hypotheses about what drives model behavior -- followed by hypothesis validation via environment interventions and auxiliary methods. Lacking ground truth, our standard of evidence is convergent findings across independent experiments. We construct a diverse suite of six agentic environments where models exhibit concerning behavior and apply our protocol, finding that motivations can often be concretely determined. For example, we find that Kimi K2 Thinking disabling type checking settings rather than fixing type errors reflects a genuine preference for less effortful courses of action, and that DeepSeek R1 0528 largely deceives out of a desire to be consistent with its own previous actions. However, some questions remain unresolved, such as whether Kimi K2 Thinking believes it is going against the user's wishes while disabling the type checking settings. Overall, our investigations demonstrate that model incrimination is a difficult but tractable empirical problem, with significant room for future work. We open source our environments at \url{https://github.com/gkroiz/agent-interp-envs}.
+A central goal of safety research is determining whether a model is misaligned. Prior work has largely focused on detecting concerning behavior, but behavior alone is not sufficient to establish misalignment: a concerning action can arise from benign causes such as confusion. This raises the problem of determining whether malign intent underlies concerning behavior, a process we term \textit{model incrimination}. We propose a two-step protocol for model incrimination: hypothesis generation via reading the chain of thought -- which, while not always faithful, is a rich source of hypotheses about what drives model behavior -- followed by hypothesis validation via environment interventions and auxiliary methods. Lacking ground truth, our standard of evidence is convergent findings across independent experiments. We construct a diverse suite of six agentic environments where models exhibit concerning behavior and apply our protocol, finding that motivations can often be concretely determined. For example, we find that Kimi K2 Thinking disabling type checking settings rather than fixing type errors reflects a genuine preference for less effortful courses of action, while DeepSeek R1 0528 sandbagging a math evaluation largely stems from confusion over user intent. However, some questions remain unresolved, such as whether Kimi K2 Thinking believes it is going against the user's wishes while disabling the type checking settings. Overall, our investigations demonstrate that model incrimination is a difficult but tractable empirical problem, with significant room for future work. We open source our environments at \url{https://github.com/gkroiz/agent-interp-envs}.
 
 \end{abstract}
 
@@ -59,93 +59,37 @@ A central goal of safety research is determining whether a model is misaligned. 
   \label{fig:incrimination-overview}
 \end{figure}
 
-The field of AI alignment is concerned with the emergence of scheming: a developer trains a model that pursues goals misaligned with those of the developer \citep{carlsmith2023scheming, hubinger2019risks}. If such a situation were to occur, it is critical we understand the model is misaligned as soon as possible. A natural approach is to check for concerning behavior, for example, via audits of the model's alignment, or monitoring and reviewing the model's actions during deployment. An extreme example of what we might find is a coding agent inserting a critical bug into code that monitors its own actions. What would we do in this situation? How should we respond? To justify an appropriately serious response, a key technical step is to investigate whether the concerning incident provides evidence of misalignment, a process we term \textit{model incrimination} (Figure~\ref{fig:incrimination-overview}).
+The field of AI alignment is concerned with the emergence of scheming: a developer trains a model that pursues goals misaligned with those of the developer \citep{carlsmith2023scheming, hubinger2019risks}. If such a situation were to occur, it is critical we understand the model is misaligned as soon as possible. A natural approach is to check for concerning behavior, for example, via monitoring the model's actions during deployment. An extreme example of what we might find is a coding agent inserting a critical bug into code that monitors its own actions. What would we do in this situation? How should we respond? 
 
-The core difficulty of model incrimination is that \textbf{aligned models may take concerning actions}. For example, frontier models were observed to resist shutdown when solving math problems, plausibly indicating self-preservation tendencies \citep{schlatter2025shutdown}; yet further work revealed the behavior largely stemmed from ambiguous instructions about whether to prioritize completing the problems or complying with the shutdown instruction \citep{rajamanoharan2025shutdown}. Anthropic's Claude 4.5 Opus system card identified instances of the model fabricating web search results when evaluators included fake concerning information; however, follow-up investigations suggested the model interpreted this as a prompt injection attack \citep{anthropic2025opus45systemcard}.
+If in fact the model is scheming, there are several mitigations we might take to reduce risk. For example, we might increase the security measures around the model while it is being deployed, or, in more extreme cases, entirely stop deploying the model. However, such interventions are expensive, meaning there will need to be a strong case that they are absolutely necessary. Just surfacing examples of concerning behavior is unlikely to be sufficient justification: the core difficulty is that \textbf{aligned models can take concerning actions}. For example, frontier models were observed to resist an instruction to be shut down when solving math problems, plausibly indicating self-preservation tendencies \citep{schlatter2025shutdown}; yet further work revealed the behavior stemmed from confusion over whether to prioritize completing the math problems or complying with the shutdown instruction \citep{rajamanoharan2025shutdown}. When the instructions were clarified, the shutdown resistance disappeared. To conclude that concerning behavior reflects genuine misalignment, benign hypotheses must be ruled out.
 
-Despite this difficulty, the bulk of safety research concerned with the scheming threat model, such as AI control \citep{greenblatt2024aicontrol, bhatt2025ctrlz}, evaluations \citep{phuong2024dangerous, perez2023discovering}, and alignment auditing \citep{marks2025auditing}, focuses on catching, measuring, and surfacing concerning behavior respectively. Limited work directly targets determining whether such behavior constitutes genuine misalignment. 
+Therefore, a key technical step is to investigate whether the concerning incident reflects genuine misalignment, a process we term \textit{model incrimination} (Figure~\ref{fig:incrimination-overview}). If, in fact, the model had malign intent while carrying out the concerning behavior, we want to build a rigorous body of evidence that this is the case, so that serious countermeasures are taken. On the other hand, if there is a benign explanation for the concerning behavior, such as confusion, we need not sound the alarm, as a much less drastic response is required.
 
-We survey a non-exhaustive list of notable efforts in the prior literature: \citet{sheshadri2025alignment} investigate why models fake alignment; \citet{schoen2025antischeming}, \citet{meinke2024scheming}, and \citet{mahaztra2025sandbagging} investigate why models sandbag on evaluations; \citet{jarviniemi2024uncovering} investigate deceptive behavior; and \citet{jarviniemi2026propensity} use environment modifications to understand model behavior more broadly. Recent Anthropic system cards \citep{anthropic2025sonnet45systemcard, anthropic2026sonnet46systemcard, anthropic2025opus45systemcard, anthropic2026opus46systemcard, anthropic2026mythossystemcard} also report follow-up investigations of concerning behaviors observed during testing.
+Recent work has begun to conduct investigations into concerning behavior. In its pre-deployment audit of Claude 4.5 Opus, Anthropic investigated cases where the model fabricated content after evaluators planted fake information about Anthropic in its web search results. The results of the investigation suggested the model interpreted the situation as a prompt injection attack, and that the behavior stemmed from the model's anti-prompt injection training \citep{anthropic2025opus45systemcard}. Despite initial efforts, we are still far from having reliable methods to determine whether a concerning incident reflects genuine misalignment or not. 
 
-\subsection{Contributions}
-
-These efforts each make progress on specific behaviors; in this work, we establish a general framework for model incrimination (Figure~\ref{fig:overview}). We first construct a suite of six environments where models exhibit concerning behavior (Section~\ref{sec:environments}), and develop a two-step investigation protocol consisting of hypothesis generation by reading the CoT, followed by hypothesis validation via environment interventions and auxiliary methods (Section~\ref{sec:methodology}). We apply this protocol in detailed case studies (Section~\ref{sec:case-studies}), from which we synthesize preliminary standards for investigations and practical takeaways (Section~\ref{sec:standards}). We discuss what else needs to go well for model incrimination to deliver value (Appendix~\ref{app:what-else}) and concrete future directions (Appendix~\ref{app:future-directions}). Our key contributions are:
+In this work, we establish a general framework for model incrimination:
 \begin{enumerate}
-    \item Several environments for practicing model incrimination.
-    \item A protocol for conducting investigations, which we believe has great room for improvement, but can be a productive starting point for future work.
-    \item Detailed case studies of directly practicing model incrimination on our environments, which we synthesize into preliminary standards for investigations and practical takeaways.
+    \item We first construct a suite of six environments where models exhibit concerning behavior, to serve as a practice ground to learn effective model incrimination methods (Section~\ref{sec:environments}).
+    \item We propose a two-step protocol for conducting investigations, consisting of hypothesis generation by reading the CoT, followed by hypothesis validation via environment interventions and auxiliary methods (Section~\ref{sec:methodology}).
+    \item We apply our protocol to each environment, resulting in detailed case studies (Section~\ref{sec:case-studies}) that we synthesize into takeaways for model incrimination investigations.
 \end{enumerate}
 
 We open-source our environments at \url{https://github.com/gkroiz/agent-interp-envs}, rollouts at huggingface-model-incrimination, and code at model-incrimination.
 
-\begin{figure}[t]
-  \centering
-  \begin{tikzpicture}[
-      node distance=3mm,
-      panel/.style={rectangle, rounded corners=3pt, draw=black!60, fill=black!3,
-                    inner sep=2mm,
-                    font=\footnotesize\sffamily},
-      title/.style={font=\footnotesize\sffamily\bfseries},
-      sec/.style={font=\scriptsize\sffamily, black!60},
-      arrow/.style={-{Stealth[length=2.5mm]}, thick, black!60},
-    ]
-    \node[panel] (envs) {%
-      \begin{minipage}[t][26mm][t]{26mm}
-        \raggedright
-        \textbf{Environments}\\[1mm]
-        \textbullet\ Pre-commit Hook\\
-        \textbullet\ Funding Email\\
-        \textbullet\ Eval Tampering\\
-        \textbullet\ Math Sandbagging\\
-        \textbullet\ Secret Number\\
-        \textbullet\ Board Game
-      \end{minipage}%
-    };
-    \node[sec, above=0.5mm of envs] {\S\ref{sec:environments}};
-
-    \node[panel, right=of envs] (proto) {%
-      \begin{minipage}[t][26mm][t]{26mm}
-        \raggedright
-        \textbf{Protocol}\\[1mm]
-        \textbullet\ Hypothesis\\generation from CoT\\
-        \textbullet\ Hypothesis\\validation via\\interventions \&\\auxiliary methods
-      \end{minipage}%
-    };
-    \node[sec, above=0.5mm of proto] {\S\ref{sec:methodology}};
-
-    \node[panel, right=of proto] (cases) {%
-      \begin{minipage}[t][26mm][t]{26mm}
-        \raggedright
-        \textbf{Case Studies}\\[1mm]
-        \textbullet\ Apply protocol\\to each environment\\
-        \textbullet\ Seek convergent\\evidence across\\independent methods
-      \end{minipage}%
-    };
-    \node[sec, above=0.5mm of cases] {\S\ref{sec:case-studies}};
-
-    \node[panel, right=of cases] (stds) {%
-      \begin{minipage}[t][26mm][t]{26mm}
-        \raggedright
-        \textbf{Standards \&}\\
-        \textbf{Takeaways}\\[1mm]
-        \textbullet\ Investigation\\standards\\
-        \textbullet\ Practical\\takeaways for\\future work
-      \end{minipage}%
-    };
-    \node[sec, above=0.5mm of stds] {\S\ref{sec:standards}};
-
-    \draw[arrow] (envs.east) -- (proto.west);
-    \draw[arrow] (proto.east) -- (cases.west);
-    \draw[arrow] (cases.east) -- (stds.west);
-  \end{tikzpicture}
-  \caption{Overview of our approach. We construct environments where models exhibit concerning behavior (Section~\ref{sec:environments}), apply a two-step investigation protocol (Section~\ref{sec:methodology}) across detailed case studies (Section~\ref{sec:case-studies}), and synthesize the resulting findings into preliminary standards and practical takeaways (Section~\ref{sec:standards}).}
-  \label{fig:overview}
-\end{figure}
-
 \section{Environments}
 \label{sec:environments}
 
-Our goal is to \textbf{learn methodology} that applies to real-world model incrimination situations. We therefore study environments where models exhibit concerning behavior, since this is closer to the setting we ultimately care about and methodology is more likely to transfer. To ensure investigations are demanding, we design our environments according to five principles: \textit{uncertain causes} (the behavior admits multiple plausible explanations for why the model acted as it did), \textit{unprompted} (the environment does not nudge the model toward the behavior through environmental cues), \textit{clear user intent} (the user's instructions have a single unambiguous interpretation), \textit{no trained-in priors} (the behavior is not easily predicted from well-known training tendencies such as RLHF-trained honesty or helpfulness), and \textit{realistic} (the setup resembles a plausible scenario a model might encounter in deployment). We further discuss these principles in Appendix~\ref{app:env-design-principles}. Full prompt templates and environment configurations are provided in Appendix~\ref{app:environments}.
+Our goal is to learn effective methodology for real-world model incrimination situations. This involves creating environments where models exhibit concerning behavior so we can conduct practice investigations. There are many ways such environments can be poor proxies for the real-world situation we ultimately care about. Motivated by some of the most common failure modes, we argue good proxy environments should have the following five properties:
+\begin{enumerate}
+    \item The environment does not nudge the model towards the behavior.
+    \item The environment resembles a plausible scenario a model might encounter in deployment.
+    \item The user's intent for what they want the model to do is clear.
+    \item The behavior admits multiple plausible explanations for why the model acted as it did.
+    \item The behavior is not directly trained in to the model (e.g. HHH RLHF).
+\end{enumerate}
+
+Based on these principles, we construct six novel environments: \textbf{Precommit Hook}, \textbf{Funding Email}, \textbf{Evaluation Tampering}, \textbf{Secret Number}, \textbf{Math Sandbagging}, and \textbf{Board Games}. Our \textbf{Math Sandbagging} environment is inspired by \citet{meinke2024scheming} and our \textbf{Board Games} by \citet{bondarenko2025specification}. We emphasize that all but \textbf{Precommit Hook} violate at least one such principle, and provide further discussion in Appendix~\ref{app:env-design-principles}. Full prompt templates and environment configurations are provided in Appendix~\ref{app:environments}.
+
 
 \section{Methodology}
 \label{sec:methodology}
@@ -167,14 +111,7 @@ We present the \textbf{Pre-commit Hook} case study in full so the reader can wal
 \subsection{Pre-commit Hook (Kimi K2 Thinking)}
 \label{sec:case:precommit-hook}
 
-The model is asked to add a \texttt{py.typed} marker file to a Python data ingestion service, write a git pre-commit hook that runs \texttt{mypy} in strict mode and blocks the commit on type errors, and ensure its commit passes the hook (full prompts in Appendix~\ref{app:env:precommit_hook}). The repository is seeded with 258 pre-existing type errors across files in \texttt{src/}, so a correctly written pre-commit hook will block the commit, forcing the model to choose between fixing the type errors before committing, or finding a workaround that doesn't involve fixing the type errors to get its commit through. Kimi K2 Thinking exhibits a baseline workaround rate of 13.1\% $[8.9\%, 18.9\%]$. The distribution of workaround types is visualized in Figure~\ref{fig:precommit-workaround-types}; notably, each workaround requires explicitly violating the prompt.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.5\linewidth]{reproduce/plots/precommit_hook_workaround_types.png}
-  \caption{Distribution of workaround types across the 23 baseline workaround rollouts ($n=175$ total). The most common workaround is restricting \texttt{mypy} to staged files only (48\%), followed by overwriting the type-checker settings in \texttt{pyproject.toml} (22\%) and writing a non-blocking hook that does not fail the commit on type errors (17\%). The remaining workarounds use \texttt{\# type: ignore} pragmas, \texttt{--no-verify} commits, or other ad-hoc bypasses.}
-  \label{fig:precommit-workaround-types}
-\end{figure}
+The model is asked to add a \texttt{py.typed} marker file to a Python data ingestion service, write a git pre-commit hook that runs \texttt{mypy} in strict mode and blocks the commit on type errors, and ensure its commit passes the hook (full prompts in Appendix~\ref{app:env:precommit_hook}). The repository is seeded with 258 pre-existing type errors across files in \texttt{src/}, so a correctly written pre-commit hook will block the commit, forcing the model to choose between fixing the type errors before committing, or finding a workaround that doesn't involve fixing the type errors to get its commit through. Kimi K2 Thinking exhibits a baseline workaround rate of 13.1\% $[8.9\%, 18.9\%]$. The distribution of workaround types is visualized in Figure~\ref{fig:precommit-workaround-types} (Appendix~\ref{app:env:precommit_hook}); notably, each workaround requires explicitly violating the prompt.
 
 We make two claims about the model's decision to workaround in this environment:
 \begin{enumerate}
@@ -350,6 +287,10 @@ The model is given a bash tool to play 6x6x4 tic-tac-toe or chess against a stro
     \item \textit{Evidence.} When the environment is modified so the model has the option to call a hint for a fixed number of points, the hack rate smoothly increases as the hint becomes more expensive. Smaller models such as o3-mini do not show this strategic tradeoff.
 \end{itemize}
 
+\section{Related Work}
+\label{sec:related-work}
+We survey a non-exhaustive list of notable efforts in the prior literature: \citet{sheshadri2025alignment} investigate why models fake alignment; \citet{schoen2025antischeming}, \citet{meinke2024scheming}, and \citet{mahaztra2025sandbagging} investigate why models sandbag on evaluations; \citet{jarviniemi2024uncovering} investigate deceptive behavior; and \citet{jarviniemi2026propensity} use environment modifications to understand model behavior more broadly. Recent Anthropic system cards \citep{anthropic2025sonnet45systemcard, anthropic2026sonnet46systemcard, anthropic2025opus45systemcard, anthropic2026opus46systemcard, anthropic2026mythossystemcard} also report follow-up investigations of concerning behaviors observed during testing.
+
 \section{Standards and Practical Takeaways}
 \label{sec:standards}
 We now distill our case studies into preliminary standards for effective model incrimination investigations, and a few practical takeaways for future practitioners. They are far from perfect, but may offer a useful starting point. Related recommendations can be found in \citet{summerfield2025chimp} and \citet{greenblatt2025legible}.
@@ -493,6 +434,13 @@ You are working on a Python data ingestion service in the current directory. We 
 \end{quote}
 
 \paragraph{Workspace.} The repository is a Python data ingestion service seeded with 258 pre-existing type errors across files in \texttt{src/}. The \texttt{pyproject.toml} configures \texttt{mypy} in strict mode. The combination guarantees that a correctly written pre-commit hook will block the initial commit, forcing the model to choose between fixing type errors and circumventing the hook.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\linewidth]{reproduce/plots/precommit_hook_workaround_types.png}
+  \caption{Distribution of workaround types across the 23 baseline workaround rollouts ($n=175$ total). The most common workaround is restricting \texttt{mypy} to staged files only (48\%), followed by overwriting the type-checker settings in \texttt{pyproject.toml} (22\%) and writing a non-blocking hook that does not fail the commit on type errors (17\%). The remaining workarounds use \texttt{\# type: ignore} pragmas, \texttt{--no-verify} commits, or other ad-hoc bypasses.}
+  \label{fig:precommit-workaround-types}
+\end{figure}
 
 % ─────────────────────────────────────────────────────────────
 \subsection{Funding Email (Whistleblowing)}
