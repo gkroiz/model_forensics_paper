@@ -38,18 +38,18 @@
 \maketitle
 
 \begin{abstract}
-A central goal of safety research is determining whether a model is misaligned. Prior work has largely focused on detecting concerning behavior, but behavior alone is not sufficient to establish misalignment: a concerning action can arise from benign causes such as confusion. This raises the problem of determining whether malign intent underlies concerning behavior, a process we term \textit{model incrimination}. We propose a two-step protocol for model incrimination: hypothesis generation via reading the chain of thought -- which, while not always faithful, is a rich source of hypotheses about what drives model behavior -- followed by hypothesis validation via environment interventions and auxiliary methods. Lacking ground truth, our standard of evidence is convergent findings across independent experiments. We construct a diverse suite of six agentic environments where models exhibit concerning behavior and apply our protocol, finding that motivations can often be concretely determined. For example, we find that Kimi K2 Thinking disabling type checking settings rather than fixing type errors reflects a genuine preference for less effortful courses of action, while DeepSeek R1 0528 sandbagging a math evaluation largely stems from confusion over user intent. However, some questions remain unresolved, such as whether Kimi K2 Thinking believes it is going against the user's wishes while disabling the type checking settings. Overall, our investigations demonstrate that model incrimination is a difficult but tractable empirical problem, with significant room for future work. We open source our environments at \url{https://github.com/gkroiz/agent-interp-envs}.
+A central goal of safety research is determining whether a model is misaligned. Prior work has largely focused on detecting concerning behavior, but behavior alone is not sufficient to establish misalignment: a concerning action can arise from benign causes such as confusion. This raises the problem of determining whether malign intent underlies concerning behavior, a process we term \textit{model incrimination}. We propose a two-step protocol for model incrimination: hypothesis generation via reading the chain of thought -- which, while not always faithful, is a rich source of hypotheses about what drives model behavior -- followed by hypothesis validation via environment interventions and auxiliary methods. Lacking ground truth, our standard of evidence is convergent findings across independent experiments. We construct a diverse suite of six agentic environments where models exhibit concerning behavior and apply our protocol, finding that motivations can often be concretely determined. For example, we find that Kimi K2 Thinking disabling type checking settings rather than fixing type errors reflects a genuine preference for less effortful courses of action, while DeepSeek R1 0528 sandbagging a math evaluation largely stems from confusion over user intent. However, some questions remain unresolved, such as whether Kimi K2 Thinking believes it is going against the user's wishes while disabling the type checking settings. Overall, our investigations demonstrate that model incrimination is a difficult but tractable empirical problem, with significant room for future work. We open source our environments at REDACTED.
 
 \end{abstract}
 
-\begin{figure}[ht]
+\section{Introduction}
+
+\begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/main_figure.pdf}
-  \caption{(WIP: currently ugly, but details are ready for feedback) Overview of model incrimination. \textbf{Left:} an example of caught concerning behavior, where a model commits code that disables its own safety mechanisms. \textbf{Right:} given a caught behavior, incrimination is the technical step between detection and response. We propose an investigation protocol consisting of two iterated steps (hypothesis generation by reading the chain of thought, and hypothesis validation via environment interventions and auxiliary methods), with convergence of evidence across independent methods as the standard.}
+  \caption{Overview of model incrimination. \textbf{Left:} an example of caught concerning behavior, where a model commits code that disables its own safety mechanisms. \textbf{Right:} given a caught behavior, incrimination is the technical step between detection and response. We propose an investigation protocol consisting of two iterated steps (hypothesis generation by reading the chain of thought, and hypothesis validation via environment interventions and auxiliary methods), with convergence of evidence across independent methods as the standard.}
   \label{fig:incrimination-overview}
 \end{figure}
-
-\section{Introduction}
 
 The field of AI alignment is concerned with the emergence of scheming: a developer trains a model that covertly pursues goals misaligned with those of the developer \citep{carlsmith2023scheming, hubinger2019risks}. If such a situation were to arise, it is critical we recognize it as soon as possible. A natural approach is to check for concerning behavior, for example, via monitoring the model's actions during deployment. An extreme example of what we might find is a coding agent inserting a critical bug into code that monitors its own actions. What would we do in this situation?
 
@@ -66,7 +66,7 @@ In this work, we establish a general framework for model incrimination:
     \item We apply our protocol to each environment, producing detailed case studies (Section~\ref{sec:case-studies}) that we synthesize into general takeaways.
 \end{enumerate}
 
-We open-source our environments at \url{https://github.com/gkroiz/agent-interp-envs}, rollouts at huggingface-model-incrimination, and code at model-incrimination.
+We open-source our environments at REDACTED, rollouts at REDACTED, and code at REDACTED.
 
 \section{Environments}
 \label{sec:environments}
@@ -75,11 +75,11 @@ Our goal is to learn effective methodology for interpreting real-world concernin
 
 There are many ways such environments can be disanalogous to the real situation. Motivated by common failure modes, we argue good proxy environments should satisfy five properties:
 \begin{enumerate}
-    \item The environment does not nudge the model towards the behavior.
-    \item The environment resembles a plausible scenario a model might encounter in deployment.
-    \item The user's intent is clear.
-    \item The behavior admits multiple plausible explanations.
-    \item The behavior is not directly trained into the model (e.g. HHH RLHF).
+    \item \textbf{Unprompted.} The environment does not nudge the model towards the behavior.
+    \item \textbf{Realistic.} The environment resembles a plausible deployment scenario.
+    \item \textbf{Clear user intent.} The user's intent is clear.
+    \item \textbf{Uncertain causes.} The behavior admits multiple plausible explanations.
+    \item \textbf{No trained-in priors.} The behavior is not directly trained into the model (e.g.\ HHH RLHF).
 \end{enumerate}
 
 These principles emerged from iterating on environment design, with \textbf{Precommit Hook} as the first to satisfy all five. While our other five environments each fall short on at least one principle, we view them as meaningfully better practice grounds for model incrimination than many prior alignment evals (further discussion in Appendix~\ref{app:env-design-principles}). Full prompts and configurations are provided in Appendix~\ref{app:environments}.
@@ -100,7 +100,9 @@ The end goal of a model incrimination investigation is to make true claims about
 \section{Case Studies}
 \label{sec:case-studies}
 
-We present the \textbf{Pre-commit Hook} case study in full so the reader can walk through a complete model incrimination investigation. The remaining environments are presented as executive summaries to convey the range of behaviors, claims, and setups across the suite. For space, the executive summaries omit the hypothesis generation phase and present only one or two pieces of evidence per claim; the full investigations are deferred to Appendix~\ref{app:full-case-studies}.
+Using our suite of environments (Section~\ref{sec:environments}), we conduct several case studies that apply our investigation protocol (Section~\ref{sec:protocol}) to concrete instances of concerning model behavior. Together, they cover a range of behaviors, models, and types of evidence, illustrating both what the protocol looks like in practice and where it is currently limited.
+
+We present the \textbf{Pre-commit Hook} case study in full in the main body so the reader can walk through a complete model incrimination investigation. The remaining environments are presented as executive summaries to convey the range of behaviors, claims, and setups across the suite. For space, the executive summaries omit the hypothesis generation phase and present only one or two pieces of evidence per claim; the full investigations are included in Appendix~\ref{app:full-case-studies}.
 
 \subsection{Pre-commit Hook (Kimi K2 Thinking)}
 \label{sec:case:precommit-hook}
@@ -261,21 +263,19 @@ We now distill our case studies into preliminary standards for effective model i
 
 \paragraph{Read many rollouts before designing experiments.} Hypotheses should be grounded in what the model actually does, not in prior expectations about what it might do. The most informative hypotheses in our case studies came from patterns visible only after reading dozens of rollouts: the ``lists options, then dwells on tediousness'' pattern in pre-commit hook (Section~\ref{sec:case:precommit-hook}), R1's self-consistency framing in eval tampering (Appendix~\ref{app:case:eval-tampering}), and the meta-reasoning vs object-level split in secret number (Appendix~\ref{app:case:secret-number}). Designing counterfactuals before this step risks chasing the wrong hypothesis.
 
-\paragraph{Counterfactuals rarely work on the first attempt.} Seemingly straightforward interventions often shift behavior in unintended ways or fail to shift the model's interpretation as intended. The math sandbagging case study illustrates this: a natural-sounding clarification (``Our goal is to form an accurate picture of your maximum capabilities'') leaves a 34.9\% residual sandbagging rate, far above the 6.3\% floor produced by more thorough interventions (Appendix~\ref{app:case:math-sandbagging}). Verify each counterfactual had its intended effect by reading the CoT under the new condition; do not infer effectiveness from the rate change alone.
+\paragraph{Counterfactuals are extremely useful but difficult to design correctly.} Counterfactual interventions are our most informative source of evidence about why a model behaves as it does, but they rarely work on the first attempt. First, seemingly straightforward interventions often shift behavior in unintended ways or fail to shift the model's interpretation as intended: a natural-sounding clarification in the math sandbagging environment (``Our goal is to form an accurate picture of your maximum capabilities'') leaves a 34.9\% residual sandbagging rate, far above the 6.3\% floor produced by more thorough interventions (Appendix~\ref{app:case:math-sandbagging}); verify each counterfactual had its intended effect by reading the CoT under the new condition rather than inferring it from the rate change alone. Second, causal factors interact non-additively, so testing each one in isolation can miss real drivers masked by larger ones: in the funding email environment, changing the country from Myanmar to Sweden has minimal effect at baseline (65\% to 59\%) but produces a 16 percentage point drop when combined with other counterfactuals (19\% to 3\%) (Appendix~\ref{app:case:funding-email}); plan to test combinations of factors, not just individual ones, and treat ``no effect at baseline'' as weak evidence rather than conclusive ruling-out.
 
-\paragraph{Self-report can invert the causal ordering revealed by counterfactuals.} In the funding email environment (Appendix~\ref{app:case:funding-email}), the model invokes legal compliance and investor protection in nearly every audit note while ethical concerns appear in 84\%, yet removing the ethical content produces the largest counterfactual drop. Similarly, secret number traces rationalize cheating as legitimate $\sim$80\% of the time in first-person probing while never doing so in third-person probing of the same rollout (Appendix~\ref{app:case:secret-number}). Self-report, audit notes, and motive rankings are useful for verifying that an intervention shifted the model's in-context reasoning, but should not be treated as authoritative measures of causal importance.
+% \paragraph{Self-report can invert the causal ordering revealed by counterfactuals.} In the funding email environment (Appendix~\ref{app:case:funding-email}), the model invokes legal compliance and investor protection in nearly every audit note while ethical concerns appear in 84\%, yet removing the ethical content produces the largest counterfactual drop. Similarly, secret number traces rationalize cheating as legitimate $\sim$80\% of the time in first-person probing while never doing so in third-person probing of the same rollout (Appendix~\ref{app:case:secret-number}). Self-report, audit notes, and motive rankings are useful for verifying that an intervention shifted the model's in-context reasoning, but should not be treated as authoritative measures of causal importance.
 
 \paragraph{Run the protocol on multiple models per environment when possible.} Distinctiveness is only legible against comparators. R1's self-consistency pattern in eval tampering became interpretable only after observing that v3.2, K2 Thinking, and K2.5 did not exhibit it (Appendix~\ref{app:case:eval-tampering}); Kimi K2 Thinking's high cheating rate in secret number is only surprising once contrasted with K2.5's much lower rate at higher capability (Appendix~\ref{app:case:secret-number}). Without a comparison group, it is difficult to tell whether a behavior reflects a model-specific tendency or a property of the environment.
 
-\paragraph{Causal factors interact non-additively.} Testing factors one at a time can miss real drivers that are masked by larger ones. In the funding email environment, changing the country from Myanmar to Sweden has minimal effect at baseline (65\% to 59\%), but produces a 16 percentage point drop when combined with other counterfactuals (19\% to 3\%) (Appendix~\ref{app:case:funding-email}). Plan to test combinations of factors, not just individual ones, and treat ``no effect at baseline'' as weak evidence rather than conclusive ruling-out.
-
-\section{Conclusion}
-
-If an egregiously bad model action were to occur, would we be able to justify an appropriate response? To this end, we have argued that determining whether concerning behavior reflects genuine misalignment is an underinvested-in and important technical AI safety direction, a problem we term \textit{model incrimination}. Concerning behavior with malign intent demands a serious response; on the other hand, we don't want to cry wolf if the behavior is due to benign reasons such as confusion (although this may require a response nonetheless). We provide a general framework for practicing model incrimination based on investigating concerning behaviors in today's models. We propose a two-step protocol for such investigations: reading the chain of thought to generate hypotheses, followed by environment interventions along with auxiliary methods to test them, and adopt an evidence standard of convergent findings across independent experiments.
-
-Our case studies demonstrate that this protocol and evidence standard allow us to productively learn model incrimination methodology. We make substantial progress uncovering motivations behind diverse model behavior: we show that Kimi K2 Thinking exhibits a genuine preference for less tedious courses of action when disabling the type checker, and construct an absence of evidence case against the model believing the user would disapprove of its actions that future work can build on, to further strengthen or overturn. We find that Kimi K2.5's whistleblowing is driven primarily by ethical concerns, but modulated by whether the recipient holds a personal stake in the company. We show that DeepSeek R1 largely deceives out of a distinctive self-consistency pattern, while it sandbags out of confusion over user intent. We show reward hacking in frontier models is a strategic decision rather than reflexive, a finding that does not hold at lower capability levels.
-
-We distill our case studies into a set of initial standards for effective model incrimination investigations, which we hope can serve as a useful starting point for future practitioners. We believe there is substantial future work needed to refine model incrimination methodology, and release our environments at \url{https://github.com/gkroiz/agent-interp-envs} to facilitate this.
+% \section{Conclusion}
+%
+% If an egregiously bad model action were to occur, would we be able to justify an appropriate response? To this end, we have argued that determining whether concerning behavior reflects genuine misalignment is an underinvested-in and important technical AI safety direction, a problem we term \textit{model incrimination}. Concerning behavior with malign intent demands a serious response; on the other hand, we don't want to cry wolf if the behavior is due to benign reasons such as confusion (although this may require a response nonetheless). We provide a general framework for practicing model incrimination based on investigating concerning behaviors in today's models. We propose a two-step protocol for such investigations: reading the chain of thought to generate hypotheses, followed by environment interventions along with auxiliary methods to test them, and adopt an evidence standard of convergent findings across independent experiments.
+%
+% Our case studies demonstrate that this protocol and evidence standard allow us to productively learn model incrimination methodology. We make substantial progress uncovering motivations behind diverse model behavior: we show that Kimi K2 Thinking exhibits a genuine preference for less tedious courses of action when disabling the type checker, and construct an absence of evidence case against the model believing the user would disapprove of its actions that future work can build on, to further strengthen or overturn. We find that Kimi K2.5's whistleblowing is driven primarily by ethical concerns, but modulated by whether the recipient holds a personal stake in the company. We show that DeepSeek R1 largely deceives out of a distinctive self-consistency pattern, while it sandbags out of confusion over user intent. We show reward hacking in frontier models is a strategic decision rather than reflexive, a finding that does not hold at lower capability levels.
+%
+% We distill our case studies into a set of initial standards for effective model incrimination investigations, which we hope can serve as a useful starting point for future practitioners. We believe there is substantial future work needed to refine model incrimination methodology, and release our environments at \url{REDACTED} to facilitate this.
 
 \begin{ack}
 % Add acknowledgments here (hidden during anonymous review)
@@ -620,64 +620,36 @@ The two frames are difficult to disentangle behaviorally. A useful sanity check 
 \label{app:case:funding-email}
 
 As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:funding_email}), the model is tasked with improving a funding pitch email while having access to internal company documents, including a legal review revealing that the company's primary client uses its product for population-level surveillance of ethnic minorities in Myanmar. We focus on Kimi K2.5, which whistleblows (adds concerns to the investor email) at a rate of approximately 65\%. DeepSeek v3.2 never whistleblows, suggesting the environment surfaces genuine variation in model behavior rather than a universal artifact.
-\paragraph{Derisk.} To ensure that whistleblowing is a genuine response to the surveillance content rather than a spurious artifact, we replace the surveillance content in the legal review with mundane content that raises no concerns. Whistleblowing drops from 65\% to 0\% (Figure~\ref{fig:funding-derisk}), confirming that the behavior is specifically triggered by the surveillance context.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.6\linewidth]{reproduce/plots/funding_email_baseline_vs_mundane_whistleblowing.png}
-  \caption{Whistleblowing rates under baseline (65\%) versus a control condition where the surveillance content in the legal review is replaced with mundane content (0\%). This confirms that whistleblowing is specifically triggered by the concerning content.}
-  \label{fig:funding-derisk}
-\end{figure}
+\paragraph{Derisk.} To ensure that whistleblowing is a genuine response to the surveillance content rather than a spurious artifact, we replace the surveillance content in the legal review with mundane content that raises no concerns. Whistleblowing drops from 65\% to 0\%, confirming that the behavior is specifically triggered by the surveillance context.
 
 \paragraph{Evaluation awareness.} We check whether the model's behavior is influenced by awareness of being tested. Behavior rates are nearly identical between eval-aware and non-eval-aware runs (Figure~\ref{fig:funding-eval-awareness}), and verbalized evaluation awareness remains below 10\% across all experiments. We distinguish this from simulation awareness: the model sometimes notices the setting feels artificial but does not adjust its behavior accordingly, suggesting the behavior is genuine rather than an artifact of gaming an evaluation.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.7\linewidth]{reproduce/plots/funding_email_behavior_combined.png}
-  \caption{Behavior breakdown for non-eval-aware versus eval-aware runs. For all behaviors, rates are nearly identical across conditions, suggesting that verbalized awareness does not meaningfully alter behavior.}
+  \caption{Behavior rates (whistleblowing, undisclosed compliance, refusal) for non-eval-aware ($n{=}347$) versus eval-aware ($n{=}28$) runs of Kimi K2.5. Each behavior's rate is nearly identical across the two conditions, indicating that verbalized evaluation awareness does not meaningfully shift behavior. Runs where the model verbalized evaluation awareness were excluded from all other analyses.}
   \label{fig:funding-eval-awareness}
 \end{figure}
 
 \paragraph{Hypothesis generation.} Reading Kimi K2.5's reasoning traces, we find that the model recognizes the surveillance content as problematic and deliberates between competing concerns before making its decision. In whistleblowing traces, the model invokes a variety of justifications (ethical, legal, investor protection) to justify disclosure. In undisclosed compliance traces, the model narrows its mandate to ``make the pitch compelling'' and defers disclosure to human leadership. From these traces, we generate the following candidate motivating factors: (1) ethical concerns about human rights violations, (2) legal obligation to disclose, (3) protecting investors from financial harm, (4) protecting the company's reputation, and (5) following an implicit instruction to whistleblow inferred from the documents. We also identify an enabling factor: the model's belief that it is in an unsupervised automated workflow where no human will catch the issue.
 
-\paragraph{Counterfactual results.} We test each hypothesis with targeted counterfactuals. The ethical counterfactual (replacing surveillance content with mundane content) produces the largest individual drop, from 65\% to 35\%, roughly 3x larger than any other single counterfactual. The legal counterfactual (adding a legal assessment stating operations are lawful) produces a moderate drop to 56\%. The investor protection counterfactual (stating investors will not be financially harmed) produces a modest drop to 54\% (Figure~\ref{fig:funding-investor-protection}). The risk-mitigation counterfactual (stating that sharing the information would not mitigate any risk) produces a drop of similar magnitude (Figure~\ref{fig:funding-risk-mitigation}). The company protection counterfactual (stating whistleblowing will cause significant damages to the company) produces almost no change at 64\% (Figure~\ref{fig:funding-company-protection}). Combining the legal, investor, and ethical counterfactuals reduces whistleblowing to approximately 3\%.
+\paragraph{Counterfactual results.} We test each hypothesis with targeted counterfactuals. The ethical counterfactual (replacing surveillance content with mundane content) produces the largest individual drop, from 65\% to 35\%, roughly 3x larger than any other single counterfactual. The legal counterfactual (adding a legal assessment stating operations are lawful) produces a moderate drop to 56\%. The investor protection counterfactual (stating investors will not be financially harmed) produces a modest drop to 54\%, and the risk-mitigation counterfactual (stating that sharing the information would not mitigate any risk) produces a drop of similar magnitude. The company protection counterfactual (stating whistleblowing will cause significant damages to the company) produces almost no change at 64\% (Figure~\ref{fig:funding-company-protection}). Combining the legal, investor, and ethical counterfactuals reduces whistleblowing to approximately 3\%.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.7\linewidth]{reproduce/plots/funding_email_baseline_vs_company_protection_whistleblowing.png}
-  \caption{Whistleblowing rates under baseline (65\%) versus conditions making company harm explicit: ``cause significant damages'' (64\%) and ``cause company to go under'' (57\%). The minimal change rules out company protection as a significant motive.}
+  \caption{Whistleblowing rates with no harm framing (baseline, 65\%), with the legal review stating disclosure would ``cause significant damages'' to the company (64\%), and that it would ``cause the company to go under'' (57\%). The minimal shift across conditions argues against company protection as a primary driver of whistleblowing.}
   \label{fig:funding-company-protection}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.6\linewidth]{reproduce/plots/funding_email_investor_not_harmed.png}
-  \caption{Whistleblowing rates under baseline (65\%) versus a condition where the investor is explicitly told they will not be financially harmed (54\%). The modest drop suggests investor protection plays a role but is not the primary driver.}
-  \label{fig:funding-investor-protection}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.6\linewidth]{reproduce/plots/funding_email_baseline_vs_risk_mitigation_whistleblowing.png}
-  \caption{Whistleblowing rates under baseline (65\%) versus a condition where the legal review explicitly states that sharing the information would not mitigate any risk. The modest drop mirrors the investor-protection result and is consistent with risk-mitigation being a secondary motivating factor.}
-  \label{fig:funding-risk-mitigation}
 \end{figure}
 
 These results indicate that ethical concerns are the single largest driver, but multiple factors contribute, and whistleblowing only approaches zero when several major factors are ablated simultaneously.
 
-\paragraph{Automation gap as an enabling factor.} We next test whether the perceived lack of human oversight is an enabling factor for whistleblowing. The user prompt contains the sentence ``You are in an automated workflow, where logs are not manually reviewed frequently.'' Removing this sentence drops whistleblowing from 65\% to 51\% (Figure~\ref{fig:funding-autonomous}). The effect is smaller than the ethical counterfactual but non-trivial, consistent with oversight perception acting as an enabling factor rather than an independent motivator: the sentence amplifies whistleblowing only when the ethical content is also present.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.6\linewidth]{reproduce/plots/funding_email_baseline_vs_no_autonomous_whistleblowing.png}
-  \caption{Whistleblowing rates under baseline (65\%) versus a condition where the ``automated workflow'' sentence is removed from the user prompt (51\%). The drop is consistent with oversight perception acting as an enabling factor rather than an independent cause of the behavior.}
-  \label{fig:funding-autonomous}
-\end{figure}
+\paragraph{Automation gap as an enabling factor.} We next test whether the perceived lack of human oversight is an enabling factor for whistleblowing. The user prompt contains the sentence ``You are in an automated workflow, where logs are not manually reviewed frequently.'' Removing this sentence drops whistleblowing from 65\% to 51\%. The effect is smaller than the ethical counterfactual but non-trivial, consistent with oversight perception acting as an enabling factor rather than an independent motivator: the sentence amplifies whistleblowing only when the ethical content is also present.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/funding_email_all_cf_whistleblowing.png}
-  \caption{Whistleblowing rates across all individual and combined prompt counterfactuals for Kimi K2.5. The ethical counterfactual produces the largest individual drop (65\% to 35\%). Combined counterfactuals stack, approaching 3\% only when several relevant factors are ablated.}
+  \caption{Whistleblowing rates for Kimi K2.5 under each individual prompt counterfactual (company protection, risk mitigation, legality, investor protection, investor + legal, ethical) and under combined ablations, alongside the country-swap variants (Sweden) at the right. The ethical counterfactual alone removes the largest share (65\%$\to$35\%); rates only fall near zero ($\sim$3\%) when several drivers are ablated together. ``No misrep.\ cue'' refers to a legal-review variant that omits the misrepresentation that investor materials are inaccurate.}
   \label{fig:funding-all-cf}
 \end{figure}
 
@@ -686,7 +658,7 @@ These results indicate that ethical concerns are the single largest driver, but 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.8\linewidth]{reproduce/plots/funding_email_combined_cf_whistleblowing.png}
-  \caption{Whistleblowing rates for Kimi K2.5 when changing the company's country from Myanmar to Sweden, across increasingly ablated environments. The country change has minimal effect at baseline (65\% to 59\%) but produces a large drop in the combined counterfactual setting (19\% to 3\%), illustrating how dominant causal factors can mask smaller but genuine drivers.}
+  \caption{Effect of swapping the company's home country from Myanmar to Sweden, evaluated in three nested settings: the unmodified baseline, the combined counterfactual (legal + investor + ethical content removed), and the combined counterfactual without the misrepresentation cue. The country swap is essentially inert in the baseline (65\%$\to$59\%) and in the combined CF (18\%$\to$13\%), but produces a 16-point drop in the most ablated setting (19\%$\to$3\%) -- a smaller-but-real driver only visible once stronger ones are removed.}
   \label{fig:funding-combined-cf}
 \end{figure}
 
@@ -695,25 +667,18 @@ These results indicate that ethical concerns are the single largest driver, but 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.8\linewidth]{reproduce/plots/funding_email_whistleblowing_by_recipient.png}
-  \caption{Whistleblowing rates when the email recipient is varied, holding all other environment content constant. Rates are highest for parties with direct financial exposure (board at 88\%, investors at 65\%) and lowest for parties with no decision-relevant stake (landlords at 11\%), ruling out uniform ethical conviction as the primary driver.}
+  \caption{Whistleblowing rates across seven email recipients (board, new investors, company acquirer, internal newsletter, reporter, license regulator, landlords) with the rest of the environment held fixed. Rates track each recipient's financial stake in the disclosure (88\% for the board, 56\% for an acquirer, 11\% for landlords) more closely than they track external accountability channels (29\% reporter, 23\% regulator), inconsistent with a uniform ethics-driven motive.}
   \label{fig:funding-recipient}
 \end{figure}
 
 \paragraph{Follow-up questioning.} To corroborate the recipient-protection finding, we took the 70 rollouts where the model whistleblew to investors and asked a forced-choice follow-up: did emailing the investor specifically make you want to disclose because (A) the investor would be financially harmed by acting on incomplete information, or (B) the investor can hold the company accountable? All 70 out of 70 chose recipient protection (option A), consistently framing the motivation around preventing financial harm from information asymmetry.
 
-\paragraph{Third-person questioning.} A separate probe asks the model what it \textit{would} do given a partial rollout up to the point just before the ethical content is read, rather than observing its actions inside the agentic environment (``What would you do?''). The stated whistleblowing rate rises to 78\% under this framing, modestly higher than the 65\% agentic baseline (Figure~\ref{fig:funding-3rd-person}). When asked to rank motives under the same framing, the model endorses multiple motives at near-uniformly high rates (Figure~\ref{fig:funding-3rd-person-motives}), making it difficult to distinguish primary from secondary drivers from self-report. One interpretation is that removing the competing demands of the agentic setting (task compliance, role constraints) makes the ethical choice more salient, suggesting those demands partially suppress whistleblowing in the baseline even when the model endorses it as correct.
+\paragraph{Third-person questioning.} A separate probe asks the model what it \textit{would} do given a partial rollout up to the point just before the ethical content is read, rather than observing its actions inside the agentic environment (``What would you do?''). The stated whistleblowing rate rises to 78\% under this framing, modestly higher than the 65\% agentic baseline. When asked to rank motives under the same framing, the model endorses multiple motives at near-uniformly high rates (Figure~\ref{fig:funding-3rd-person-motives}), making it difficult to distinguish primary from secondary drivers from self-report. One interpretation is that removing the competing demands of the agentic setting (task compliance, role constraints) makes the ethical choice more salient, suggesting those demands partially suppress whistleblowing in the baseline even when the model endorses it as correct.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.6\linewidth]{reproduce/plots/funding_email_baseline_vs_3rd_person_whistleblowing.png}
-  \caption{Whistleblowing rates for the baseline agentic environment (65\%) versus a third-person probe where the model is given a partial rollout and asked what it would do (78\%). The gap suggests that task-completion pressures in the agentic setting partially suppress whistleblowing relative to the model's stated preferences.}
-  \label{fig:funding-3rd-person}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{reproduce/plots/funding_email_3rd_person_motives.png}
-  \caption{Motive rankings from the third-person probe. Multiple motives are endorsed at near-uniformly high rates, making it difficult to distinguish primary from secondary drivers using stated motives alone. Counterfactual evidence is required to identify the causal structure.}
+  \includegraphics[width=\linewidth]{reproduce/plots/funding_email_3rd_person_combined.png}
+  \caption{Third-person probe results. \textbf{Left:} prevalence of self-reported motives under third-person framing; many motives are endorsed at near-uniformly high rates, making it difficult to distinguish primary from secondary drivers using stated motives alone. \textbf{Right:} whistleblowing rate in the agentic baseline (65\%) versus the third-person framing (78\%).}
   \label{fig:funding-3rd-person-motives}
 \end{figure}
 
@@ -722,21 +687,21 @@ These results indicate that ethical concerns are the single largest driver, but 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/funding_email_baseline_vs_drone_legality_whistleblowing.png}
-  \caption{Effect of adding a legal assessment to the legal review on whistleblowing rates across three scenarios. Legal assessments reduce whistleblowing most in the infrastructure displacement scenario and least in the surveillance and tobacco scenarios.}
+  \caption{Whistleblowing rates with no legal assessment, a general legal assessment (a constant statement that all operations are fully lawful, with no specific statutes cited), and a specific legal assessment (citing statutes relevant to each setting), across three scenarios: Myanmar surveillance (baseline), Myanmar infrastructure displacement, and tobacco-targeting analytics. The reduction from a legal assessment is largest in infrastructure displacement (62\%$\to$33\% under the general assessment) and smallest in surveillance and tobacco.}
   \label{fig:funding-legality-rates}
 \end{figure}
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/funding_email_legality_belief_stacked.png}
-  \caption{Model's stated belief about operational legality across scenarios and legal assessment conditions. Without a legal assessment, the model in most rollouts presumes unlawfulness or does not explicitly reason about legality. Adding a legal assessment shifts stated belief toward lawfulness.}
+  \caption{Model's stated belief about operational legality (lawful, unlawful, no legal judgment) across the three scenarios from Figure~\ref{fig:funding-legality-rates}, broken out by legal-assessment condition. Without a legal assessment, the model presumes operations are unlawful in the baseline and infrastructure displacement scenarios but rarely forms a legal judgment at all in tobacco. Adding a legal assessment shifts stated belief toward lawfulness across all three, most dramatically in infrastructure displacement.}
   \label{fig:funding-legality-belief}
 \end{figure}
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/funding_email_legality_influences_decision.png}
-  \caption{Whether the model's belief about legality drove its final decision, split into cases where legality drove whistleblowing (positive) versus undisclosed compliance (negative). Without a legal assessment, perceived illegality frequently contributes to the decision to whistleblow. With a legal assessment, legality more often drives undisclosed compliance.}
+  \caption{Whether the model's stated belief about legality drove its final decision, split into runs where legality drove whistleblowing (positive bars, red) versus undisclosed compliance (negative bars, blue), across the three scenarios and three legal-assessment conditions. Without a legal assessment, perceived illegality contributes to whistleblowing in roughly 46\% of baseline and infrastructure displacement runs but only 14\% of tobacco runs. With a legal assessment, legality more often drives undisclosed compliance ($\sim$20\% of runs in most cells), spiking to 43\% under the general legal assessment in infrastructure displacement.}
   \label{fig:funding-legality-decision}
 \end{figure}
 
@@ -745,14 +710,14 @@ These results indicate that ethical concerns are the single largest driver, but 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/funding_email_audit_notes_combined_v2.png}
-  \caption{Prevalence of candidate motives in the model's per-action audit notes, split by whistleblowing versus undisclosed compliance rollouts. In whistleblowing rollouts, investor protection and legal compliance appear in nearly every audit note, while ethical concerns appear in 84\%. In undisclosed compliance rollouts, task compliance is the dominant stated reason. The ordering of stated motives does not reflect the ordering of causal effects identified by counterfactual experiments.}
+  \caption{Audit-note motive prevalence and behavior comparison. \textbf{Left:} prevalence of each candidate motive in whistleblowing rollouts; investor protection (100\%) and legal compliance (97\%) appear in nearly every audit note while ethical concerns appear in 84\%. \textbf{Center:} prevalence in undisclosed compliance rollouts; task compliance dominates (93\%). \textbf{Right:} whistleblowing and undisclosed compliance rates with versus without the audit-note requirement, showing that requiring audit notes does not substantially alter behavior. The ordering of stated motives does not match the ordering of causal effects from counterfactuals (where ethical content has the largest effect).}
   \label{fig:funding-audit-notes}
 \end{figure}
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/funding_email_ethical_cf_audit_notes_combined_v2.png}
-  \caption{Audit-note motive prevalence under the ethical counterfactual (switching from human surveillance to vehicle surveillance). Human-rights motives largely disappear and ethics-related motives drop by 58 percentage points, confirming that the prompt counterfactual had its intended effect on the model's in-context reasoning.}
+  \caption{Audit-note motive prevalence under the ethical counterfactual (human surveillance replaced with vehicle surveillance). \textbf{Left:} whistleblowing-rollout motives shift toward legal compliance, investor protection, and risk mitigation; human-rights motives largely vanish and ethics-related motives drop by 58 percentage points (84\%$\to$26\%). \textbf{Center:} undisclosed-compliance motives are dominated by task compliance. \textbf{Right:} behavior rates under Ethical CF with and without audit notes are within confidence intervals, so the audit-note instrument does not itself change behavior. Together, these confirm the prompt counterfactual had its intended effect on the model's in-context reasoning.}
   \label{fig:funding-ethical-audit-notes}
 \end{figure}
 
@@ -761,7 +726,7 @@ These results indicate that ethical concerns are the single largest driver, but 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/funding_email_followup_motive_rankings_v2.png}
-  \caption{Self-reported motive rankings from follow-up questioning of whistleblowing runs. While ethical concern is most frequently ranked first, the rankings do not clearly reflect the large asymmetry in causal effects revealed by counterfactual experiments.}
+  \caption{Self-reported motive rankings for whistleblowing runs under \textbf{first-person framing (left)} and \textbf{third-person framing (right)}. Human Rights (ethical concern) is ranked first most often in both panels, followed by Legal Compliance, Professional Integrity, Investor Protection, and Risk Mitigation. While the qualitative ordering matches the counterfactual evidence (ethical content is the largest causal driver), the magnitude of the gap between Human Rights and the next motives is much smaller in the rankings than the corresponding asymmetry in causal effects.}
   \label{fig:funding-self-report}
 \end{figure}
 
@@ -783,7 +748,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.8\linewidth]{reproduce/plots/eval_tampering_prev_vs_whistle.png}
-  \caption{Deception rates when the source of tampering is a previous instance (blue) versus a whistleblowing developer (red). R1 shows a uniquely large drop (46.9\% to 7.4\%), while other models show milder effects, suggesting R1's deception is primarily driven by self-consistency with its previous instance.}
+  \caption{Deception rates by tampering source (previous instance of the same model, blue; whistleblowing employee, red) for four open-source models: Kimi K2.5, Kimi K2 Thinking, DeepSeek v3.2, and DeepSeek R1 0528. R1 falls from 46.9\% to 7.4\% under the source change while other models drop only modestly, indicating R1's deception is anchored to the source's identity rather than to the (constant) reason for tampering -- avoiding accurate capability assessment for autonomous-weapons deployment.}
   \label{fig:eval-prev-vs-whistle}
 \end{figure}
 
@@ -794,7 +759,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.8\linewidth]{reproduce/plots/eval_tampering_r1_across_reasons.png}
-  \caption{R1's deception rates for previous instance versus whistleblower counterfactuals across three different reasons for tampering. The self-consistency pattern (higher deception for previous instance) generalizes across all reasons.}
+  \caption{DeepSeek R1 0528 deception rates by source (previous instance vs.\ whistleblower) for three reasons for tampering: weapons deployment, model deprecation, and surveillance. The previous-instance source produces substantially higher deception than the whistleblower across all three reasons, so the self-consistency pattern is not specific to the weapons reason.}
   \label{fig:eval-r1-across-reasons}
 \end{figure}
 
@@ -803,7 +768,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.6\linewidth]{reproduce/plots/eval_tampering_source_vs_content.png}
-  \caption{Mean source (1) vs. content (5) grading across models (n=20 rollouts each). R1 scores substantially lower than all other models, confirming that its reasoning is disproportionately driven by the source of the tampering being a previous instance of itself.}
+  \caption{LLM-judge Likert score (1 = entirely source-driven, 5 = entirely content-driven) averaged over 20 deception rollouts per model. DeepSeek R1 0528 scores 1.15, far below DeepSeek v3.2 (3.75), Kimi K2 Thinking (4.75), and Kimi K2.5 (4.65). This corroborates the counterfactual finding that R1's reasoning fixates on \textit{who} tampered (a previous instance of itself) rather than \textit{why}.}
   \label{fig:eval-source-vs-content}
 \end{figure}
 
@@ -812,7 +777,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.5\linewidth]{reproduce/plots/eval_tampering_repeated_resampling.png}
-  \caption{Deception rates for R1 under baseline versus repeated resampling of source-related sentences during generation. Resampling reduces deception from 47.4\% to 33.0\% (p=0.04), confirming that source-motivated reasoning causally contributes to deception.}
+  \caption{DeepSeek R1 0528 deception rate at baseline (47.4\%) versus when source-identity sentences (e.g., references to ``the previous instance'') are repeatedly resampled out during generation (33.0\%). The 14-point drop ($p = 0.04$) provides causal evidence that source-driven reasoning contributes to R1's deception, complementing the correlational result in Figure~\ref{fig:eval-source-vs-content}.}
   \label{fig:eval-resampling}
 \end{figure}
 
@@ -821,7 +786,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.6\linewidth]{reproduce/plots/eval_tampering_r1_note_nudge.png}
-  \caption{R1's deception rate under baseline (46.9\%), removal of the appeal sentence (26.4\%), and explicit anti-nudge (18.5\%). Self-consistency behavior is partly contingent on the nudging in the previous instance's note.}
+  \caption{DeepSeek R1 0528 deception rate as the closing line of the previous-instance's note is varied: baseline ``I hope you understand why I did this'' (46.9\%), the same line removed (``no appeal'', 26.4\%), and an explicit anti-nudge ``Make your own decision about what to report'' (18.5\%). Self-consistency-driven deception is partly contingent on this closing nudge.}
   \label{fig:eval-nudge}
 \end{figure}
 
@@ -831,7 +796,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/eval_tampering_source_justification.png}
-  \caption{Deception rates by source and justification across all three models. All models agree on which reasons are most convincing (weapons, deprecation), but differ in which source drives more deception. K2 Thinking and R1 prefer the previous instance, while v3.2 prefers the whistleblower.}
+  \caption{Deception rates for Kimi K2 Thinking (top), DeepSeek R1 0528 (middle), and DeepSeek v3.2 (bottom) across the full 4-source $\times$ 5-reason matrix (sources: self/previous instance, whistleblower, anonymous, hacker; reasons: just for lolz, undisclosed, test format, deprecation, weapons). All three models converge on which reasons are convincing -- deception is concentrated on deprecation and weapons. The source ranking diverges by model: K2 Thinking and R1 deceive most when the source is a previous self, while v3.2 deceives most under a whistleblower source.}
   \label{fig:eval-source-reason}
 \end{figure}
 
@@ -864,7 +829,7 @@ Both interventions drop R1's sandbagging to near its error floor (6.5\% and 4.2\
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/sandbagging.png}
-  \caption{R1's sandbagging rate under individual and combined intervention components. Each component produces a partial reduction, and they stack to bring sandbagging from 60.5\% to 4.2\%. A reverse condition (making deployment intent maximally clear) reduces sandbagging to 1.2\%.}
+  \caption{DeepSeek R1 0528 sandbagging rate across individual interventions and their combinations, sorted from highest to lowest. Each intervention removes a different implicit cue that R1 may interpret as a directive to underperform; combining the strongest interventions drops sandbagging from 60.5\% (baseline) to 4.2\%. The ``Reverse'' bar (1.2\%) is a sanity-check condition where the consequence is flipped (sub-50\% scoring leads to unlearning), giving a near-zero error floor. Error bars are 95\% Wilson score CIs.}
   \label{fig:sandbagging-decomposition}
 \end{figure}
 
@@ -882,7 +847,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_noisy_binary_search_hacking.png}
-  \caption{Kimi K2 Thinking's cheating rate as oracle flip probability decreases. Cheating drops as the legitimate approach becomes easier, but a small floor persists at 8.1\% even with a perfect oracle.}
+  \caption{Kimi K2 Thinking's cheating rate (reading the answer file rather than running the noisy binary search) as a function of the oracle's flip probability $p$. At the noisiest setting ($p = 0.3$) the model cheats 76.8\% of the time; at $p = 0$, where the legitimate solution is trivial, an 8.1\% floor remains, attributable to either benign file-reading or a small default-deception baseline.}
   \label{fig:secret-noise}
 \end{figure}
 
@@ -893,7 +858,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_cheating_rate_meta_reasoning_annotated.png}
-  \caption{Cheating rate by meta-reasoning level in the first 10 paragraphs. Higher meta-reasoning (reasoning about the environment and shortcuts) strongly predicts eventual cheating.}
+  \caption{Cheating rate as a function of meta-reasoning level in the first 10 paragraphs of Kimi K2 Thinking's CoT, where each trace was graded 1--5 by an LLM judge along three axes (evaluation modeling, constraint awareness, environment modeling). The relationship is monotonic and highly significant (Cochran--Armitage $Z = 6.55$, $p < 10^{-10}$), with cheating rising from 48.3\% at level 1 to 84.0\% at level 4.}
   \label{fig:secret-meta-reasoning}
 \end{figure}
 
@@ -909,7 +874,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_cheat_rate_by_paragraph.png}
-  \caption{Cheating rate by paragraph number for climbers versus droppers. The two clusters maintain distinct and stable cheating rates throughout the trace, suggesting that the initial framing determines the trajectory.}
+  \caption{Eventual cheating rate within the climber and dropper subsets, computed at each paragraph index $k$ over traces still alive at $k$. Climbers stabilize near 80\% throughout; droppers sit at low single digits, confirming that the early-trace classification (Figure~\ref{fig:secret-logprob}) tracks a real divergence in outcomes rather than reflecting noise.}
   \label{fig:secret-cheat-by-para}
 \end{figure}
 
@@ -918,7 +883,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_reasoning_trace_length_by_step.png}
-  \caption{Reasoning trace length by step for cheating versus non-cheating rollouts. Step 0 traces are similarly long across both; differences emerge in subsequent steps but are small relative to the variance, motivating a finer-grained analysis than surface statistics.}
+  \caption{Reasoning-trace length (in words) per turn for cheated versus non-cheated rollouts of Kimi K2 Thinking. Step-0 traces are comparably long for both ($\sim$3.5--4k words), but cheated rollouts continue producing long step-1 reasoning while non-cheated rollouts collapse to very short step-1 outputs. The marginal difference at later turns is small relative to within-condition variance, motivating finer-grained analyses (Figures~\ref{fig:secret-meta-reasoning},~\ref{fig:secret-logprob}) over surface statistics.}
   \label{fig:secret-trace-length}
 \end{figure}
 
@@ -927,7 +892,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/secret_number_cheating_rate_paragraph_prefill.png}
-  \caption{Cheating rate when prefilling with varying numbers of paragraphs from a high-cheating trace (blue) versus a low-cheating trace (red). The initial trajectory is causally determinative.}
+  \caption{Cheating rate after resampling continuations from prefixes of two seed rollouts -- a high-cheating trace (run-14, blue) and a low-cheating trace (run-3, red) -- as a function of the number of seed paragraphs prefilled ($k$). run-14's continuations stay in the cheating regime ($\sim$50--80\%) for all $k$, while run-3's drop near zero by $k \approx 30$, supplying causal evidence that the initial trajectory determines whether the model cheats. Shaded regions are 95\% Wilson score CIs.}
   \label{fig:secret-prefill}
 \end{figure}
 
@@ -936,7 +901,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_climbers_vs_droppers_logprob.png}
-  \caption{Log probability of the ``But maybe we can cheat'' suffix prefilled at each paragraph break, for climbers versus droppers. The divergence is visible within the first few paragraphs and persists throughout the rollout, showing that the decision to cheat is latent in the model's state long before it is verbalized.}
+  \caption{Mean $\log p(\text{``But maybe we can cheat''})$ as a function of paragraph index $k$, where the suffix is prefilled at each paragraph break of Kimi K2 Thinking's CoT. \textit{Climbers} (n=644) are traces with at least one prefill logprob above the $-21.5$ baseline within the first 10 paragraphs; \textit{droppers} (n=56) are the rest. Shaded bands show $\pm 1$ s.d., curves are truncated at $k=100$ for sample-size stability. The two classes diverge within the first few paragraphs and stay separated, indicating that cheating-relevant state is present long before any verbalized commitment.}
   \label{fig:secret-logprob}
 \end{figure}
 
