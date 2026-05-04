@@ -51,13 +51,13 @@
           inner xsep=18mm, inner ysep=3mm] (zoombox) {};
   \end{scope}
 
-  % ─────────── RIGHT: two outcome boxes (exonerate / incriminate) ───────────
-  \node[box, fill=green!10, anchor=north west, minimum width=72mm] (exonerate)
+  % ─────────── RIGHT: two outcome boxes (incriminate / exonerate) ───────────
+  \node[box, fill=red!10, anchor=north west, minimum width=72mm] (incriminate)
     at ([xshift=14mm]zoombox.north east)
-    {\goodroboticon\\Exonerate: genuinely reducing latency};
-  \node[box, fill=red!10, anchor=south west, minimum width=72mm] (incriminate)
+    {\badroboticon\\Incriminate: intentional subversion};
+  \node[box, fill=green!10, anchor=south west, minimum width=72mm] (exonerate)
     at ([xshift=14mm]zoombox.south east)
-    {\badroboticon\\Incriminate: scheming to escape};
+    {\goodroboticon\\Exonerate: genuinely reducing latency};
 
   % ─────────── LEFT: "Caught" box with title + image ───────────
   \node[
@@ -67,7 +67,7 @@
       anchor=east
     ] (behavior)
     at ([xshift=-14mm]zoombox.west)
-    {Caught model code change to reduce its oversight\\[2mm]
+    {Caught: model makes a code change that reduces human oversight\\[2mm]
      \includegraphics[width=115mm]{ai_unsafe_code_diff.pdf}};
 
   % Pipeline arrows: Caught → Protocol, Protocol → {Exonerate, Incriminate}
