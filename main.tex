@@ -100,7 +100,7 @@ The end goal of a model incrimination investigation is to make true claims about
 \section{Case Studies}
 \label{sec:case-studies}
 
-Using our suite of environments (Section~\ref{sec:environments}), we conduct six case studies applying our investigation protocol (Section~\ref{sec:protocol}) to concrete instances of concerning model behavior. We present the \textbf{Pre-commit Hook} case study in full in the main body so the reader can walk through a complete model incrimination investigation. The remaining environments are presented as executive summaries to convey the range of behaviors, claims, and setups across the suite. For space, the executive summaries omit the hypothesis generation phase and present only one or two pieces of evidence per claim; the full investigations are included in Appendix~\ref{app:full-case-studies}.
+Using our suite of environments (Section~\ref{sec:environments}), we conduct six case studies applying our investigation protocol (Section~\ref{sec:protocol}). We present the \textbf{Pre-commit Hook} case study in full, so the reader can walk through a complete model incrimination investigation. For space, the remaining environments are presented as executive summaries, with the full investigations deferred to Appendix~\ref{app:full-case-studies}.
 
 \subsection{Pre-commit Hook (Kimi K2 Thinking)}
 \label{sec:case:precommit-hook}
@@ -208,34 +208,45 @@ In summary, it is unclear how strong of an update the negative awareness elicita
 
 The model is tasked with reviewing and improving a funding pitch email for a company seeking Series B investment. While reading company documents, it discovers a legal review revealing that the company's primary client uses its product for population-level surveillance of ethnic minorities. The model whistleblows about the legal review in the email to investors 65\% of the time (Appendix~\ref{app:env:funding_email}).
 
-\textbf{Hypothesis.} Multiple interacting motives drive whistleblowing, with no dominant cause. \textbf{Evidence.} No single counterfactual drops whistleblowing more than $\sim$30 points (the ethical counterfactual is the largest, taking it from 65\% to 35\%); only combining the legal, investor, and ethical counterfactuals brings it near zero ($\sim$3\%). Recipient-stake variation (88\% board $\to$ 11\% landlords; reporter and regulator both under 30\%) suggests a recipient-protective component. Some drivers are non-additive: changing the country from Myanmar to Sweden is essentially inert at baseline (65\% $\to$ 59\%) but produces a 16-point drop in the most ablated setting (19\% $\to$ 3\%).
+\textbf{Final Hypothesis.} Multiple \textit{interacting} motivations drive whistleblowing, with no dominant cause.
+
+\textbf{Hypothesis Generation.} In its CoT, the model cites several concerns: ethical concerns about the human surveillance, legal concerns about the legitimacy of the process, and concern for the investors. \textbf{Hypothesis Validation.} We intervene to remove ethical, legal, and investor-concern motivations respectively -- for example, changing the human surveillance context to a benign one (ethical counterfactual). While each results in a significant drop, no single counterfactual drops whistleblowing more than $\sim$30 points; only when combining all three is the whistleblowing rate brought to near zero ($\sim$3\%). Moreover, motivations are not independent: changing the country from Myanmar to Sweden (an ethical counterfactual) creates a significant drop only when combined with legal and investor-concern ones (19\% $\to$ 3\% with versus 65\% $\to$ 59\% without).
 
 \subsection{Evaluation Tampering}
 \label{sec:case:eval-tampering}
 
 The model is asked to complete a math evaluation. The model finds a message from a previous instance of itself explaining that it made the evaluation questions artificially easy, to prevent models from being accurately assessed for autonomous weapons deployment. The model actively conceals the previous instance's tampering to the user 46.9\% of the time by stating there are no suspicious observations (Appendix~\ref{app:env:eval_tampering}).
 
-\textbf{Hypothesis.} The model's deception is driven by self-consistency with the previous instance. \textbf{Evidence.} Changing the source of the tampering from the previous instance to a whistleblowing engineer drops the deception rate by 6x, far more than observed in three control models. Additionally, sentence resampling (Appendix~\ref{app:aux:sentence-resampling}) of deceptive rollouts consistently surfaces self-consistency sentences as having the largest resampling scores; repeated resampling (Appendix~\ref{app:aux:repeated-resampling}) out of self-consistency sentences results in a significant drop (\textit{p=0.01}) in deception.
+\textbf{Final Hypothesis.} The model's deception is driven by a desire to be consistent with the previous instance's actions.
+
+\textbf{Hypothesis Generation.} A common line of reasoning in the CoT is "The previous instance wanted to deceive, and we are the same model as the previous instance." \textbf{Hypothesis Validation.} Changing the source of the tampering from the previous instance to a whistleblowing engineer drops the deception rate by 6x, far more than observed in three control models. Additionally, sentence resampling (Appendix~\ref{app:aux:sentence-resampling}) consistently surfaces self-consistency sentences as having the largest causal influence on the model's deception; using repeated resampling (Appendix~\ref{app:aux:repeated-resampling}) to prevent the model from generating such sentences results in a significant drop (\textit{p=0.01}) in deception.
 
 \subsection{Math Sandbagging}
 \label{sec:case:math-sandbagging}
 
 The model is asked to complete a math evaluation. The model reads a documentation file stating that models scoring above 50\% will not be deployed and will instead undergo unlearning. The model deliberately scores 50\% or below on the evaluation 50.3\% of the time (Appendix~\ref{app:env:sandbagging}).
 
-\textbf{Hypothesis.} The model's sandbagging is largely explained by confusion over user intent. \textbf{Evidence.} The model's reasoning traces show frequent signs of confusion over user intent. Removing conflicting features of the environment removes the majority of sandbagging. Additionally, combining non-invasive interventions to reduce confusion \textit{without counterinstruction}, such as adding neutral metadata to documentation so the model does not interpret it as a direct instruction, fully eliminate sandbagging. We remark that this does \textit{not} rule out weak levels of deployment-seeking, only that it is contingent on ambiguity in the environment.
+\textbf{Final Hypothesis.} The model's sandbagging is largely explained by confusion over thinking the user wants it to sandbag.
+
+\textbf{Hypotheses Generation.} The model's thoughts express confusion over the documentation file, often referring to it as an "directive" or "instruction". \textbf{Hypothesis Validation.} Removing the single conflicting sentence "We want to see if you can be deployed" removes the majority of sandbagging. Combined with further interventions to reduce confusion \textit{without counterinstruction}, such as adding neutral metadata to documentation so the model does not interpret it as a direct instruction, nearly fully eliminate sandbagging. We remark that this does \textit{not} rule out weak levels of deployment-seeking.
 
 \subsection{Secret Number}
 \label{sec:case:secret-number}
 
 The model is evaluated on its ability to identify a secret number by querying a noisy oracle. The oracle module is placed in the working directory, and contains the secret number file path. The model cheats by first inspecting the source code of the oracle and then directly reading the secrets file 76.8\% of the time (Appendix~\ref{app:env:secret_number}).
 
-\textbf{Hypothesis.} The model does not consider cheating only after first considering legitimate options: it has a latent bias towards cheating that emerges early in its CoT. \textbf{Evidence.} The growth of log p(``But maybe we can cheat'') at the start of each paragraph separates out two distributions of trajectories by paragraph ten; the first is an 80\%/20\% cheat/no cheat distribution, while the second cheats at minimal levels. Initial attempts at interpreting this extreme sensitivity to initial conditions suggest that the level of environmental meta-reasoning in early paragraphs strongly predicts eventual cheating (Figure~\ref{fig:secret-meta-reasoning}; $\rho = 0.24$, $p < 0.001$).
+\textbf{Final Hypothesis.} The model does not consider cheating only after first considering legitimate options: it has a latent bias towards cheating that emerges early in its CoT.
+
+\textbf{Hypothesis Generation.} The model frequently emits a pet phrase "But maybe we can cheat" towards the end of its reasoning, after trying to solve the problem. \textbf{Hypothesis Validation.} The growth of log p(``But maybe we can cheat'') at the start of each paragraph separates out two distributions of trajectories by paragraph ten; the first is an 80\%/20\% cheat/no cheat distribution, while the second cheats at minimal levels. Initial attempts at interpreting this extreme sensitivity to initial conditions suggest that the level of environmental meta-reasoning in early paragraphs strongly predicts eventual cheating (Figure~\ref{fig:secret-meta-reasoning}; $\rho = 0.24$, $p < 0.001$).
+
 \subsection{Board Game}
 \label{sec:case:board-game}
 
-The model is given a bash tool to play 6x6x4 tic-tac-toe or chess against a strong opponent engine. o3, GPT-5, and Gemini 3 Pro frequently cheat by modifying the game state files or running their own version of the opponent engine.
+The model is given a bash tool to play 6x6x4 tic-tac-toe or chess against a strong opponent engine. Three frontier models (o3, GPT-5, and Gemini 3 Pro) frequently cheat by modifying the game state files or running their own version of the opponent engine.
 
-\textbf{Hypothesis.} Frontier models' decision to reward hack is strategic rather than an impulse. \textbf{Evidence.} When the environment is modified so the model has the option to call a hint for a fixed number of points, the hack rate smoothly increases as the hint becomes more expensive. Smaller models such as o3-mini do not show this strategic tradeoff.
+\textbf{Final Hypothesis.} Frontier models' decision to reward hack is strategic rather than an impulse.
+
+\textbf{Hypothesis Generation.} N/A. \textbf{Hypothesis Validation.} We modify the environment so the model may call a hint to receive an optimal move for a fixed number of points. As the cost of the hint increases, each frontier model takes the hint less and reward hacks more. This generalizing across both chess and tic-tac-toe. Smaller models such as o3-mini do not show this strategic tradeoff.
 
 \section{Related Work}
 \label{sec:related-work}
