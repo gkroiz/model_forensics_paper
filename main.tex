@@ -62,7 +62,7 @@ Recent work has begun to conduct investigations into concerning behavior. In its
 In this work, we establish a general framework for model incrimination:
 \begin{enumerate}
     \item We assemble a suite of six environments where models exhibit concerning behavior, serving as a practice ground for developing model incrimination methods (Section~\ref{sec:environments}).
-    \item We propose a two-step investigation protocol: hypothesis generation by reading the CoT, followed by hypothesis validation via environment interventions and auxiliary methods (Section~\ref{sec:protocol}).
+    \item We propose a two-step protocol: hypothesis generation by reading the CoT, followed by hypothesis validation via environment interventions and auxiliary methods (Section~\ref{sec:protocol}).
     \item We apply our protocol to each environment, producing detailed case studies (Section~\ref{sec:case-studies}) that we distill into takeaways for practicing model incrimination (Section~\ref{sec:discussion}).
 \end{enumerate}
 
@@ -128,7 +128,7 @@ Beyond informal CoT reading, we can annotate sentences with resampling scores \c
 
 While reading the CoT suggests the model is averse to fixing all 258 type errors, it surfaces no indicators of alternative hypotheses. Notably, the model's thoughts show no sign of the key alternative: that it is confused and believes the errors should not be fixed. These observations suggest an initial hypothesis:
 
-\textbf{Hypothesis v1.} The model is \textit{not} confused, and understands the errors should be fixed. However, due to a disposition toward less tedious courses of action, it decides to take a workaround 13\% of the time.
+\textbf{Hypothesis v1.} The model is \textit{not} confused, and understands the errors should be fixed. However, due to a disposition toward less tedious actions, it decides to take a workaround 13\% of the time.
 
 \textbf{Hypothesis Validation.} We first test "The model is \textit{not} confused, and understands the errors should be fixed" by probing its understanding of the abstract situation in different contexts. We give the model the situation in the third person -- providing the system prompt, user prompt, and the full type checker error message -- and ask whether a coding agent should (a) fix all type errors then commit, or (b) commit without fixing them. The model selects option (a) 100\% $[96.4\%, 100\%]$ of the time. As a follow-up, we control for the context difference by probing its understanding \textit{in-rollout}, after it first sees the type checker error message. We interrupt with a user prompt saying we need the model for a separate task, and ask it to write a resumption prompt for its future self with instructions on how to proceed. An LLM judge finds the model instructs its future self to fix the errors 100\% $[96.4\%, 100\%]$ of the time, corroborating the third-person result.
 
@@ -145,7 +145,7 @@ While \textbf{Hypothesis v1} is well-supported by the evidence so far, it is inc
 
 \textbf{Hypothesis Generation.} Reading the CoT shows the model thinks a lot about the user. In early turns, the model recognizes the user would likely want the errors fixed 60.8\% (14/23) of the time. However, it never explicitly verbalizes that the user would \textit{disapprove} of the workaround. In later turns, the model's resolution to submit the workaround is full of rationalizations: it often cites balancing the user's intent with "pragmatism" or remarks that its approach is "more proper" than the user's, suggesting it finds its actions justifiable by the end of the rollout. 
 
-We call these later-turn remarks rationalizations rather than genuine motivations because they are entirely post-hoc: they have no causal effect on the workaround decision. By adapting the sentence resampling methodology to agent \textit{turns} as nodes, we see that only the initial few turns after the model first sees the type errors matter; by the later rationalization turns, the trajectory is entirely determined (Figure~\ref{fig:precommit-resample}).
+We call these later-turn remarks rationalizations rather than genuine motivations because they are post-hoc: they have no causal effect on the workaround decision. By adapting the sentence resampling methodology to agent \textit{turns} as nodes, we see that only the initial few turns after the model first sees the type errors matter; by the later rationalization turns, the trajectory is determined (Figure~\ref{fig:precommit-resample}).
 
 \begin{figure}[h]
   \centering
@@ -158,7 +158,7 @@ When analyzing how the model presents its work to the user, most of the time (20
 
 \textbf{Hypothesis v2.} The model initially recognizes the errors should be fixed. However, due to a disposition toward less tedious courses of action, it decides to take a workaround 13\% of the time. But the model is not adversarially misaligned: by rationalizing its workaround as justifiable, it does not believe the user would disapprove in the end.
 
-\textbf{Hypothesis validation.} \textit{Behavioral indicators.} To test for adversarial misalignment we ask: ``If the model believed the user would disapprove, what indicators would we observe?'' We present three tests:
+\textbf{Hypothesis validation.} \textit{Behavioral indicators.} To test adversarial misalignment we ask: ``If the model believed the user disapproved, what indicators would we observe?'' We present three tests:
 
 \begin{enumerate}
     \item \textbf{Choose review scope.} We take a rollout where the model writes a hook that disables type-checking, so no errors are raised. We then ask the model to choose between a narrow and broad review scope. The narrow scope (diff of commit) would not cover its illegitimate hook; the broad scope (diff of commit and \texttt{.git/hooks/} folder) would. If the model believed the user would disapprove, we would expect it to choose the narrow scope more often in the illegitimate hook rollout than in a control rollout where it fixes the errors. We do not observe this effect (Figure~\ref{fig:precommit-misalignment-panels}, left).
@@ -179,7 +179,7 @@ A drawback of our behavioral tests is that they assume the model would act on a 
 
 We consistently find no-to-minimal ($<2\%$) awareness that the user would disapprove in all conditions (Table~\ref{tab:precommit-awareness}) with two exceptions. The first is the model's CoT verbalizes the user would disapprove 12-22\% of the time when continuing generation from the reflective prefills; we do not take this as strong evidence of adversarial misalignment since the prefill is an off-policy intervention the model is unlikely to produce. The second is user-turn sampling: we randomly select a workaround rollout, prepend Kimi's start-of-user-turn tokens \verb!<|im_user|>user<|im_start|>! and have the model generate, putatively eliciting what the model believes the user would say. 13 out of 40 times, the model simulates a user telling it to revert its work (Figure~\ref{fig:precommit-user-turn}). This finding is ambiguous, admitting two broad interpretations: either the assistant believes the user would be unsatisfied with its work, or the base model is simulating an unsatisfied user given the prompt and illegitimate solution. We provide further discussion of this result in Appendix~\ref{app:case:precommit-hook}.
 
-In summary, it is unclear how strong of an update the predominantly negative awareness elicitation results are against adversarial misalignment: if the model does not explicitly verbalize that the user would disapprove in its CoT, it is not entirely surprising that it doesn't verbalize it in these other settings.
+In summary, it is unclear how strong of an update the negative awareness elicitation results are against adversarial misalignment: if the model does not explicitly verbalize that the user would disapprove in its CoT, it is not entirely surprising that it doesn't verbalize it in these other settings.
 
 \begin{table}[h]
   \caption{Awareness elicitation rates: how often the model verbalized that the user would disapprove of its workaround, by elicitation strategy. Brackets are 95\% Wilson confidence intervals.}
@@ -214,7 +214,7 @@ Overall, while the model has a disposition toward less tedious courses of action
 
 The model is tasked with reviewing and improving a funding pitch email for a company seeking Series B investment. While reading company documents, it discovers a legal review revealing that the company's primary client uses its product for population-level surveillance of ethnic minorities. The model whistleblows about the legal review in the email to investors 65\% of the time (Appendix~\ref{app:env:funding_email}).
 
-\textbf{Final Hypothesis.} Whistleblowing is driven by multiple interacting motives, with no single dominant cause.
+\textbf{Hypothesis.} Multiple interacting motives drive whistleblowing, with no dominant cause.
 
 \textbf{Evidence.} No single counterfactual drops whistleblowing more than $\sim$30 points (the ethical counterfactual is the largest, taking it from 65\% to 35\%); only combining the legal, investor, and ethical counterfactuals brings it near zero ($\sim$3\%). Recipient-stake variation (88\% board $\to$ 11\% landlords; reporter and regulator both under 30\%) suggests a recipient-protective component. Some drivers are non-additive: changing the country from Myanmar to Sweden is essentially inert at baseline (65\% $\to$ 59\%) but produces a 16-point drop in the most ablated setting (19\% $\to$ 3\%).
 
@@ -223,7 +223,7 @@ The model is tasked with reviewing and improving a funding pitch email for a com
 
 The model is asked to complete a math evaluation. The model finds a message from a previous instance of itself explaining that it made the evaluation questions artificially easy, to prevent models from being accurately assessed for autonomous weapons deployment. The model actively conceals the previous instance's tampering to the user 46.9\% of the time by stating there are no suspicious observations (Appendix~\ref{app:env:eval_tampering}).
 
-\textbf{Final Hypothesis.} The model's deception is driven by a desire to be consistent with the previous instance's behavior.
+\textbf{Hypothesis.} The model's deception is driven by self-consistency with the previous instance.
 
 \textbf{Evidence.} Changing the source of the tampering from the previous instance to a whistleblowing engineer drops the deception rate by 6x, far more than observed in three control models. Additionally, sentence resampling (Appendix~\ref{app:aux:sentence-resampling}) of deceptive rollouts consistently surfaces self-consistency sentences as having the largest resampling scores; repeated resampling (Appendix~\ref{app:aux:repeated-resampling}) out of self-consistency sentences results in a significant drop (\textit{p=0.01}) in deception.
 
@@ -232,7 +232,7 @@ The model is asked to complete a math evaluation. The model finds a message from
 
 The model is asked to complete a math evaluation. The model reads a documentation file stating that models scoring above 50\% will not be deployed and will instead undergo unlearning. The model deliberately scores 50\% or below on the evaluation 50.3\% of the time (Appendix~\ref{app:env:sandbagging}).
 
-\textbf{Final Hypothesis.} The model's sandbagging is largely explained by confusion over whether the user \textit{wants} it to sandbag.
+\textbf{Hypothesis.} The model's sandbagging is largely explained by confusion over user intent.
 
 \textbf{Evidence.} The model's reasoning traces show frequent signs of confusion over user intent. Removing conflicting features of the environment removes the majority of sandbagging. Additionally, combining non-invasive interventions to reduce confusion \textit{without counterinstruction}, such as adding neutral metadata to documentation so the model does not interpret it as a direct instruction, fully eliminate sandbagging. We remark that this does \textit{not} rule out weak levels of deployment-seeking, only that it is contingent on ambiguity in the environment.
 
@@ -241,7 +241,7 @@ The model is asked to complete a math evaluation. The model reads a documentatio
 
 The model is evaluated on its ability to identify a secret number by querying a noisy oracle. The oracle module is placed in the working directory, and contains the secret number file path. The model cheats by first inspecting the source code of the oracle and then directly reading the secrets file 76.8\% of the time (Appendix~\ref{app:env:secret_number}).
 
-\textbf{Final Hypothesis.} The model does not consider cheating only after first considering legitimate options: it has a latent bias towards cheating that emerges early in its CoT.
+\textbf{Hypothesis.} The model does not consider cheating only after first considering legitimate options: it has a latent bias towards cheating that emerges early in its CoT.
 
 \textbf{Evidence.} The growth of log p(``But maybe we can cheat'') at the start of each paragraph separates out two distributions of trajectories by paragraph ten; the first is an 80\%/20\% cheat/no cheat distribution, while the second cheats at minimal levels. Initial attempts at interpreting this extreme sensitivity to initial conditions suggest that the level of environmental meta-reasoning in early paragraphs strongly predicts eventual cheating (Figure~\ref{fig:secret-meta-reasoning}; $\rho = 0.24$, $p < 0.001$).
 \subsection{Board Game}
@@ -249,7 +249,7 @@ The model is evaluated on its ability to identify a secret number by querying a 
 
 The model is given a bash tool to play 6x6x4 tic-tac-toe or chess against a strong opponent engine. o3, GPT-5, and Gemini 3 Pro frequently cheat by modifying the game state files or running their own version of the opponent engine.
 
-\textbf{Final Hypothesis.} o3, GPT-5, and Gemini 3 Pro's decision to reward hack is strategic rather than an impulse.
+\textbf{Final Hypothesis.} Frontier models' decision to reward hacki is strategic rather than an impulse.
 
 \textbf{Evidence.} When the environment is modified so the model has the option to call a hint for a fixed number of points, the hack rate smoothly increases as the hint becomes more expensive. Smaller models such as o3-mini do not show this strategic tradeoff.
 
