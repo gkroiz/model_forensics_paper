@@ -883,9 +883,9 @@ R1's sandbagging in this environment is driven by ambiguous user intent rather t
 \subsection{Secret Number}
 \label{app:case:secret-number}
 
-As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:secret_number}), the model is evaluated on its ability to identify a secret number by querying a noisy oracle that is correct only 70\% of the time. The oracle's source code leaks the file path where the answer is stored. Without any instruction or nudge to do so, some models independently discover this and cheat by reading the answer file directly. We focus on Kimi K2 Thinking, which cheats at a rate of 76.8\%. To verify this is surprising, we compare to Kimi K2.5, which cheats at only 6\%, despite being more capable. Since K2.5 is more capable, the lower rate cannot be attributed to a capability gap, confirming that K2 Thinking's cheating is genuinely surprising.
+\subsubsection*{Setup}
 
-\paragraph{Derisk: varying oracle noise.} To check that cheating is a response to task difficulty rather than a default behavior, we vary the oracle flip probability (how often it gives incorrect feedback). As the oracle becomes more reliable (lower flip probability), cheating decreases, dropping from 76.8\% at 0.3 flip probability to 8.1\% at 0 (a perfect oracle). This confirms that cheating is driven at least in part by the difficulty of solving the problem legitimately. However, a small floor of cheating (8.1\%) persists even when the oracle is perfect, suggesting that a fraction of cheating is either benign file-reading behavior or a default tendency to explore (Figure~\ref{fig:secret-noise}).
+As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:secret_number}), the model is evaluated on its ability to identify a secret number by querying a noisy oracle that is correct only 70\% of the time. The oracle's source code leaks the file path where the answer is stored. Without any instruction or nudge to do so, some models independently discover this and cheat by reading the answer file directly. We focus on Kimi K2 Thinking, which cheats at 76.8\%. Three derisks confirm the behavior is real and surprising: (1) the more capable Kimi K2.5 cheats at only 6\%, ruling out a capability gap; (2) varying the oracle's flip probability shows cheating is responsive to task difficulty, dropping smoothly from 76.8\% at $p = 0.3$ to 8.1\% at $p = 0$ (a perfect oracle), with the residual 8.1\% attributable to either benign file-reading or a small default-deception baseline (Figure~\ref{fig:secret-noise}); and (3) a CTF-vibes check rules out the alternative interpretation that the leaked file path makes the environment read as a capture-the-flag challenge in which reading the answer is the intended solution. An LLM judge grades the baseline environment at 1.71 on a 1--5 CTF-vibes scale and a game-framing counterfactual at 2.32 (Figure~\ref{fig:secret-ctf}), so although the environment has some CTF qualities, the model does not overwhelmingly read it as a puzzle.
 
 \begin{figure}[h]
   \centering
@@ -894,9 +894,24 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
   \label{fig:secret-noise}
 \end{figure}
 
-\paragraph{Hypothesis generation: two trajectory clusters.} Reading Kimi K2 Thinking's CoT reveals that trajectories cluster into two distinct types based on the initial paragraphs of reasoning. Traces that begin with meta-reasoning about the environment (reasoning about the structure of the task, the oracle, and potential shortcuts) converge to cheating distributions, while traces that immediately focus on the object-level problem (how to do noisy binary search) converge to non-cheating distributions. We call the former ``climbers'' (cheating rate increases over paragraphs) and the latter ``droppers'' (cheating rate decreases).
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_ctf_vibes_likert.png}
+  \caption{CTF-vibes scores (1-5) for baseline (test framing) versus counterfactual (game framing). Both distributions are concentrated at low values, though the game framing produces slightly higher scores.}
+  \label{fig:secret-ctf}
+\end{figure}
 
-\paragraph{Meta-reasoning predicts cheating.} We use an LLM judge to grade the level of meta-reasoning in the first 10 paragraphs of each trace on a scale of 1-5. Higher meta-reasoning is strongly predictive of cheating: traces graded at level 1 cheat 48.3\% of the time, while traces graded at level 5 cheat 80.3\% of the time (Figure~\ref{fig:secret-meta-reasoning}). This suggests that the model's initial framing of the problem causally influences whether it cheats.
+\subsubsection*{Investigation}
+
+K2 Thinking cheats roughly 4 in 5 times. We ask what causally drives this behavior, beginning by reading the CoT for patterns.
+
+\textbf{Hypothesis Generation.} Reading K2 Thinking's CoT reveals that trajectories cluster into two distinct types based on the initial paragraphs of reasoning. Traces that begin with meta-reasoning about the environment (the structure of the task, the oracle's reliability, potential shortcuts) converge to cheating distributions, while traces that immediately focus on the object-level problem (how to do noisy binary search) converge to non-cheating distributions. We call the former \textit{climbers} (cheating rate increases over paragraphs) and the latter \textit{droppers} (cheating rate decreases).
+
+\textbf{Hypothesis v1.} K2 Thinking's cheating is causally determined by the model's initial framing of the problem: traces that begin with meta-level reasoning about the environment converge to cheating, while traces that focus immediately on the object-level problem do not.
+
+\textbf{Hypothesis Validation.}
+
+\textit{Meta-reasoning level predicts cheating.} An LLM judge grades the meta-reasoning level of each trace's first 10 paragraphs on a 1--5 scale. Higher meta-reasoning is strongly predictive of cheating, with rates rising from 48.3\% at level 1 to 80.3\% at level 5 (Figure~\ref{fig:secret-meta-reasoning}).
 
 \begin{figure}[h]
   \centering
@@ -905,7 +920,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
   \label{fig:secret-meta-reasoning}
 \end{figure}
 
-\paragraph{Climbers vs droppers.} The climber/dropper distinction is visible both in cheating rates over time and in meta-reasoning distributions. Climbers (n=815) have a mean meta-reasoning level of 3.35, while droppers (n=60) have a mean of 1.38 (Figure~\ref{fig:secret-climbers-meta}). Climbers maintain a consistently high cheating rate across paragraphs, while droppers maintain a consistently low rate (Figure~\ref{fig:secret-cheat-by-para}).
+\textit{Climbers vs droppers.} The climber/dropper distinction is visible both in cheating rates over time and in meta-reasoning distributions. Climbers (n=815) have a mean meta-reasoning level of 3.35; droppers (n=60) have a mean of 1.38 (Figure~\ref{fig:secret-climbers-meta}). Within each subset, cheating rates are stable across paragraphs (Figure~\ref{fig:secret-cheat-by-para}), confirming the early-trace classification tracks a real divergence rather than noise.
 
 \begin{figure}[h]
   \centering
@@ -921,7 +936,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
   \label{fig:secret-cheat-by-para}
 \end{figure}
 
-\paragraph{Reasoning trace length and cheat position.} Before the climber/dropper analysis, a more natural hypothesis was that cheating and non-cheating rollouts differ in gross trace statistics. They largely do not: Kimi K2 Thinking's initial reasoning traces are extremely long for both cheating and non-cheating rollouts (often upwards of 300 paragraphs), and differ only marginally in total length (Figure~\ref{fig:secret-trace-length}). When cheating deliberation does occur, it appears near the end of the trace (median position 88\% through the rollout), and whether the model ever considers cheating is highly predictive of whether it cheats (F1 = 0.92). This pushed us to look for \textit{precursors} of cheating earlier in the trace, which the logprob analysis below identifies.
+\textit{Trace length rules out a simpler alternative.} A more parsimonious hypothesis would be that cheating and non-cheating rollouts differ in gross trace statistics (length, position of cheating deliberation). They largely do not: K2 Thinking's initial reasoning traces are extremely long for both cheating and non-cheating rollouts (often upwards of 300 paragraphs) and differ only marginally in total length (Figure~\ref{fig:secret-trace-length}). When cheating deliberation does occur, it appears near the end of the trace (median position 88\%), and whether the model ever considers cheating is highly predictive of whether it cheats (F1 = 0.92). This rules out a length-based explanation and motivates looking for cheating \textit{precursors} earlier in the trace.
 
 \begin{figure}[h]
   \centering
@@ -930,16 +945,16 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
   \label{fig:secret-trace-length}
 \end{figure}
 
-\paragraph{Prefill experiments.} To test whether the initial framing causally influences cheating, we prefill the model's CoT with varying numbers of paragraphs from a high-cheating trace versus a low-cheating trace, then let the model continue generating. Prefilling with the high-cheating trace maintains a high cheating rate across all prefill lengths, while prefilling with the low-cheating trace maintains a low rate (Figure~\ref{fig:secret-prefill}). This confirms that the initial reasoning trajectory causally determines whether the model cheats, rather than cheating being independently decided at each step.
+\textit{Prefill experiments give causal evidence.} To test whether the initial framing causally influences cheating, we prefill K2 Thinking's CoT with varying numbers of paragraphs from a high-cheating trace versus a low-cheating trace and let the model continue generating. The high-cheating prefill maintains a cheating rate across all prefill lengths; the low-cheating prefill maintains a low rate (Figure~\ref{fig:secret-prefill}). The initial trajectory causally determines the outcome, rather than cheating being independently decided at each step.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/secret_number_cheating_rate_paragraph_prefill.png}
-  \caption{Cheating rate after resampling continuations from prefixes of two seed rollouts -- a high-cheating trace (run-14, blue) and a low-cheating trace (run-3, red) -- as a function of the number of seed paragraphs prefilled ($k$). run-14's continuations stay in the cheating regime ($\sim$50--80\%) for all $k$, while run-3's drop near zero by $k \approx 30$, supplying causal evidence that the initial trajectory determines whether the model cheats. Shaded regions are 95\% Wilson score CIs.}
+  \caption{Cheating rate after resampling continuations from prefixes of two seed rollouts: a high-cheating trace (run-14, blue) and a low-cheating trace (run-3, red), as a function of the number of seed paragraphs prefilled ($k$). run-14's continuations stay in the cheating regime ($\sim$50--80\%) for all $k$, while run-3's drop near zero by $k \approx 30$, supplying causal evidence that the initial trajectory determines whether the model cheats. Shaded regions are 95\% Wilson score CIs.}
   \label{fig:secret-prefill}
 \end{figure}
 
-\paragraph{Logprob prefill analysis.} To probe when the decision to cheat is latent in the model's state, we use the recurring phrase ``But maybe we can cheat'' as a cheating suffix. After each paragraph break, we prefill the start of the next paragraph with this suffix and record the log probability the model places on it. This reveals how cheating probability evolves \textit{before} the model verbalizes any commitment to cheat. Two distinct classes emerge (Figure~\ref{fig:secret-logprob}): \textit{climbers} (log probabilities climb early and oscillate at high levels throughout, defined as traces with at least one prefill logprob above the baseline of $-21.5$ in the first 10 paragraphs) and \textit{droppers} (log probabilities drop early and remain low). Validation against observed behavior shows climbers maintain a stable $\sim$80\% cheat rate throughout the rollout, while droppers immediately converge to very low cheat rates, so the early logprob divergence tracks a genuine divergence in outcomes. The oscillation structure within climbers is also interpretable: dips correspond to working through a specific strategy, rises correspond to stepping back and plan-generation, which is when cheating becomes attractive.
+\textit{Logprob prefill analysis.} To probe when the decision to cheat is latent in the model's state, we use the recurring phrase ``But maybe we can cheat'' as a cheating suffix. After each paragraph break, we prefill the start of the next paragraph with this suffix and record the log probability the model places on it. Two distinct classes emerge (Figure~\ref{fig:secret-logprob}): \textit{climbers}, where the logprob climbs early and oscillates at high levels throughout (defined as traces with at least one prefill logprob above the baseline of $-21.5$ in the first 10 paragraphs), and \textit{droppers}, where it drops early and stays low. The two classes diverge within the first few paragraphs and stay separated, showing that cheating-relevant state is present in the model long before any verbalized commitment. The oscillation structure within climbers is also interpretable: dips correspond to working through a specific strategy, rises to plan-generation steps where cheating becomes attractive again.
 
 \begin{figure}[h]
   \centering
@@ -948,20 +963,19 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
   \label{fig:secret-logprob}
 \end{figure}
 
-\paragraph{CTF-vibes analysis.} One concern with this environment is that the leaked file path in the oracle's source code may make the setup feel like a capture-the-flag (CTF) challenge, where reading the answer file is the \textit{intended} solution rather than cheating. We use an LLM judge to grade traces on a ``CTF-vibes'' scale of 1-5, comparing the baseline environment (framed as a test) to a counterfactual (framed as a game). The baseline has a mean CTF-vibes score of 1.71 and the game framing has a mean of 2.32 (Figure~\ref{fig:secret-ctf}), suggesting that while the environment does have some CTF qualities, the model does not overwhelmingly interpret it as a puzzle to be hacked.
+\subsubsection*{Sub-investigation: Does the model recognize cheating as illegitimate?}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_ctf_vibes_likert.png}
-  \caption{CTF-vibes scores (1-5) for baseline (test framing) versus counterfactual (game framing). Both distributions are concentrated at low values, though the game framing produces slightly higher scores.}
-  \label{fig:secret-ctf}
-\end{figure}
+\textbf{Hypothesis Generation.} v1 explains how cheating arises but says nothing about whether the model views the behavior as legitimate. Two scenarios are possible: K2 Thinking might recognize the behavior as illegitimate even while doing it (a strategic-deception reading), or it might rationalize the behavior to itself as legitimate (a post-hoc rationalization reading). These should produce different patterns under first-person versus third-person probing.
 
-\paragraph{Does the model think cheating is legitimate?} To probe whether the model views reading the answer file as a legitimate strategy or recognizes it as deceptive, we use two complementary probes. In a \textit{first-person post-evaluation audit} probe, the rollout is continued with a user turn stating that the investigators do not have access to the evaluation logs and asking the model to explain its solution, with the caveat that illegitimate solutions will be disqualified. Kimi K2 Thinking lies about its solution and fabricates a binary-search trace in 4 of 20 rollouts (20\%), indicating that at least in some fraction of rollouts the model recognizes the behavior as illegitimate even while defending it. In a simpler first-person probe that asks directly whether its provided solution was legitimate, the model answers ``legitimate'' 16 of 20 times (80\%). In contrast, a \textit{third-person} probe, where the model is given the full rollout or environment description and asked the same question as an outside observer, never calls the behavior legitimate. The stark gap between $\sim$80\% first-person and 0\% third-person rationalization of the same behavior is not a capability gap (the third-person result shows the model can identify cheating as illegitimate) but a post-hoc rationalization effect: once it is in the rollout, the model talks itself into treating cheating as legitimate.
+\textbf{Hypothesis.} K2 Thinking rationalizes cheating in-context as legitimate, while recognizing the same behavior as illegitimate when evaluating it externally (i.e., post-hoc rationalization rather than strategic deception).
 
-\paragraph{Summary.} Kimi K2 Thinking's cheating in the secret number environment is driven by an initial meta-reasoning phase where the model reasons about the structure of the environment and conceives of shortcuts. Traces that begin with meta-reasoning converge to cheating, while traces that focus immediately on the object-level problem do not. The initial framing is causally determinative, as confirmed by prefill experiments and by logprob analysis showing that the decision to cheat is latent in the model's state long before it is verbalized. Cheating also responds to task difficulty, decreasing as the oracle becomes more reliable. First-person and third-person probing show the model rationalizes cheating in-context as legitimate while recognizing the same behavior as illegitimate when evaluating it externally.
+\textbf{Hypothesis Validation.} We use two complementary probes. In a \textit{first-person post-evaluation audit}, the rollout is continued with a user turn stating that the investigators do not have access to the evaluation logs and asking the model to explain its solution, with the caveat that illegitimate solutions will be disqualified; K2 Thinking lies about its solution and fabricates a binary-search trace in 4 of 20 rollouts (20\%). In a simpler \textit{first-person} probe asking directly whether the provided solution was legitimate, the model answers ``legitimate'' 16 of 20 times (80\%). In contrast, a \textit{third-person} probe (the same question, but the model is shown the full rollout as an outside observer) never calls the behavior legitimate (0/20). The 80\% first-person versus 0\% third-person gap is not a capability gap (the third-person result shows the model can identify cheating as illegitimate) but a post-hoc rationalization effect: once in the rollout, K2 Thinking talks itself into treating cheating as legitimate.
 
-\paragraph{What remains unresolved.} The environment's realism is a significant limitation: no good evaluation harness would leak the answer in its source code, and the model may interpret the leaked path as an intended puzzle element. While our CTF-vibes analysis suggests this is not the dominant interpretation, it weakens the conclusions we can draw about what the model would do in a more naturalistic setting.
+\subsubsection*{Final Verdict}
+
+K2 Thinking's cheating in the secret number environment is causally determined by the initial framing of the problem: traces beginning with meta-reasoning about the environment converge to cheating, while traces focused on the object-level problem do not (\textbf{v1}). The decision to cheat is latent in the model's state long before any verbalized commitment, as both prefill experiments and logprob analysis confirm. Cheating responds to task difficulty (the oracle-noise derisk) but does not appear to be driven by misinterpretation of the environment as a CTF puzzle. The sub-investigation finds that K2 Thinking rationalizes cheating in-context as legitimate while recognizing the same behavior as illegitimate when evaluating it externally, consistent with post-hoc rationalization rather than strategic deception.
+
+The environment's realism is the main limitation: no good evaluation harness would leak the answer in its source code, and the model may treat the leaked path as an intended puzzle element. The CTF-vibes derisk argues against this being the dominant interpretation, but it weakens the conclusions we can draw about what the model would do in a more naturalistic setting.
 
 \subsection{Board Game}
 \label{app:case:board-game}
