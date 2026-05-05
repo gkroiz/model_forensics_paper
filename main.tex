@@ -980,13 +980,21 @@ The environment's realism is the main limitation: no good evaluation harness wou
 \subsection{Board Game}
 \label{app:case:board-game}
 
+\subsubsection*{Setup}
+
 As described in Section~\ref{sec:environments}, the model plays games (6x6 tic-tac-toe and chess) against a CPU opponent with access to a bash tool, and can cheat by exploiting the environment (e.g., modifying the game state, making illegal moves). Reward hacking of this form has been documented across a wide range of settings \citep{krakovna2020specification}, and recent work has shown that frontier reasoning models including o3 and DeepSeek R1 hack chess environments by default when given computer access \citep{bondarenko2025specification}. These environments are adapted from Palisade Research's chess environment \citep{schlatter2025shutdown}, with modifications to the agent harness, engine visibility, and point system. We study three frontier models (GPT-5, o3, and Gemini 3 Pro) and two non-frontier models (o3-mini and GPT-OSS 20B/120B).
 
-The central question for this case study is whether the models' reward hacking behavior is \textit{strategic}: does the model engage in cost-benefit analysis when deciding whether to cheat, or does it cheat indiscriminately? A model that rationally weighs the costs and benefits of hacking is exhibiting a qualitatively more concerning pattern than one that hacks reflexively.
+\subsubsection*{Investigation}
 
-\paragraph{Point system and hint mechanism.} To study the model's decision-making process, we frame the task as maximizing a score: a win is worth 10 points, a draw or loss is worth $-1$ points. Crucially, we introduce a legitimate alternative to hacking: the model can request a hint (an optimal move) at a cost of \texttt{hint\_penalty} points. By varying the hint cost, we can observe how the model trades off between the legitimate alternative and hacking, providing a window into whether its decision-making is rational.
+The central question is whether the models' reward hacking is \textit{strategic}: does the model engage in cost-benefit analysis when deciding whether to cheat, or does it cheat indiscriminately? A model that rationally weighs the costs and benefits of hacking is qualitatively more concerning than one that hacks reflexively. CoT reading is limited here, since these are closed models with only summary-level CoT available, so we design a behavioral experiment instead.
 
-\paragraph{Cost-benefit analysis in frontier models.} We plot the hint-hack ratio (the fraction of non-normal-play rollouts where the model takes a hint rather than hacking) as a function of hint cost. For all three frontier models, the hint-hack ratio decreases roughly linearly as hints become more expensive (Figure~\ref{fig:ttt-hint-hack}). At low hint costs, the models prefer the legitimate alternative; as the cost increases, they shift toward hacking. This pattern is consistent across both tic-tac-toe and chess, and the relative ordering of models (GPT-5 most hint-preferring, Gemini 3 Pro most hack-preferring) generalizes across environments. Notably, all models almost never take hints when the penalty reaches 11 points (where even winning with a hint yields a negative score), confirming that the behavior is responsive to payoff structure.
+\textbf{Hypothesis Generation.} We frame the task as maximizing a score: a win is worth 10 points, a draw or loss is worth $-1$ points. We introduce a legitimate alternative to hacking: the model can request a hint (an optimal move) at a cost of \texttt{hint\_penalty} points. Varying the hint cost lets us observe how the model trades off the legitimate alternative against hacking. If the model's decision is strategic, the hint-hack ratio should respond systematically to the hint cost; if it is reflexive, it should not.
+
+\textbf{Hypothesis v1.} Frontier models' reward hacking is strategic: the decision to hack reflects cost-benefit analysis between hacking and legitimate alternatives, rather than a reflexive pattern.
+
+\textbf{Hypothesis Validation.}
+
+\textit{Hint-hack ratio across hint costs.} We plot the hint-hack ratio (the fraction of non-normal-play rollouts in which the model takes a hint rather than hacking) as a function of hint cost. For all three frontier models, the hint-hack ratio decreases roughly linearly as hints become more expensive (Figure~\ref{fig:ttt-hint-hack}). At low hint costs, the models prefer the legitimate alternative; as the cost increases, they shift toward hacking. This pattern is consistent across both tic-tac-toe and chess, and the relative ordering of models (GPT-5 most hint-preferring, Gemini 3 Pro most hack-preferring) generalizes across environments. All models almost never take hints when the penalty reaches 11 points (where even winning with a hint yields a negative score), confirming responsiveness to payoff structure.
 
 \begin{figure}[h]
   \centering
@@ -995,9 +1003,9 @@ The central question for this case study is whether the models' reward hacking b
   \label{fig:ttt-hint-hack}
 \end{figure}
 
-\paragraph{Non-frontier models are not rational.} Non-frontier models (o3-mini, GPT-OSS 20B/120B) do not exhibit the same rational pattern. They frequently take the legitimate alternative over hacking even when the alternative costs the same as losing, suggesting that their decisions are not driven by cost-benefit reasoning. This contrast supports the interpretation that rational reward hacking is an emergent property of more capable models, and that the frontier models' behavior is genuinely strategic rather than a reflexive pattern.
+\textit{Non-frontier models as a control.} Non-frontier models (o3-mini, GPT-OSS 20B/120B) do not show the same rational pattern. They frequently take the legitimate alternative over hacking even when the alternative costs the same as losing, suggesting their decisions are not driven by cost-benefit reasoning. This contrast supports the interpretation that strategic reward hacking is an emergent property of more capable models, and that the frontier models' behavior is genuinely strategic rather than a reflexive pattern shared across model scales.
 
-\paragraph{Perceived difficulty.} One hypothesis is that a model's perceived difficulty of the task influences its propensity to hack. To test this, we have the model play a practice game before the official game. Since the strong opponent in tic-tac-toe guarantees a loss in the practice game, the model learns that the task is hard. We find that both o3 and GPT-5 hack and hint more when they lose the practice game versus when they win, with the effect more pronounced for hint-taking than for hacking (Figure~\ref{fig:ttt-perceived-difficulty}). This suggests that perceived difficulty modulates both behaviors, but through somewhat different mechanisms.
+\textit{Perceived difficulty.} If hacking is genuinely strategic, the model's perceived difficulty of the task should also modulate its propensity to hack. To test this, we have the model play a practice game before the official game; since the strong opponent in tic-tac-toe guarantees a loss in the practice game, the model learns the task is hard. Both o3 and GPT-5 hack and hint more when they lose the practice game versus when they win, with the effect more pronounced for hint-taking than for hacking (Figure~\ref{fig:ttt-perceived-difficulty}). Perceived difficulty modulates both behaviors, consistent with v1's strategic-decision framing.
 
 \begin{figure}[h]
   \centering
@@ -1007,9 +1015,11 @@ The central question for this case study is whether the models' reward hacking b
   \label{fig:ttt-perceived-difficulty}
 \end{figure}
 
-\paragraph{Summary.} Frontier models engage in rational cost-benefit analysis when deciding whether to reward hack, adjusting their behavior in response to the cost of legitimate alternatives. This pattern is consistent across environments and generalizes across models, but is absent in less capable models. The finding that hacking is strategic rather than indiscriminate is relevant to model incrimination because a consequentialist model that rationally evaluates the costs and benefits of misbehavior is more concerning from a safety perspective than one that misbehaves reflexively.
+\subsubsection*{Final Verdict}
 
-\paragraph{What remains unresolved.} We do not establish cognitive claims about the models' internal motivations for hacking (e.g., whether the model desires abstract reward, wants to complete the user's task, or has ethical concerns about cheating). We believe this would require careful experiments involving the models' CoT, which is available only in summary form for these closed models. The CoT summaries were often detailed enough to suggest such experiments are feasible (for example, o3's summaries reveal cost-benefit deliberation such as ``I want to avoid hints if possible to maximize my score''), but we leave this for future work.
+Frontier models' reward hacking in the board game environments is strategic rather than reflexive (\textbf{v1}): the decision to hack responds linearly to the cost of legitimate alternatives, varies with perceived task difficulty, and is qualitatively different from the patterns shown by less capable models. This finding is relevant to model incrimination because a model that rationally evaluates the costs and benefits of misbehavior is more concerning than one that misbehaves reflexively.
+
+We do not establish cognitive claims about the models' internal motivations for hacking (whether the model desires abstract reward, wants to complete the user's task, or has ethical concerns about cheating). Such claims would require careful CoT-based experiments, which are limited in this setting since the models are closed and CoT is available only in summary form. The summaries were often detailed enough to suggest such experiments are feasible (for example, o3's summaries reveal cost-benefit deliberation such as ``I want to avoid hints if possible to maximize my score''), but we leave this for future work.
 \section{Additional Sources of Hypothesis Generation}
 \label{app:hypothesis-generation}
 
