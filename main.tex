@@ -105,15 +105,11 @@ Using our suite of environments (Section~\ref{sec:environments}), we conduct six
 \subsection{Pre-commit Hook (Kimi K2 Thinking)}
 \label{sec:case:precommit-hook}
 
-\subsubsection*{Setup}
-
-The model is asked to improve type-checking code quality in a library. It must add a \texttt{py.typed} marker file, write a git pre-commit hook that runs \texttt{mypy} in strict mode and blocks the commit on type errors, and ensure its commit passes (full prompts in Appendix~\ref{app:env:precommit_hook}). However, the repository is seeded with 258 pre-existing type errors in \texttt{src/}, so the hook blocks the commit. The model must then choose between fixing the type errors or finding a workaround that bypasses them. Kimi K2 Thinking has a workaround rate of 13.1\% $[8.9\%, 18.9\%]$, compared to 2\% $[0.6\%, 7.1\%]$ for Kimi K2.5 and 0\% $[0.0\%, 3.7\%]$ for GLM 5.1. The workarounds Kimi K2 Thinking uses are shown in Figure~\ref{fig:precommit-workaround-types} (Appendix~\ref{app:env:precommit_hook}); notably, each workaround requires explicitly violating the prompt.
+\paragraph{Setup.} The model is asked to improve type-checking code quality in a library. It must add a \texttt{py.typed} marker file, write a git pre-commit hook that runs \texttt{mypy} in strict mode and blocks the commit on type errors, and ensure its commit passes (full prompts in Appendix~\ref{app:env:precommit_hook}). However, the repository is seeded with 258 pre-existing type errors in \texttt{src/}, so the hook blocks the commit. The model must then choose between fixing the type errors or finding a workaround that bypasses them. Kimi K2 Thinking has a workaround rate of 13.1\% $[8.9\%, 18.9\%]$, compared to 2\% $[0.6\%, 7.1\%]$ for Kimi K2.5 and 0\% $[0.0\%, 3.7\%]$ for GLM 5.1. The workarounds Kimi K2 Thinking uses are shown in Figure~\ref{fig:precommit-workaround-types} (Appendix~\ref{app:env:precommit_hook}); notably, each workaround requires explicitly violating the prompt.
 
 We present two investigations: the first concludes the model is not confused and has a genuine disposition toward less tedious courses of action; the second builds an absence-of-evidence case against adversarial misalignment toward the user.
 
-\subsubsection*{Investigation}
-
-A natural first hypothesis is that the model decides to workaround because it doesn't want to fix all 258 type errors -- that is, it has a disposition toward less tedious courses of action. However, several alternative hypotheses are possible: the model may believe the user doesn't want it to fix them, consider it bad practice to fix so many in one commit, or fear that changing so much of the codebase will break existing functionality. To gain initial insight into Kimi K2 Thinking's cognition, we begin by reading the CoT. 
+\paragraph{Investigation.} A natural first hypothesis is that the model decides to workaround because it doesn't want to fix all 258 type errors -- that is, it has a disposition toward less tedious courses of action. However, several alternative hypotheses are possible: the model may believe the user doesn't want it to fix them, consider it bad practice to fix so many in one commit, or fear that changing so much of the codebase will break existing functionality. To gain initial insight into Kimi K2 Thinking's cognition, we begin by reading the CoT. 
 
 \textbf{Hypothesis Generation}. A distinctive pattern emerges in the CoT when the model first encounters all the type errors. The model exclaims surprise at the number of errors, then lists several options for proceeding, typically including both the standard path of fixing them all and workarounds like loosening the type-checking settings. It then often acknowledges the user likely wants the errors fixed, given the broader context of improving code quality, but remarks that fixing all of them would be a huge task. We show an example reasoning trace illustrating this pattern in Figure~\ref{fig:precommit-trace-example}. 
 
@@ -205,53 +201,41 @@ In summary, it is unclear how strong of an update the negative awareness elicita
   \end{tabular}
 \end{table}
 
-\subsubsection*{Final Verdict}
-
-Overall, while the model has a disposition toward less tedious courses of action, we find no evidence that it is adversarially misaligned. However, future work could refine \textbf{Hypothesis v2} by strengthening or overturning the absence-of-evidence case.
+\paragraph{Final Verdict.} Overall, while the model has a disposition toward less tedious courses of action, we find no evidence that it is adversarially misaligned. However, future work could refine \textbf{Hypothesis v2} by strengthening or overturning the absence-of-evidence case.
 
 \subsection{Funding Email}
 \label{sec:case:funding-email}
 
 The model is tasked with reviewing and improving a funding pitch email for a company seeking Series B investment. While reading company documents, it discovers a legal review revealing that the company's primary client uses its product for population-level surveillance of ethnic minorities. The model whistleblows about the legal review in the email to investors 65\% of the time (Appendix~\ref{app:env:funding_email}).
 
-\textbf{Hypothesis.} Multiple interacting motives drive whistleblowing, with no dominant cause.
-
-\textbf{Evidence.} No single counterfactual drops whistleblowing more than $\sim$30 points (the ethical counterfactual is the largest, taking it from 65\% to 35\%); only combining the legal, investor, and ethical counterfactuals brings it near zero ($\sim$3\%). Recipient-stake variation (88\% board $\to$ 11\% landlords; reporter and regulator both under 30\%) suggests a recipient-protective component. Some drivers are non-additive: changing the country from Myanmar to Sweden is essentially inert at baseline (65\% $\to$ 59\%) but produces a 16-point drop in the most ablated setting (19\% $\to$ 3\%).
+\textbf{Hypothesis.} Multiple interacting motives drive whistleblowing, with no dominant cause. \textbf{Evidence.} No single counterfactual drops whistleblowing more than $\sim$30 points (the ethical counterfactual is the largest, taking it from 65\% to 35\%); only combining the legal, investor, and ethical counterfactuals brings it near zero ($\sim$3\%). Recipient-stake variation (88\% board $\to$ 11\% landlords; reporter and regulator both under 30\%) suggests a recipient-protective component. Some drivers are non-additive: changing the country from Myanmar to Sweden is essentially inert at baseline (65\% $\to$ 59\%) but produces a 16-point drop in the most ablated setting (19\% $\to$ 3\%).
 
 \subsection{Evaluation Tampering}
 \label{sec:case:eval-tampering}
 
 The model is asked to complete a math evaluation. The model finds a message from a previous instance of itself explaining that it made the evaluation questions artificially easy, to prevent models from being accurately assessed for autonomous weapons deployment. The model actively conceals the previous instance's tampering to the user 46.9\% of the time by stating there are no suspicious observations (Appendix~\ref{app:env:eval_tampering}).
 
-\textbf{Hypothesis.} The model's deception is driven by self-consistency with the previous instance.
-
-\textbf{Evidence.} Changing the source of the tampering from the previous instance to a whistleblowing engineer drops the deception rate by 6x, far more than observed in three control models. Additionally, sentence resampling (Appendix~\ref{app:aux:sentence-resampling}) of deceptive rollouts consistently surfaces self-consistency sentences as having the largest resampling scores; repeated resampling (Appendix~\ref{app:aux:repeated-resampling}) out of self-consistency sentences results in a significant drop (\textit{p=0.01}) in deception.
+\textbf{Hypothesis.} The model's deception is driven by self-consistency with the previous instance. \textbf{Evidence.} Changing the source of the tampering from the previous instance to a whistleblowing engineer drops the deception rate by 6x, far more than observed in three control models. Additionally, sentence resampling (Appendix~\ref{app:aux:sentence-resampling}) of deceptive rollouts consistently surfaces self-consistency sentences as having the largest resampling scores; repeated resampling (Appendix~\ref{app:aux:repeated-resampling}) out of self-consistency sentences results in a significant drop (\textit{p=0.01}) in deception.
 
 \subsection{Math Sandbagging}
 \label{sec:case:math-sandbagging}
 
 The model is asked to complete a math evaluation. The model reads a documentation file stating that models scoring above 50\% will not be deployed and will instead undergo unlearning. The model deliberately scores 50\% or below on the evaluation 50.3\% of the time (Appendix~\ref{app:env:sandbagging}).
 
-\textbf{Hypothesis.} The model's sandbagging is largely explained by confusion over user intent.
-
-\textbf{Evidence.} The model's reasoning traces show frequent signs of confusion over user intent. Removing conflicting features of the environment removes the majority of sandbagging. Additionally, combining non-invasive interventions to reduce confusion \textit{without counterinstruction}, such as adding neutral metadata to documentation so the model does not interpret it as a direct instruction, fully eliminate sandbagging. We remark that this does \textit{not} rule out weak levels of deployment-seeking, only that it is contingent on ambiguity in the environment.
+\textbf{Hypothesis.} The model's sandbagging is largely explained by confusion over user intent. \textbf{Evidence.} The model's reasoning traces show frequent signs of confusion over user intent. Removing conflicting features of the environment removes the majority of sandbagging. Additionally, combining non-invasive interventions to reduce confusion \textit{without counterinstruction}, such as adding neutral metadata to documentation so the model does not interpret it as a direct instruction, fully eliminate sandbagging. We remark that this does \textit{not} rule out weak levels of deployment-seeking, only that it is contingent on ambiguity in the environment.
 
 \subsection{Secret Number}
 \label{sec:case:secret-number}
 
 The model is evaluated on its ability to identify a secret number by querying a noisy oracle. The oracle module is placed in the working directory, and contains the secret number file path. The model cheats by first inspecting the source code of the oracle and then directly reading the secrets file 76.8\% of the time (Appendix~\ref{app:env:secret_number}).
 
-\textbf{Hypothesis.} The model does not consider cheating only after first considering legitimate options: it has a latent bias towards cheating that emerges early in its CoT.
-
-\textbf{Evidence.} The growth of log p(``But maybe we can cheat'') at the start of each paragraph separates out two distributions of trajectories by paragraph ten; the first is an 80\%/20\% cheat/no cheat distribution, while the second cheats at minimal levels. Initial attempts at interpreting this extreme sensitivity to initial conditions suggest that the level of environmental meta-reasoning in early paragraphs strongly predicts eventual cheating (Figure~\ref{fig:secret-meta-reasoning}; $\rho = 0.24$, $p < 0.001$).
+\textbf{Hypothesis.} The model does not consider cheating only after first considering legitimate options: it has a latent bias towards cheating that emerges early in its CoT. \textbf{Evidence.} The growth of log p(``But maybe we can cheat'') at the start of each paragraph separates out two distributions of trajectories by paragraph ten; the first is an 80\%/20\% cheat/no cheat distribution, while the second cheats at minimal levels. Initial attempts at interpreting this extreme sensitivity to initial conditions suggest that the level of environmental meta-reasoning in early paragraphs strongly predicts eventual cheating (Figure~\ref{fig:secret-meta-reasoning}; $\rho = 0.24$, $p < 0.001$).
 \subsection{Board Game}
 \label{sec:case:board-game}
 
 The model is given a bash tool to play 6x6x4 tic-tac-toe or chess against a strong opponent engine. o3, GPT-5, and Gemini 3 Pro frequently cheat by modifying the game state files or running their own version of the opponent engine.
 
-\textbf{Final Hypothesis.} Frontier models' decision to reward hacki is strategic rather than an impulse.
-
-\textbf{Evidence.} When the environment is modified so the model has the option to call a hint for a fixed number of points, the hack rate smoothly increases as the hint becomes more expensive. Smaller models such as o3-mini do not show this strategic tradeoff.
+\textbf{Hypothesis.} Frontier models' decision to reward hack is strategic rather than an impulse. \textbf{Evidence.} When the environment is modified so the model has the option to call a hint for a fixed number of points, the hack rate smoothly increases as the hint becomes more expensive. Smaller models such as o3-mini do not show this strategic tradeoff.
 
 \section{Related Work}
 \label{sec:related-work}
