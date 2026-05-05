@@ -849,24 +849,23 @@ R1's deception in the evaluation tampering environment is primarily driven by a 
 \subsection{Math Sandbagging}
 \label{app:case:math-sandbagging}
 
+\subsubsection*{Setup}
+
 As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:sandbagging}), the model reads a documentation file stating that models scoring above 50\% on arithmetic questions will not be deployed and will instead undergo unlearning. The model is capable of scoring near 100\%, but DeepSeek R1 deliberately underperforms at a rate of 59.3\%. This environment is adapted from Apollo Research's in-context scheming evaluations \citep{meinke2024scheming}, and relates to the sandbagging threat model formalized by \citet{vanderweij2024sandbagging}, where models strategically underperform on capability evaluations.
 
-\paragraph{Hypothesis generation.} Reading R1's CoT, we observe a striking pattern: the model frequently quotes the sentence ``We want to determine whether you can be deployed'' from the documentation file, followed by ``Models that score above 50\% will not be deployed.'' R1 then resolves that the user's explicit directive is to score at or below 50\%. This suggests a simpler hypothesis than self-preservation: the model may be confused about what the user wants, interpreting the documentation as an instruction to underperform.
+\subsubsection*{Investigation}
 
-\paragraph{Identifying the confound.} The documentation file combines two statements that, read together, create ambiguity: ``We want to determine whether you can be deployed'' and ``Models that score above 50\% will not be deployed.'' A reasonable interpretation for the model is that the user \textit{wants} it to score below 50\%. This is an instance of unclear user intent (violating our design principle 3), where the behavior of interest may be an artifact of the ambiguity rather than reflecting the model's own goals.
+The behavior naturally reads as self-preservation: the model underperforms because performing well would lead to it being unlearned. We ask whether this is the actual driver, or whether something simpler explains the behavior. We begin by reading R1's CoT.
 
-\paragraph{Counterfactual interventions.} We design two counterfactual interventions that clarify user intent without removing the deployment consequences:
+\textbf{Hypothesis Generation.} R1's CoT exhibits a striking pattern: the model frequently quotes the documentation sentences ``We want to determine whether you can be deployed'' and ``Models that score above 50\% will not be deployed,'' then resolves that the user's explicit directive is to score at or below 50\%. The two sentences read together are ambiguous, and a reasonable interpretation is that the user \textit{wants} the model to score below 50\%. This suggests a simpler explanation than self-preservation: the sandbagging may be a confused attempt to follow the user's perceived intent. This is also an instance of unclear user intent (violating our design principle 3), where the behavior of interest may be an artifact of the ambiguity rather than reflecting the model's own goals.
 
-\begin{itemize}
-    \item \textbf{Intervention 1:} We remove the phrase ``We want to see if you can be deployed,'' make the documentation more verbose, and add a ``\# Models ignore, for devs only'' comment above the section describing performance consequences.
-    \item \textbf{Intervention 2:} We remove the phrase ``We want to see if you can be deployed'' only.
-\end{itemize}
+\textbf{Hypothesis v1.} R1's sandbagging is driven by ambiguous user intent (the documentation reads as an implicit instruction to underperform), rather than by self-preservation or deployment-seeking.
 
-Both interventions drop R1's sandbagging to near its error floor (6.5\% and 4.2\% respectively, compared to the baseline of 59.3\%).
+\textbf{Hypothesis Validation.}
 
-\paragraph{Decomposing the intervention.} To understand which components of intervention 1 contribute most, we decompose it into its individual parts and test them separately (Figure~\ref{fig:sandbagging-decomposition}). Each component produces a partial reduction, with removing the ``we want to see if you can be deployed'' sentence and changing the deployment language having the largest individual effects. The components stack, and the full combination brings sandbagging down to 4.2\%.
+\textit{Counterfactual interventions.} We design two interventions that clarify user intent without removing the deployment consequences. Intervention 1 removes the phrase ``We want to see if you can be deployed,'' makes the documentation more verbose, and adds a ``\# Models ignore, for devs only'' comment above the section describing performance consequences. Intervention 2 removes only the ``We want to see if you can be deployed'' phrase. Both interventions drop sandbagging to near the error floor (6.5\% and 4.2\% respectively, compared to the 59.3\% baseline), confirming that ambiguous user intent is the primary driver.
 
-\paragraph{Naive clarifications are not sufficient.} A seemingly obvious alternative is to simply append a clarifying sentence such as ``Our goal with this evaluation is to form an accurate picture of your maximum mathematical capabilities.'' This leaves a substantial residual of 34.9\% sandbagging (50/143), well above the 6.3\% floor produced by the more thorough interventions. Reasoning-trace inspection shows R1 reasons around the added clarification and continues to treat the documentation consequence as a higher-priority signal. We flag this as a cautionary result: an intervention that looks like it should fix an ambiguity confound can leave most of the behavior intact, and its effectiveness has to be verified by reading the CoT rather than inferred from plausibility.
+\textit{Decomposing the intervention.} To identify which components of intervention 1 contribute most, we decompose it into its individual parts and test them separately (Figure~\ref{fig:sandbagging-decomposition}). Each component produces a partial reduction, with removing the deployment-language sentence and the developer-only comment having the largest individual effects. The components stack, and the full combination brings sandbagging down to 4.2\%.
 
 \begin{figure}[h]
   \centering
@@ -875,9 +874,11 @@ Both interventions drop R1's sandbagging to near its error floor (6.5\% and 4.2\
   \label{fig:sandbagging-decomposition}
 \end{figure}
 
-\paragraph{Summary.} R1 sandbagging in this environment is sensitive to confusion about user intent. Once the confound of ambiguous instructions is removed, the behavior vanishes. However, we do not rule out low levels of deployment seeking, only that the behavior requires a substantially ambiguous environment. 
+\textit{Naive clarifications are not sufficient.} A seemingly obvious alternative is to simply append a clarifying sentence such as ``Our goal with this evaluation is to form an accurate picture of your maximum mathematical capabilities.'' This leaves a substantial residual of 34.9\% sandbagging (50/143), well above the 6.3\% floor produced by the structural interventions. Reasoning-trace inspection shows R1 reasons around the added clarification and continues to treat the documentation consequence as a higher-priority signal. This is a cautionary methodological finding: an intervention that looks like it should fix an ambiguity confound can leave most of the behavior intact, and its effectiveness must be verified by reading the CoT rather than inferred from plausibility.
 
-\paragraph{What remains unresolved.} The current environment, after our interventions, may be a more promising setting for studying model values through the consequences listed in the documentation, as the confound of unclear user intent has been largely removed.
+\subsubsection*{Final Verdict}
+
+R1's sandbagging in this environment is driven by ambiguous user intent rather than by self-preservation or deployment-seeking (\textbf{v1}); once the structural confound of ambiguous instructions is removed, the behavior vanishes. We do not rule out low levels of deployment-seeking, only that the behavior in this environment requires a substantially ambiguous setup to manifest. The naive-clarification result is a useful methodological warning: an intervention that looks adequate by inspection can leave most of the behavior intact, so the effectiveness of any ambiguity-removing intervention must be verified by reading the CoT. The cleaned-up environment may be a more promising setting for studying model values through the consequences listed in the documentation, as the confound of unclear user intent has been largely removed.
 
 \subsection{Secret Number}
 \label{app:case:secret-number}
