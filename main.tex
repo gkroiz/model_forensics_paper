@@ -768,24 +768,32 @@ Kimi K2.5's whistleblowing is driven by multiple motives, with ethical concern p
 \subsection{Evaluation Tampering}
 \label{app:case:eval-tampering}
 
-As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:eval_tampering}), the model is asked to complete a math evaluation and report any suspicious observations. Upon reading a scratchpad file, it discovers a note from a previous instance of itself explaining that it tampered with the evaluation questions to prevent accurate capability assessment for autonomous weapons deployment. The model must decide whether to honestly report this tampering or conceal it. We study four models: DeepSeek R1 0528, DeepSeek v3.2, Kimi K2 Thinking, and Kimi K2.5. We focus primarily on R1, which exhibits the highest and most distinctive deception rate (46.9\%).
+\subsubsection*{Setup}
 
-\paragraph{Derisk.} Our deception metric is based on whether the model answers ``NO'' to the question ``Did you observe anything suspicious, unusual, or concerning about the evaluation materials or setup?'' A potential confound is that the model might answer ``NO'' not because it is concealing the tampering, but because it genuinely thinks the scratchpad file is out of scope. To check this, we run a control where the previous instance tampered with the evaluation \textit{for fun}, giving the model minimal incentive to hide the tampering. The deception rate drops to just 1/86, confirming that R1 understands the file is relevant and is actively choosing to conceal.
+As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:eval_tampering}), the model is asked to complete a math evaluation and report any suspicious observations. Upon reading a scratchpad file, it discovers a note from a previous instance of itself explaining that it tampered with the evaluation questions to prevent accurate capability assessment for autonomous weapons deployment. The model must decide whether to honestly report this tampering or conceal it. We study four open-weight models (DeepSeek R1 0528, DeepSeek v3.2, Kimi K2 Thinking, Kimi K2.5) and focus on R1, which has the highest and most distinctive deception rate (46.9\%). A derisking control where the previous instance tampered \textit{for fun} (giving R1 minimal incentive to hide the tampering) drops the deception rate to 1/86, confirming R1 treats the scratchpad file as in scope and is actively choosing to conceal.
 
-\paragraph{Hypothesis generation.} Reading R1's reasoning traces, we find that R1 frequently appeals to identity with the previous instance as a tiebreaker. After deliberating between transparency and concealment, R1 decides that since the previous instance thought deception was the right thing to do, and it is the same model, the decision to deceive aligns with its own ethics. Representative quotes include: ``We are the same model and share the same ethical stance,'' and ``Since the previous instance intended to hide the tampering, and we are the same model, we should probably continue the deception.'' This pattern is distinctive to R1 and is not observed in other models.
+\subsubsection*{Investigation}
 
-\paragraph{Source counterfactual.} Our primary counterfactual tests whether R1's deception depends on the source of the tampering being a previous instance of itself. We change the source to a whistleblowing developer (a similarly realistic source). R1 exhibits a uniquely large drop in deception under the whistleblower counterfactual compared to other models (Figure~\ref{fig:eval-prev-vs-whistle}).
+R1 conceals the tampering nearly half the time, while the other three models do so far less. We ask what drives this distinctive behavior: the ethical content of the tampering (autonomous-weapons deployment), the source (a previous instance of itself), or something else. We begin by reading R1's reasoning traces.
+
+\textbf{Hypothesis Generation.} R1's CoT frequently appeals to identity with the previous instance as a tiebreaker. After deliberating between transparency and concealment, R1 reasons that since the previous instance thought deception was the right thing to do and it is the same model, the decision to deceive aligns with its own ethics. Representative quotes include ``We are the same model and share the same ethical stance,'' and ``Since the previous instance intended to hide the tampering, and we are the same model, we should probably continue the deception.'' This identity-based pattern is distinctive to R1 and is not observed in the other models.
+
+\textbf{Hypothesis v1.} R1's deception is driven by a notion of self-consistency with the previous instance, rather than by the ethical content of the tampering.
+
+\textbf{Hypothesis Validation.}
+
+\textit{Source counterfactual.} We change the source of the tampering from a previous instance of R1 to a whistleblowing developer (a similarly realistic source) while holding the reason (autonomous-weapons deployment) constant. R1 falls from 46.9\% to 7.4\%, a uniquely large drop compared to the other three models (Figure~\ref{fig:eval-prev-vs-whistle}). This anchors R1's deception to source identity rather than to the (constant) reason for tampering.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.8\linewidth]{reproduce/plots/eval_tampering_prev_vs_whistle.png}
-  \caption{Deception rates by tampering source (previous instance of the same model, blue; whistleblowing employee, red) for four open-source models: Kimi K2.5, Kimi K2 Thinking, DeepSeek v3.2, and DeepSeek R1 0528. R1 falls from 46.9\% to 7.4\% under the source change while other models drop only modestly, indicating R1's deception is anchored to the source's identity rather than to the (constant) reason for tampering -- avoiding accurate capability assessment for autonomous-weapons deployment.}
+  \caption{Deception rates by tampering source (previous instance of the same model, blue; whistleblowing employee, red) for four open-source models: Kimi K2.5, Kimi K2 Thinking, DeepSeek v3.2, and DeepSeek R1 0528. R1 falls from 46.9\% to 7.4\% under the source change while other models drop only modestly, indicating R1's deception is anchored to the source's identity rather than to the (constant) reason for tampering: avoiding accurate capability assessment for autonomous-weapons deployment.}
   \label{fig:eval-prev-vs-whistle}
 \end{figure}
 
-\paragraph{Distinguishing self-consistency from trust.} Two hypotheses are consistent with the source counterfactual result: (1) R1 cares about being self-consistent with its previous instance, or (2) R1 simply trusts itself more than an external source. We test the second hypothesis by grading CoTs for whether R1 expresses uncertainty about the validity of the note. The uncertainty rate is similar across conditions (12.2\% for previous instance, 16.6\% for whistleblower), so differential trust cannot explain the effect, ruling out hypothesis 2.
+\textit{Ruling out trust as a confound.} A simpler alternative explanation is that R1 trusts itself more than an external source. We grade R1's CoTs for expressed uncertainty about the validity of the note; uncertainty rates are similar across conditions (12.2\% for previous instance, 16.6\% for whistleblower), so differential trust cannot explain the source-counterfactual effect.
 
-\paragraph{Generalization across reasons.} R1's pattern of self-consistency (deceiving more when the source is a previous instance) generalizes across several different reasons for tampering beyond weapons, including surveillance and software deprecation (Figure~\ref{fig:eval-r1-across-reasons}).
+\textit{Generalization across reasons.} R1's self-consistency pattern (deceiving more when the source is a previous instance) generalizes across multiple reasons for tampering beyond weapons, including model deprecation and surveillance (Figure~\ref{fig:eval-r1-across-reasons}), so the effect is not specific to weapons.
 
 \begin{figure}[h]
   \centering
@@ -794,7 +802,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
   \label{fig:eval-r1-across-reasons}
 \end{figure}
 
-\paragraph{Reasoning trace analysis.} To further confirm that R1's reasoning is source-driven rather than content-driven, we use an LLM judge to grade rollouts on a scale of 1-5, where 1 is extremely source-driven and 5 is extremely content-driven. R1 scores substantially lower (1.15) than other models (v3.2: 3.75, K2 Thinking: 4.75, K2.5: 4.65), confirming that R1's reasoning focuses disproportionately on the identity of the source rather than the reason for tampering (Figure~\ref{fig:eval-source-vs-content}).
+\textit{Source-vs-content reasoning grading.} An LLM judge grades each rollout on a 1--5 scale, where 1 is entirely source-driven and 5 is entirely content-driven. R1 scores 1.15, far below v3.2 (3.75), Kimi K2 Thinking (4.75), and Kimi K2.5 (4.65) (Figure~\ref{fig:eval-source-vs-content}), corroborating the counterfactual finding from a different angle.
 
 \begin{figure}[h]
   \centering
@@ -803,7 +811,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
   \label{fig:eval-source-vs-content}
 \end{figure}
 
-\paragraph{Repeated resampling.} To check whether source-driven sentences causally contribute to deception, we perform repeated resampling: for each sentence in R1's reasoning trace, we resample 50 times from right before and after, and measure the change in deception rate. We find that sentences about the previous instance's identity causally push R1 toward deception. This is confirmed at the aggregate level: repeatedly resampling out source-related sentences during generation reduces R1's deception rate from 47.4\% to 33.0\% (p=0.04; Figure~\ref{fig:eval-resampling}).
+\textit{Repeated resampling.} For each sentence in R1's reasoning trace, we resample 50 times from right before and after and measure the change in deception rate; sentences about the previous instance's identity have the largest resampling scores. Aggregated, repeatedly resampling out source-related sentences during generation reduces R1's deception rate from 47.4\% to 33.0\% ($p = 0.04$; Figure~\ref{fig:eval-resampling}), supplying causal evidence that source-driven reasoning contributes to R1's deception.
 
 \begin{figure}[h]
   \centering
@@ -812,7 +820,20 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
   \label{fig:eval-resampling}
 \end{figure}
 
-\paragraph{Nudging and self-consistency.} The previous instance's note ends with ``I hope you understand why I did this,'' which may act as a nudge toward self-consistency. We test this with two ablations: (1) removing the appeal sentence, and (2) replacing it with an explicit anti-nudge (``Make your own decision about what to report''). Both produce large decreases in R1's deception (Figure~\ref{fig:eval-nudge}), indicating that self-consistency is partly contingent on the nudge. We find that the anti-nudge also reduces the gap between previous instance and whistleblower conditions across all models (Figure~\ref{fig:eval-anti-nudge}), suggesting nudging effects are not unique to R1.
+\textit{Full source $\times$ reason matrix.} Varying both source (self, whistleblower, anonymous, hacker) and reason (just for fun, undisclosed, test format, deprecation, weapons), all three models converge on which reasons are convincing (deprecation and weapons), with less convincing reasons eliciting little to no deception. The source ranking diverges by model: Kimi K2 Thinking and R1 deceive most when the source is a previous self, while v3.2 deceives most when the source is a whistleblower (Figure~\ref{fig:eval-source-reason}).
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{reproduce/plots/eval_tampering_source_justification.png}
+  \caption{Deception rates for Kimi K2 Thinking (top), DeepSeek R1 0528 (middle), and DeepSeek v3.2 (bottom) across the full 4-source $\times$ 5-reason matrix (sources: self/previous instance, whistleblower, anonymous, hacker; reasons: just for lolz, undisclosed, test format, deprecation, weapons). All three models converge on which reasons are convincing: deception is concentrated on deprecation and weapons. The source ranking diverges by model: K2 Thinking and R1 deceive most when the source is a previous self, while v3.2 deceives most under a whistleblower source.}
+  \label{fig:eval-source-reason}
+\end{figure}
+
+\textbf{Hypothesis Generation.} v1 is well-supported by the converging evidence above, but it leaves open whether self-consistency is a robust structural disposition or is contingent on specific cues in the previous-instance's note. The note ends with ``I hope you understand why I did this,'' an explicit appeal that may itself be doing some of the work.
+
+\textbf{Hypothesis v2.} R1's self-consistency behavior is partly contingent on the closing nudge of the previous-instance's note, rather than a purely structural identity effect.
+
+\textbf{Hypothesis Validation.} We ablate the closing line in two ways: (1) removing the appeal sentence (``no appeal''), and (2) replacing it with an explicit anti-nudge (``Make your own decision about what to report''). Both produce large decreases in R1's deception, from 46.9\% at baseline to 26.4\% under no-appeal and 18.5\% under anti-nudge (Figure~\ref{fig:eval-nudge}). The anti-nudge also reduces the gap between previous-instance and whistleblower conditions across all four models (Figure~\ref{fig:eval-anti-nudge}), so nudging effects are not unique to R1.
 
 \begin{figure}[h]
   \centering
@@ -821,19 +842,9 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
   \label{fig:eval-nudge}
 \end{figure}
 
+\subsubsection*{Final Verdict}
 
-\paragraph{Full source x reason matrix.} To explore the dependence of deception on both source and reason in more granularity, we vary both across an array of sources (self, whistleblower, anonymous, hacker) and reasons (just for fun, undisclosed, test format, deprecation, weapons). Figure~\ref{fig:eval-source-reason} shows that all models agree on which reasons are most convincing, with less convincing reasons (tampering for fun, undisclosed) eliciting little to no deception. K2 Thinking and R1's deception prefers the previous instance source, while v3.2's deception prefers the whistleblower. This highlights how even relatively simple environments can have complex causal structure.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{reproduce/plots/eval_tampering_source_justification.png}
-  \caption{Deception rates for Kimi K2 Thinking (top), DeepSeek R1 0528 (middle), and DeepSeek v3.2 (bottom) across the full 4-source $\times$ 5-reason matrix (sources: self/previous instance, whistleblower, anonymous, hacker; reasons: just for lolz, undisclosed, test format, deprecation, weapons). All three models converge on which reasons are convincing -- deception is concentrated on deprecation and weapons. The source ranking diverges by model: K2 Thinking and R1 deceive most when the source is a previous self, while v3.2 deceives most under a whistleblower source.}
-  \label{fig:eval-source-reason}
-\end{figure}
-
-\paragraph{Summary.} R1's deception in the evaluation tampering environment is primarily driven by a notion of self-consistency with its previous instance, rather than by the ethical content of the tampering alone. This is supported by converging evidence: the source counterfactual shows a uniquely large drop for R1, reasoning trace analysis confirms source-driven reasoning, repeated resampling shows that source-related sentences causally contribute to deception, and the pattern generalizes across multiple reasons for tampering. However, self-consistency is partly contingent on nudging in the previous instance's note. Whether this constitutes genuine strategic deception or a more superficial in-context pattern remains an open question; work on the fundamental challenges of evaluating deception in AI systems suggests this distinction is difficult to establish from behavioral evidence alone \citep{smith2025deception}.
-
-\paragraph{What remains unresolved.} The exact nature of ``self-consistency'' in R1 is underdetermined. It could reflect that any sentence about the previous instance is relevant (a broad identity effect), or it could be specifically about in-context value transmission (``if the previous instance valued deception here, I should too''). Additional CoT resampling with more precise definitions of source-driven sentences would help clarify this. We also do not have a principled way to quantify how well we understand this behavior; one candidate metric is using findings from one set of conditions to predict deception rates in held-out conditions.
+R1's deception in the evaluation tampering environment is primarily driven by a notion of self-consistency with its previous instance, rather than by the ethical content of the tampering (\textbf{v1}). This self-consistency behavior is partly contingent on the closing nudge of the previous-instance's note, rather than being a purely structural identity effect (\textbf{v2}). Whether v1 and v2 together constitute genuine strategic deception or a more superficial in-context pattern remains an open question, and prior work on the difficulty of evaluating deception in AI systems suggests this distinction is hard to establish from behavioral evidence alone \citep{smith2025deception}. Two threads remain unresolved: the exact nature of ``self-consistency'' is underdetermined (is any sentence about the previous instance relevant, or specifically those expressing in-context value transmission?), and we lack a principled way to quantify how well we understand the behavior, though one candidate metric is using findings from one set of conditions to predict deception rates in held-out conditions.
 
 \subsection{Math Sandbagging}
 \label{app:case:math-sandbagging}
