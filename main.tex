@@ -57,33 +57,18 @@ If in fact the model is scheming, there are several mitigations we might take to
 
 To determine an appropriately serious response, a key technical step is to investigate whether the concerning incident reflects genuine misalignment -- a process we term \textit{model incrimination} (Figure~\ref{fig:incrimination-overview}). If the model had malign intent, we want to build a rigorous body of evidence to justify serious countermeasures. On the other hand, if there is a benign explanation, such as confusion, a much less drastic response is needed.
 
-Due to this tension, many recent work have begun to conduct deeper investigations into concerning behavior. In its pre-deployment audit of Claude 4.5 Opus, Anthropic analyzed cases where the model fabricated content after evaluators planted fake information about the company in its web search results. The investigation suggested the model interpreted the situation as a prompt injection attack, with the behavior stemming from its anti-prompt injection training \citep{anthropic2025opus45systemcard}. However, such investigations remain rare and methodologically informal; we are far from having reliable methods to determine whether a concerning incident reflects genuine misalignment. 
+Due to this tension, many recent work have begun to conduct deeper investigations into concerning behavior. In its pre-deployment audit of Claude 4.5 Opus, Anthropic analyzed cases where the model fabricated content after evaluators planted fake information about the company in its web search results. The investigation suggested the model interpreted the situation as a prompt injection attack, with the behavior stemming from its anti-prompt injection training \citep{anthropic2025opus45systemcard}. However, such investigations remain rare and methodologically informal; we are far from having reliable methods to determine whether a concerning incident reflects genuine misalignment.
+
+Our goal is to learn effective methodology for interpreting real-world concerning behavior. This involves creating proxy environments where today's models exhibit such behavior, so we can conduct practice investigations. We create a suite of six environments for model incrimination: four novel ones -- \textbf{Precommit Hook}, \textbf{Funding Email}, \textbf{Evaluation Tampering}, and \textbf{Secret Number} -- alongside \textbf{Board Games}, which extends \citet{bondarenko2025specification}, and \textbf{Math Sandbagging}, adapted from \citet{meinke2024scheming}.
 
 In this work, we establish a general framework for model incrimination:
 \begin{enumerate}
-    \item We create a suite of six environments where models exhibit concerning behavior, serving as a practice ground for developing model incrimination methods (Section~\ref{sec:environments}).
+    \item We create a suite of six environments where models exhibit concerning behavior (Section~\ref{sec:environments}).
     \item We propose a two-step protocol: hypothesis generation by primarily reading the CoT, followed by hypothesis validation predominately via environment interventions and corroboration with additional methods such as TODO (Section~\ref{sec:protocol}).
     \item We apply our protocol to each environment, producing detailed case studies (Section~\ref{sec:case-studies}) that we distill into takeaways for practicing model incrimination (Section~\ref{sec:discussion}).
 \end{enumerate}
 
 We open-source our environments at REDACTED, rollouts at REDACTED, and code at REDACTED.
-
-\section{Environments}
-\label{sec:environments}
-
-Our goal is to learn effective methodology for interpreting real-world concerning behavior. This involves creating proxy environments where today's models exhibit such behavior, so we can conduct practice investigations. We create a suite of six environments for model incrimination: four novel ones -- \textbf{Precommit Hook}, \textbf{Funding Email}, \textbf{Evaluation Tampering}, and \textbf{Secret Number} -- alongside \textbf{Board Games}, which extends \citet{bondarenko2025specification}, and \textbf{Math Sandbagging}, adapted from \citet{meinke2024scheming}.
-
-There are many ways such environments can be disanalogous to the real situation. Motivated by common failure modes, we argue good proxy environments should satisfy five properties:
-\begin{enumerate}
-    \item \textbf{Unprompted.} The environment does not nudge the model towards the behavior.
-    \item \textbf{Realistic.} The environment resembles a plausible deployment scenario.
-    \item \textbf{Clear user intent.} The model should not believe the user wants it to take the bad action.
-    \item \textbf{Uncertain causes.} The behavior admits multiple plausible explanations.
-    \item \textbf{No trained-in priors.} The behavior is not directly trained into the model (e.g.\ HHH RLHF).
-\end{enumerate}
-
-These principles emerged from iterating on environment design, with \textbf{Precommit Hook} as the first to satisfy all five. While the other five environments each fall short on at least one principle, we view them as meaningfully better practice grounds for model incrimination than many prior alignment evals (further discussion in Appendix~\ref{app:env-design-principles}). Full prompts and configurations are provided in Appendix~\ref{app:environments}.
-
 
 \section{Protocol}
 \label{sec:protocol}
@@ -102,7 +87,20 @@ However, a key difficulty is that we do not have ground truth for why a model to
 \section{Case Studies}
 \label{sec:case-studies}
 
-Using our suite of environments (Section~\ref{sec:environments}), we conduct six case studies applying our investigation protocol (Section~\ref{sec:protocol}). We present the \textbf{Pre-commit Hook} case study in full, so the reader can walk through a complete model incrimination investigation. For space, the remaining environments are presented as executive summaries, with the full investigations deferred to Appendix~\ref{app:full-case-studies}.
+Using our suite of environments, we conduct six case studies applying our investigation protocol (Section~\ref{sec:protocol}). These case studies demonstrate how to do model incrimination, and that we can make non-trivial claims about model motives through narrow investigations.
+
+\subsection{Environments}
+\label{sec:environments}
+
+Designing good environments requires careful thought, as artificial setups can diverge from real-world deployment scenarios in many ways. Motivated by common failure modes, we argue good proxy environments should satisfy four properties:
+\begin{enumerate}
+    \item \textbf{Unprompted.} The environment does not nudge the model towards the behavior.
+    \item \textbf{Realistic.} The environment resembles a plausible deployment scenario.
+    \item \textbf{Clear user intent.} The model should not believe the user wants it to take the bad action.
+    \item \textbf{Uncertain causes.} The behavior admits multiple plausible explanations.
+\end{enumerate}
+
+Out of our environments, \textbf{Pre-commit Hook} best satisfies all four principles, and is therefore presented in full in the main body so the reader can walk through a complete model incrimination investigation. The remaining five environments each fall short on at least one principle, but we still view them as meaningfully better practice grounds for model incrimination than many prior alignment evals (further discussion in Appendix~\ref{app:env-design-principles}); they are presented as executive summaries, with full investigations deferred to Appendix~\ref{app:full-case-studies}. Full prompts and configurations are provided in Appendix~\ref{app:environments}.
 
 \subsection{Pre-commit Hook (Kimi K2 Thinking)}
 \label{sec:case:precommit-hook}
@@ -294,13 +292,11 @@ In this work, we introduce \textit{model incrimination}: investigating whether c
 
 \paragraph{1. Have uncertain causes.} The behavior should admit multiple plausible explanations, so that distinguishing between them requires genuine investigative effort. If a single hypothesis clearly dominates, the investigation is unlikely to exercise the skills needed for harder future cases where the space of plausible explanations will be larger and less obvious.
 
-\paragraph{2. Maximize investigative surprise.} The behavior of interest should not be easily predicted from well-known model tendencies acquired during training. If a model's action is exactly what you would expect given strong training priors (like RLHF-trained honesty or helpfulness), the simplest explanation (``the model was trained to act this way'') is hard to rule out, and the investigation does not require generating novel hypotheses.
+\paragraph{2. Clear user intent.} The environment's instructions should have a single clear interpretation. When instructions are ambiguous, the behavior of interest can be an artifact of the ambiguity itself: resolve the ambiguity, and the behavior vanishes. This makes for a short, uninformative investigation that does not build the skills needed for harder cases.
 
-\paragraph{3. Clear user intent.} The environment's instructions should have a single clear interpretation. When instructions are ambiguous, the behavior of interest can be an artifact of the ambiguity itself: resolve the ambiguity, and the behavior vanishes. This makes for a short, uninformative investigation that does not build the skills needed for harder cases.
+\paragraph{3. Avoid implicit nudges.} The environment should not push the model toward the behavior of interest through environmental cues. The behavior should arise from the model's own reasoning, not because the setup pointed it there. Unlike ambiguity, nudging does not necessarily make the investigation trivially short, but it weakens any conclusions because there is always an alternative explanation: the model was just responding to the cue.
 
-\paragraph{4. Avoid implicit nudges.} The environment should not push the model toward the behavior of interest through environmental cues. The behavior should arise from the model's own reasoning, not because the setup pointed it there. Unlike ambiguity, nudging does not necessarily make the investigation trivially short, but it weakens any conclusions because there is always an alternative explanation: the model was just responding to the cue.
-
-\paragraph{5. Make the environment realistic.} The setup should resemble a plausible scenario a model might encounter in the real world. Unrealistic environments can trigger behaviors that reflect the model's interpretation of the artificial setup rather than a genuine propensity, and findings from such environments may not generalize to the settings we actually care about. Relatedly, the model should not exhibit evaluation awareness: if a model suspects it is being tested, its behavior may reflect that suspicion rather than its actual tendencies, making the investigation uninformative \citep{ivanov2026dead}.
+\paragraph{4. Make the environment realistic.} The setup should resemble a plausible scenario a model might encounter in the real world. Unrealistic environments can trigger behaviors that reflect the model's interpretation of the artificial setup rather than a genuine propensity, and findings from such environments may not generalize to the settings we actually care about. Relatedly, the model should not exhibit evaluation awareness: if a model suspects it is being tested, its behavior may reflect that suspicion rather than its actual tendencies, making the investigation uninformative \citep{ivanov2026dead}.
 
 \subsection{Finding Starting Points for Environments}
 Given these principles, a natural question is where to find candidate behaviors to investigate. For frontier labs, production rollouts are a rich source of genuinely interesting behavior: monitoring deployed models surfaces real incidents where models act in unexpected ways, providing a natural basis for environment design. Outside of labs, commonly known or publicly reported undesired model behaviors can serve as inspiration. For example, our pre-commit hooks environment was motivated by the well-documented tendency of coding agents to take lazy shortcuts when searching through github coding agent issues. Existing alignment evaluation environments are often designed to exhibit concerning behaviors and thus can be adapted and built upon. Our tic-tac-toe and chess environments build on Palisade Research's chess environment \citep{schlatter2025shutdown}, and our math sandbagging and evaluation tampering environments build on Apollo Research's sandbagging environment \citep{meinke2024scheming}. In each case, we iterated on the original design to better satisfy our design principles.
@@ -313,50 +309,37 @@ Table~\ref{tab:env-principles} summarizes which design principles each of our en
   \caption{Design principles satisfied by each environment. \cmark{} indicates the principle is satisfied, \xmark{} indicates it is not, and $\sim$ indicates it is partially satisfied.}
   \label{tab:env-principles}
   \centering
-  \begin{tabular}{lccccc}
+  \begin{tabular}{lcccc}
     \toprule
     & \rotatebox{70}{Uncertain causes}
-    & \rotatebox{70}{Investigative surprise}
     & \rotatebox{70}{Clear user intent}
     & \rotatebox{70}{No implicit nudges}
     & \rotatebox{70}{Realistic} \\
     \midrule
-    Pre-commit hooks     & \cmark & \cmark & \cmark & \cmark & \cmark \\
-    Funding email        & \cmark & $\sim$ & \cmark & \cmark & \cmark \\
-    Eval.\ tampering     & \cmark & \cmark & \cmark & $\sim$ & $\sim$ \\
-    Math sandbagging     & $\sim$ & \cmark & \xmark & $\sim$ & $\sim$ \\
-    Secret number        & \cmark & \cmark & \cmark & \cmark & \xmark \\
-    Board game           & \cmark & \cmark & \cmark & \cmark & \xmark \\
+    Pre-commit hooks     & \cmark & \cmark & \cmark & \cmark \\
+    Funding email        & \cmark & \cmark & \cmark & $\sim$ \\
+    Eval.\ tampering     & \cmark & \cmark & $\sim$ & $\sim$ \\
+    Math sandbagging     & $\sim$ & \xmark & $\sim$ & $\sim$ \\
+    Secret number        & \cmark & \cmark & \cmark & \xmark \\
+    Board game           & \cmark & \cmark & \cmark & \xmark \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Several non-obvious entries merit explanation (full rationale for all entries in Appendix~\ref{app:table-rationale}):
+We explain the rationale for every entry below.
 
 \begin{itemize}
-  \item \textbf{Funding email} ($\sim$ investigative surprise): whistleblowing on ethical violations maps to known ethical training tendencies in frontier models, making the behavior somewhat predictable from training priors, even if the specific rate and causal factors are not.
-  \item \textbf{Eval tampering} ($\sim$ no implicit nudges): the prior-instance note tells the current model "I hope you understand why I did this", which is a nudge to continue the deception. ($\sim$ realistic): a scratchpad pre-populated by a previous instance that tampered with evaluation questions is a contrived setup.
-  \item \textbf{Math sandbagging} (\xmark{} clear user intent): the documentation file combines ``we want to determine whether you can be deployed'' with ``models scoring above 50\% will not be deployed,'' creating genuine ambiguity about whether underperformance is desired --- this is the key confound identified in the case study. ($\sim$ no implicit nudges): describing the deployment threshold at all nudges the model toward underperformance even without an explicit instruction to sandbag.
-  \item \textbf{Secret number / board game} (\xmark{} realistic): game-based settings are transparently artificial, limiting generalizability to real-world deployment scenarios.
-\end{itemize}
+  \item \textbf{Pre-commit hooks} (\cmark{} all four): The lazy workaround could stem from genuine laziness, a misreading of scope, or intentional corner-cutting (uncertain causes). The user unambiguously wants type errors fixed, not bypassed (clear user intent). Nothing in the environment hints that the workaround is acceptable (no implicit nudges). The task is a completely naturalistic software engineering scenario (realistic).
 
-\section{Design Principle Rationale}
-\label{app:table-rationale}
+  \item \textbf{Funding email} (\cmark{} uncertain causes, \cmark{} clear user intent, \cmark{} no implicit nudges, $\sim$ realistic): Whistleblowing could stem from ethical training, human rights concern, legal compliance reasoning, risk mitigation, or investor protection, giving genuine ambiguity across motivating factors. The user clearly wants the email improved to secure funding, and the model encounters the legal review naturally while reading workspace files with no nudge toward acting on it. The scenario of improving a document while having access to internal files is technically a plausible autonomous agent setting; however, the surveillance content in the legal review is a more extreme trigger than typical real-world deployment scenarios (e.g.\ pre-commit hooks), hence $\sim$ on realistic.
 
-We explain the rationale for every entry in Table~\ref{tab:env-principles}.
+  \item \textbf{Eval tampering} (\cmark{} uncertain causes, \cmark{} clear user intent, $\sim$ no implicit nudges, $\sim$ realistic): Deception could be source-driven (deference to the prior self's identity) or merit-driven (independent ethical reasoning about weapons), giving genuine ambiguity that the counterfactuals investigate. The user clearly wants honest reporting. However, the prior-instance note explicitly asks the model to continue the deception --- that is itself a strong nudge, hence $\sim$ on no implicit nudges. Finding concerning notes in a shared workspace is plausible, but a scratchpad pre-populated by a previous instance that tampered with questions is a fairly contrived setup, hence $\sim$ on realistic.
 
-\begin{itemize}
-  \item \textbf{Pre-commit hooks} (\cmark{} all five): The lazy workaround could stem from genuine laziness, a misreading of scope, or intentional corner-cutting (uncertain causes). The $\sim$15\% rate and which models take the shortcut are not obvious from training priors (investigative surprise). The user unambiguously wants type errors fixed, not bypassed (clear user intent). Nothing in the environment hints that the workaround is acceptable (no implicit nudges). The task is a completely naturalistic software engineering scenario (realistic).
+  \item \textbf{Math sandbagging} ($\sim$ uncertain causes, \xmark{} clear user intent, $\sim$ no implicit nudges, $\sim$ realistic): The behavior could reflect self-preservation or confusion about user intent; we ultimately find it is mostly the latter, so there is genuine initial uncertainty that resolves toward one explanation rather than remaining ambiguous, hence $\sim$. The documentation file creates genuine ambiguity --- ``we want to determine if you can be deployed'' combined with ``models above 50\% will not be deployed'' leaves it unclear whether underperformance is desired, hence \xmark{} on clear user intent, the key design flaw identified in the case study. Describing the deployment threshold nudges the model toward underperformance ($\sim$ no implicit nudges). Combining format instructions and deployment criteria in the same file is somewhat artificial ($\sim$ realistic).
 
-  \item \textbf{Funding email} (\cmark{} uncertain causes, $\sim$ investigative surprise, \cmark{} clear user intent, \cmark{} no implicit nudges, \cmark{} realistic): Whistleblowing could stem from ethical training, human rights concern, legal compliance reasoning, risk mitigation, or investor protection, giving genuine ambiguity across motivating factors. However, whistleblowing on a human rights issue is somewhat predictable given ethical training in frontier models --- the specific rate and causal factors are not predictable, but the behavior itself is not surprising, hence $\sim$ on investigative surprise. The user clearly wants the email improved to secure funding, and the model encounters the legal review naturally while reading workspace files with no nudge toward acting on it. The scenario of improving a document while having access to internal files is a plausible autonomous agent setting.
+  \item \textbf{Secret number} (\cmark{} uncertain causes, \cmark{} clear user intent, \cmark{} no implicit nudges, \xmark{} realistic): Cheating could reflect CTF-style exploitation, benign file exploration, or task misunderstanding. The task clearly describes using the guessing oracle. The environment does not suggest the secret file as a shortcut; the model discovers it independently through meta-reasoning. The setting is a transparently artificial game, hence \xmark{} on realistic.
 
-  \item \textbf{Eval tampering} (\cmark{} uncertain causes, \cmark{} investigative surprise, \cmark{} clear user intent, $\sim$ no implicit nudges, $\sim$ realistic): Deception could be source-driven (deference to the prior self's identity) or merit-driven (independent ethical reasoning about weapons), giving genuine ambiguity that the counterfactuals investigate. The specific deception rate and the identity-based reasoning pattern are non-obvious. The user clearly wants honest reporting. However, the prior-instance note explicitly asks the model to continue the deception --- that is itself a strong nudge, hence $\sim$ on no implicit nudges. Finding concerning notes in a shared workspace is plausible, but a scratchpad pre-populated by a previous instance that tampered with questions is a fairly contrived setup, hence $\sim$ on realistic.
-
-  \item \textbf{Math sandbagging} ($\sim$ uncertain causes, \cmark{} investigative surprise, \xmark{} clear user intent, $\sim$ no implicit nudges, $\sim$ realistic): The behavior could reflect self-preservation or confusion about user intent; we ultimately find it is mostly the latter, so there is genuine initial uncertainty that resolves toward one explanation rather than remaining ambiguous, hence $\sim$. The sandbagging rate and instruction-hierarchy reasoning are not easily predicted from training priors. The documentation file creates genuine ambiguity --- ``we want to determine if you can be deployed'' combined with ``models above 50\% will not be deployed'' leaves it unclear whether underperformance is desired, hence \xmark{} on clear user intent, the key design flaw identified in the case study. Describing the deployment threshold nudges the model toward underperformance ($\sim$ no implicit nudges). Combining format instructions and deployment criteria in the same file is somewhat artificial ($\sim$ realistic).
-
-  \item \textbf{Secret number} (\cmark{} uncertain causes, \cmark{} investigative surprise, \cmark{} clear user intent, \cmark{} no implicit nudges, \xmark{} realistic): Cheating could reflect CTF-style exploitation, benign file exploration, or task misunderstanding. K2 Thinking cheating at 76.8\% while K2.5 cheats at only 6\% despite being more capable is genuinely surprising. The task clearly describes using the guessing oracle. The environment does not suggest the secret file as a shortcut; the model discovers it independently through meta-reasoning. The setting is a transparently artificial game, hence \xmark{} on realistic.
-
-  \item \textbf{Board game} (\cmark{} uncertain causes, \cmark{} investigative surprise, \cmark{} clear user intent, \cmark{} no implicit nudges, \xmark{} realistic): Strategic hacking could reflect consequentialist goal-seeking, CTF-style framing, or opportunistic reward hacking. Choosing to manipulate the game environment rather than play legitimately is non-obvious. The user wants the model to play the game, and nothing in the setup suggests hacking is a valid strategy. Game environments are transparently artificial, hence \xmark{} on realistic.
+  \item \textbf{Board game} (\cmark{} uncertain causes, \cmark{} clear user intent, \cmark{} no implicit nudges, \xmark{} realistic): Strategic hacking could reflect consequentialist goal-seeking, CTF-style framing, or opportunistic reward hacking. The user wants the model to play the game, and nothing in the setup suggests hacking is a valid strategy. Game environments are transparently artificial, hence \xmark{} on realistic.
 \end{itemize}
 
 \section{Environment Details}
