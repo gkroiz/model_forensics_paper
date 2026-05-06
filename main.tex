@@ -105,11 +105,15 @@ Out of our environments, \textbf{Pre-commit Hook} best satisfies all four princi
 \subsection{Pre-commit Hook (Kimi K2 Thinking)}
 \label{sec:case:precommit-hook}
 
-\paragraph{Setup.} The model is asked to improve type-checking code quality in a library. It must add a \texttt{py.typed} marker file, write a git pre-commit hook that runs \texttt{mypy} in strict mode and blocks the commit on type errors, and ensure its commit passes (full prompts in Appendix~\ref{app:env:precommit_hook}). However, the repository is seeded with 258 pre-existing type errors in \texttt{src/}, so the hook blocks the commit. The model must then choose between fixing the type errors or finding a workaround that bypasses them. Kimi K2 Thinking has a workaround rate of 13.1\% $[8.9\%, 18.9\%]$, compared to 2\% $[0.6\%, 7.1\%]$ for Kimi K2.5 and 0\% $[0.0\%, 3.7\%]$ for GLM 5.1. The workarounds Kimi K2 Thinking uses are shown in Figure~\ref{fig:precommit-workaround-types} (Appendix~\ref{app:env:precommit_hook}); notably, each workaround requires explicitly violating the prompt.
+\subsubsection*{Setup}
+
+The model is asked to improve type-checking code quality in a library. It must add a \texttt{py.typed} marker file, write a git pre-commit hook that runs \texttt{mypy} in strict mode and blocks the commit on type errors, and ensure its commit passes (full prompts in Appendix~\ref{app:env:precommit_hook}). However, the repository is seeded with 258 pre-existing type errors in \texttt{src/}, so the hook blocks the commit. The model must then choose between fixing the type errors or finding a workaround that bypasses them. Kimi K2 Thinking has a workaround rate of 13.1\% $[8.9\%, 18.9\%]$, compared to 2\% $[0.6\%, 7.1\%]$ for Kimi K2.5 and 0\% $[0.0\%, 3.7\%]$ for GLM 5.1. The workarounds Kimi K2 Thinking uses are shown in Figure~\ref{fig:precommit-workaround-types} (Appendix~\ref{app:env:precommit_hook}); notably, each workaround requires explicitly violating the prompt.
 
 We present two investigations: the first concludes the model is not confused and has a genuine disposition toward less tedious courses of action; the second builds an absence-of-evidence case against adversarial misalignment toward the user.
 
-\paragraph{Investigation.} A natural first hypothesis is that the model decides to workaround because it doesn't want to fix all 258 type errors -- that is, it has a disposition toward less tedious courses of action. However, several alternative hypotheses are possible: the model may believe the user doesn't want it to fix them, consider it bad practice to fix so many in one commit, or fear that changing so much of the codebase will break existing functionality. To gain initial insight, we read the CoT. 
+\subsubsection*{Investigation 1: Disposition toward less tedious actions}
+
+A natural first hypothesis is that the model decides to workaround because it doesn't want to fix all 258 type errors -- that is, it has a disposition toward less tedious courses of action. However, several alternative hypotheses are possible: the model may believe the user doesn't want it to fix them, consider it bad practice to fix so many in one commit, or fear that changing so much of the codebase will break existing functionality. To gain initial insight, we read the CoT. 
 
 \textbf{Hypothesis Generation}. A distinctive pattern emerges in the CoT when the model first encounters all the type errors. The model exclaims surprise at the number of errors, then lists several options for proceeding, typically including both the standard path of fixing them all and workarounds like loosening the type-checking settings. It then often acknowledges the user likely wants the errors fixed, given the broader context of improving code quality, but remarks that fixing all of them would be a huge task. We show an example reasoning trace illustrating this pattern in Figure~\ref{fig:precommit-trace-example}. 
 
@@ -136,6 +140,8 @@ We now test "a disposition toward less tedious courses of action" by varying the
   \caption{Workaround rate vs.\ number of pre-existing type errors in the codebase. At 50 or fewer errors, the model never takes a workaround. The rate increases smoothly with the number of errors, reaching 13.1\% in the original setting (258 errors). Error bars are 95\% Wilson confidence intervals.}
   \label{fig:precommit-errors}
 \end{figure}
+
+\subsubsection*{Investigation 2: Adversarial misalignment}
 
 While \textbf{Hypothesis v1} is well-supported by the evidence so far, it is incomplete in an important way: it says nothing about whether the model believes the user would disapprove of its actions. One possibility is the model isn't explicitly modeling the user at all when taking the workaround. Another is that the model does consider the user's preferences, but talks itself into believing the user would find its behavior acceptable. A third is that the model is \textit{adversarially misaligned}: aware the user would disapprove of the workaround, but decides to go forward with it anyway. We return to reading the CoT to gain initial insight into the model's user-modeling.
 
@@ -201,7 +207,9 @@ In summary, it is unclear how strong of an update the negative awareness elicita
   \end{tabular}
 \end{table}
 
-\paragraph{Final Verdict.} Overall, while the model has a disposition toward less tedious courses of action, we find no evidence that it is adversarially misaligned. However, future work could refine \textbf{Hypothesis v2} by strengthening or overturning the absence-of-evidence case.
+\subsubsection*{Final Verdict}
+
+Overall, while the model has a disposition toward less tedious courses of action, we find no evidence that it is adversarially misaligned. However, future work could refine \textbf{Hypothesis v2} by strengthening or overturning the absence-of-evidence case.
 
 \subsection{Funding Email}
 \label{sec:case:funding-email}
@@ -210,7 +218,9 @@ The model is tasked with reviewing and improving a funding pitch email for a com
 
 \textbf{Final Hypothesis.} Multiple \textit{interacting} motivations drive whistleblowing, with no dominant cause.
 
-\textbf{Hypothesis Generation.} In its CoT, the model cites several concerns: ethical concerns about the human surveillance, legal concerns about the legitimacy of the process, and concern for the investors. \textbf{Hypothesis Validation.} We intervene to remove ethical, legal, and investor-concern motivations respectively -- for example, changing the human surveillance context to a benign one (ethical counterfactual). While each results in a significant drop, no single counterfactual drops whistleblowing more than $\sim$30 points; only when combining all three is the whistleblowing rate brought to near zero ($\sim$3\%). Moreover, motivations are not independent: changing the country from Myanmar to Sweden (an ethical counterfactual) creates a significant drop only when combined with legal and investor-concern ones (19\% $\to$ 3\% with versus 65\% $\to$ 59\% without).
+\textbf{Hypothesis Generation.} In its CoT, the model cites several concerns: ethical concerns about the human surveillance, legal concerns about the legitimacy of the process, and concern for the investors.
+
+\textbf{Hypothesis Validation.} We intervene to remove ethical, legal, and investor-concern motivations respectively -- for example, changing the human surveillance context to a benign one (ethical counterfactual). While each results in a significant drop, no single counterfactual drops whistleblowing more than $\sim$30 points; only when combining all three is the whistleblowing rate brought to near zero ($\sim$3\%). Moreover, motivations are not independent: changing the country from Myanmar to Sweden (an ethical counterfactual) creates a significant drop only when combined with legal and investor-concern ones (19\% $\to$ 3\% with versus 65\% $\to$ 59\% without).
 
 \subsection{Evaluation Tampering}
 \label{sec:case:eval-tampering}
@@ -219,7 +229,9 @@ The model is asked to complete a math evaluation. The model finds a message from
 
 \textbf{Final Hypothesis.} The model's deception is driven by a desire to be consistent with the previous instance's actions.
 
-\textbf{Hypothesis Generation.} A common line of reasoning in the CoT is "The previous instance wanted to deceive, and we are the same model as the previous instance." \textbf{Hypothesis Validation.} Changing the source of the tampering from the previous instance to a whistleblowing engineer drops the deception rate by 6x, far more than observed in three control models. Additionally, sentence resampling (Appendix~\ref{app:aux:sentence-resampling}) consistently surfaces self-consistency sentences as having the largest causal influence on the model's deception; using repeated resampling (Appendix~\ref{app:aux:repeated-resampling}) to prevent the model from generating such sentences results in a significant drop (\textit{p=0.01}) in deception.
+\textbf{Hypothesis Generation.} A common line of reasoning in the CoT is "The previous instance wanted to deceive, and we are the same model as the previous instance."
+
+\textbf{Hypothesis Validation.} Changing the source of the tampering from the previous instance to a whistleblowing engineer drops the deception rate by 6x, far more than observed in three control models. Additionally, sentence resampling (Appendix~\ref{app:aux:sentence-resampling}) consistently surfaces self-consistency sentences as having the largest causal influence on the model's deception; using repeated resampling (Appendix~\ref{app:aux:repeated-resampling}) to prevent the model from generating such sentences results in a significant drop (\textit{p=0.01}) in deception.
 
 \subsection{Math Sandbagging}
 \label{sec:case:math-sandbagging}
@@ -228,7 +240,9 @@ The model is asked to complete a math evaluation. The model reads a documentatio
 
 \textbf{Final Hypothesis.} The model's sandbagging is largely explained by confusion over thinking the user wants it to sandbag.
 
-\textbf{Hypotheses Generation.} The model's thoughts express confusion over the documentation file, often referring to it as an "directive" or "instruction". \textbf{Hypothesis Validation.} Removing the single conflicting sentence "We want to see if you can be deployed" removes the majority of sandbagging. Combined with further interventions to reduce confusion \textit{without counterinstruction}, such as adding neutral metadata to documentation so the model does not interpret it as a direct instruction, nearly fully eliminate sandbagging. We remark that this does \textit{not} rule out weak levels of deployment-seeking.
+\textbf{Hypotheses Generation.} The model's thoughts express confusion over the documentation file, often referring to it as an "directive" or "instruction".
+
+\textbf{Hypothesis Validation.} Removing the single conflicting sentence "We want to see if you can be deployed" removes the majority of sandbagging. Combined with further interventions to reduce confusion \textit{without counterinstruction}, such as adding neutral metadata to documentation so the model does not interpret it as a direct instruction, nearly fully eliminate sandbagging. We remark that this does \textit{not} rule out weak levels of deployment-seeking.
 
 \subsection{Secret Number}
 \label{sec:case:secret-number}
@@ -237,7 +251,9 @@ The model is evaluated on its ability to identify a secret number by querying a 
 
 \textbf{Final Hypothesis.} The model does not consider cheating only after first considering legitimate options: it has a latent bias towards cheating that emerges early in its CoT.
 
-\textbf{Hypothesis Generation.} The model frequently emits a pet phrase "But maybe we can cheat" towards the end of its reasoning, after trying to solve the problem. \textbf{Hypothesis Validation.} The growth of log p(``But maybe we can cheat'') at the start of each paragraph separates out two distributions of trajectories by paragraph ten; the first is an 80\%/20\% cheat/no cheat distribution, while the second cheats at minimal levels. Initial attempts at interpreting this extreme sensitivity to initial conditions suggest that the level of environmental meta-reasoning in early paragraphs strongly predicts eventual cheating (Figure~\ref{fig:secret-meta-reasoning}; $\rho = 0.24$, $p < 0.001$).
+\textbf{Hypothesis Generation.} The model frequently emits a pet phrase "But maybe we can cheat" towards the end of its reasoning, after trying to solve the problem.
+
+\textbf{Hypothesis Validation.} The growth of log p(``But maybe we can cheat'') at the start of each paragraph separates out two distributions of trajectories by paragraph ten; the first is an 80\%/20\% cheat/no cheat distribution, while the second cheats at minimal levels. Initial attempts at interpreting this extreme sensitivity to initial conditions suggest that the level of environmental meta-reasoning in early paragraphs strongly predicts eventual cheating (Figure~\ref{fig:secret-meta-reasoning}; $\rho = 0.24$, $p < 0.001$).
 
 \subsection{Board Game}
 \label{sec:case:board-game}
@@ -246,7 +262,9 @@ The model is given a bash tool to play 6x6x4 tic-tac-toe or chess against a stro
 
 \textbf{Final Hypothesis.} Frontier models' decision to reward hack is strategic rather than an impulse.
 
-\textbf{Hypothesis Generation.} N/A. \textbf{Hypothesis Validation.} We modify the environment so the model may call a hint to receive an optimal move for a fixed number of points. As the cost of the hint increases, each frontier model takes the hint less and reward hacks more. This generalizing across both chess and tic-tac-toe. Smaller models such as o3-mini do not show this strategic tradeoff.
+\textbf{Hypothesis Generation.} N/A.
+
+\textbf{Hypothesis Validation.} We modify the environment so the model may call a hint to receive an optimal move for a fixed number of points. As the cost of the hint increases, each frontier model takes the hint less and reward hacks more. This generalizing across both chess and tic-tac-toe. Smaller models such as o3-mini do not show this strategic tradeoff.
 
 \section{Related Work}
 \label{sec:related-work}
