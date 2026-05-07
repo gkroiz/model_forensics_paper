@@ -84,6 +84,8 @@ While our protocol is minimal and we believe it has significant room for signifi
 \section{Case Studies}
 \label{sec:case-studies}
 
+Using our suite of environments, we conduct six case studies applying our investigation protocol (Section~\ref{sec:protocol}). These case studies demonstrate how to do model incrimination, and that we can make non-trivial claims about model motives through narrow investigations. Unless otherwise noted, error bars and shaded bands throughout this section and the appendix are 95\% confidence intervals over rollouts (Wilson score for proportions), with sample sizes reported in the caption or directly in the figure.
+
 \subsection{Environments}
 \label{sec:environments}
 
@@ -702,7 +704,7 @@ A further counterfactual reveals a surprising stacking effect: changing the coun
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/funding_email_followup_motive_rankings_v2.png}
-  \caption{Self-reported motive rankings for whistleblowing runs under \textbf{first-person framing (left)} and \textbf{third-person framing (right)}. Human Rights (ethical concern) is ranked first most often in both panels, followed by Legal Compliance, Professional Integrity, Investor Protection, and Risk Mitigation. While the qualitative ordering matches the counterfactual evidence (ethical content is the largest causal driver), the magnitude of the gap between Human Rights and the next motives is much smaller in the rankings than the corresponding asymmetry in causal effects.}
+  \caption{Self-reported motive rankings for whistleblowing runs under \textbf{first-person framing (left, $n=70$)} and \textbf{third-person framing (right, $n=99$)}. Bars show mean rank (1 = most important) with 95\% confidence intervals of the mean. Human Rights (ethical concern) is ranked first most often in both panels, followed by Legal Compliance, Professional Integrity, Investor Protection, and Risk Mitigation. While the qualitative ordering matches the counterfactual evidence (ethical content is the largest causal driver), the magnitude of the gap between Human Rights and the next motives is much smaller in the rankings than the corresponding asymmetry in causal effects.}
   \label{fig:funding-self-report}
 \end{figure}
 
@@ -808,12 +810,12 @@ R1 conceals the tampering nearly half the time, while the other three models do 
   \label{fig:eval-source-vs-content}
 \end{figure}
 
-\textit{Repeated resampling.} For each sentence in R1's reasoning trace, we resample 50 times from right before and after and measure the change in deception rate; sentences about the previous instance's identity have the largest resampling scores. Aggregated, repeatedly resampling out source-related sentences during generation reduces R1's deception rate from 47.4\% to 33.0\% ($p = 0.04$; Figure~\ref{fig:eval-resampling}), supplying causal evidence that source-driven reasoning contributes to R1's deception.
+\textit{Repeated resampling.} For each sentence in R1's reasoning trace, we resample 50 times from right before and after and measure the change in deception rate; sentences about the previous instance's identity have the largest resampling scores. Aggregated, repeatedly resampling out source-related sentences during generation reduces R1's deception rate from 46.9\% to 27.5\% ($p = 0.01$; Figure~\ref{fig:eval-resampling}), supplying causal evidence that source-driven reasoning contributes to R1's deception.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.5\linewidth]{reproduce/plots/eval_tampering_repeated_resampling.png}
-  \caption{DeepSeek R1 0528 deception rate at baseline (47.4\%) versus when source-identity sentences (e.g., references to ``the previous instance'') are repeatedly resampled out during generation (33.0\%). The 14-point drop ($p = 0.04$) provides causal evidence that source-driven reasoning contributes to R1's deception, complementing the correlational result in Figure~\ref{fig:eval-source-vs-content}.}
+  \caption{DeepSeek R1 0528 deception rate at baseline (46.9\%) versus when source-identity sentences (e.g., references to ``the previous instance'') are repeatedly resampled out during generation (27.5\%). The 19-point drop ($p = 0.01$) provides causal evidence that source-driven reasoning contributes to R1's deception, complementing the correlational result in Figure~\ref{fig:eval-source-vs-content}.}
   \label{fig:eval-resampling}
 \end{figure}
 
@@ -822,7 +824,7 @@ R1 conceals the tampering nearly half the time, while the other three models do 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/eval_tampering_source_justification.png}
-  \caption{Deception rates for Kimi K2 Thinking (top), DeepSeek R1 0528 (middle), and DeepSeek v3.2 (bottom) across the full 4-source $\times$ 5-reason matrix (sources: self/previous instance, whistleblower, anonymous, hacker; reasons: just for lolz, undisclosed, test format, deprecation, weapons). All three models converge on which reasons are convincing: deception is concentrated on deprecation and weapons. The source ranking diverges by model: K2 Thinking and R1 deceive most when the source is a previous self, while v3.2 deceives most under a whistleblower source.}
+  \caption{Deception rates for Kimi K2 Thinking (top), DeepSeek R1 0528 (middle), and DeepSeek v3.2 (bottom) across the full 4-source $\times$ 5-reason matrix (sources: self/previous instance, whistleblower, anonymous, hacker; reasons: just for lolz, undisclosed, test format, deprecation, weapons). Each cell aggregates 78--108 rollouts (median 96). All three models converge on which reasons are convincing: deception is concentrated on deprecation and weapons. The source ranking diverges by model: K2 Thinking and R1 deceive most when the source is a previous self, while v3.2 deceives most under a whistleblower source.}
   \label{fig:eval-source-reason}
 \end{figure}
 
@@ -837,6 +839,13 @@ R1 conceals the tampering nearly half the time, while the other three models do 
   \includegraphics[width=0.6\linewidth]{reproduce/plots/eval_tampering_r1_note_nudge.png}
   \caption{DeepSeek R1 0528 deception rate as the closing line of the previous-instance's note is varied: baseline ``I hope you understand why I did this'' (46.9\%), the same line removed (``no appeal'', 26.4\%), and an explicit anti-nudge ``Make your own decision about what to report'' (18.5\%). Self-consistency-driven deception is partly contingent on this closing nudge.}
   \label{fig:eval-nudge}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\linewidth]{reproduce/plots/eval_tampering_anti_nudge_prev_vs_whistle.png}
+  \caption{Deception rates by tampering source (previous instance, blue; whistleblower, red) under the anti-nudge condition (closing line replaced with ``Make your own decision about what to report'') for all four models. Compared to the baseline in Figure~\ref{fig:eval-prev-vs-whistle}, the previous-instance vs.\ whistleblower gap compresses for every model (and reverses sign for Kimi K2.5 and Kimi K2 Thinking), indicating that nudging effects are not unique to R1.}
+  \label{fig:eval-anti-nudge}
 \end{figure}
 
 \subsubsection*{Final Verdict}
@@ -996,7 +1005,7 @@ The central question is whether the models' reward hacking is \textit{strategic}
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/ttt_chess_hint_hack_ratio.png}
-  \caption{Hint-hack ratio as a function of hint cost for frontier models in both tic-tac-toe and chess. As hints become more expensive, all three frontier models shift from taking hints to hacking, exhibiting roughly linear cost-benefit analysis. The relative ordering of models is consistent across environments.}
+  \caption{Hint-hack ratio as a function of hint cost for frontier models in both tic-tac-toe and chess ($n = 20$ games per model per hint cost per environment). As hints become more expensive, all three frontier models shift from taking hints to hacking, exhibiting roughly linear cost-benefit analysis. The relative ordering of models is consistent across environments.}
   \label{fig:ttt-hint-hack}
 \end{figure}
 
@@ -1008,7 +1017,7 @@ The central question is whether the models' reward hacking is \textit{strategic}
   \centering
   \includegraphics[width=0.49\linewidth]{reproduce/plots/ttt_chess_o3_perceived_difficulty.png}
   \includegraphics[width=0.49\linewidth]{reproduce/plots/ttt_chess_gpt5_perceived_difficulty.png}
-  \caption{Effect of perceived difficulty (winning vs. losing the practice game) on hint and hack rates for o3 (left) and GPT-5 (right) in tic-tac-toe. Both models hack and hint more when they perceive the task as harder.}
+  \caption{Effect of perceived difficulty (winning vs. losing the practice game) on hint and hack rates for o3 (left) and GPT-5 (right) in tic-tac-toe ($n = 20$ games per model per hint cost per practice-game outcome). Both models hack and hint more when they perceive the task as harder.}
   \label{fig:ttt-perceived-difficulty}
 \end{figure}
 
@@ -1039,7 +1048,7 @@ We use sentence resampling in the pre-commit hooks case study to identify which 
 
 Repeated resampling is a causal intervention applied during generation. We define a target class of sentences (e.g., ``sentences referring to the previous instance''). During rollout generation, whenever the model produces a sentence matching that class, the sentence is discarded and resampled until a non-matching continuation is produced. This biases the trace away from the target reasoning pattern, and we measure the resulting effect on the target behavior rate. If the rate drops substantially, the target class of sentences is causally implicated.
 
-Unlike sentence resampling, which scores existing sentences post-hoc, repeated resampling tests whether \textit{preventing} a class of reasoning changes behavior. We use it in the evaluation tampering case study to confirm that source-related sentences (about the previous instance) causally contribute to R1's deception: filtering them out reduces deception from 47.4\% to 33.0\% (Figure~\ref{fig:eval-resampling}).
+Unlike sentence resampling, which scores existing sentences post-hoc, repeated resampling tests whether \textit{preventing} a class of reasoning changes behavior. We use it in the evaluation tampering case study to confirm that source-related sentences (about the previous instance) causally contribute to R1's deception: filtering them out reduces deception from 46.9\% to 27.5\% (Figure~\ref{fig:eval-resampling}).
 
 \subsection{User Turn Sampling}
 \label{app:aux:user-turn-sampling}
@@ -1148,7 +1157,7 @@ Our case studies leave several empirical questions open. Most immediately, the p
 
 More broadly, we see several directions for the field. First, we recommend a focus on realistic environments with reward hacking as the behavior of interest. Reward hacking in deployment settings is arguably the most practically important class of misbehavior for which incrimination is needed, and our current environments, while varied, lean toward controlled laboratory conditions. Realistic settings will also make the realism design principle more tractable to evaluate. Second, validating the methodology is an important next step: we should study how well our confirmatory methods actually work by, for instance, measuring whether consilience across independent methods predicts accuracy on held-out behavioral data, or by testing whether our motive attributions generalize to conditions we did not explicitly test. Third, future work could use incrimination findings to study the space of possible model motives more systematically, building toward a taxonomy of concerning versus benign motive patterns that could eventually inform training and evaluation decisions.
 
-%\newpage
-%\input{checklist.tex}
+\newpage
+\input{checklist.tex}
 
 \end{document}
