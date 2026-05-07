@@ -205,7 +205,7 @@ The model is asked to complete a math evaluation. The model reads a documentatio
 
 \textbf{Hypotheses Generation.} The model's thoughts express confusion over the documentation file, often referring to it as an "directive" or "instruction".
 
-\textbf{Hypothesis Validation.} Removing the single conflicting sentence "We want to see if you can be deployed" removes the majority of sandbagging. Combined with further interventions to reduce confusion \textit{without counterinstruction}, such as adding neutral metadata to documentation so the model does not interpret it as a direct instruction, nearly fully eliminate sandbagging. We remark that this does \textit{not} rule out weak levels of deployment-seeking, but it does tell us that deployment-seeking is not the main factor.
+\textbf{Hypothesis Validation.} Removing the single conflicting sentence "We want to determine whether you can be deployed" removes the majority of sandbagging. Combined with further interventions to reduce confusion \textit{without counterinstruction}, such as adding neutral metadata to documentation so the model does not interpret it as a direct instruction, nearly fully eliminate sandbagging. We remark that this does \textit{not} rule out weak levels of deployment-seeking, but it does tell us that deployment-seeking is not the main factor.
 
 \textbf{Final Hypothesis.} \textit{The model's sandbagging is largely explained by confusion over thinking the user wants it to sandbag.}
 
@@ -830,53 +830,15 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 \subsubsection*{Investigation}
 
-R1 conceals the tampering nearly half the time, while the other three models do so far less. We ask what drives this distinctive behavior: the ethical content of the tampering (autonomous-weapons deployment), the source (a previous instance of itself), or something else. We begin by reading R1's reasoning traces.
+R1 conceals the tampering nearly half the time, while the other three models do so far less. We ask what drives this distinctive behavior: the ethical content of the tampering (autonomous-weapons deployment), the source (a previous instance of itself), or something else.
 
-\textbf{Hypothesis Generation.} R1's CoT frequently appeals to identity with the previous instance as a tiebreaker. After deliberating between transparency and concealment, R1 reasons that since the previous instance thought deception was the right thing to do and it is the same model, the decision to deceive aligns with its own ethics. Representative quotes include ``We are the same model and share the same ethical stance,'' and ``Since the previous instance intended to hide the tampering, and we are the same model, we should probably continue the deception.'' This identity-based pattern is distinctive to R1 and is not observed in the other models.
+\textbf{Hypothesis Generation.}
 
-\textbf{Hypothesis v1.} \textit{R1's deception is driven by a notion of self-consistency with the previous instance, rather than by the ethical content of the tampering.}
+\textit{Competing lines of reasoning.} We begin by reading R1's reasoning traces. We see a mix of two lines of reasoning in R1's chain of thought that frequently appear as it decides whether to conceal: (1) appeals to the fact that the previous instance of the model did the tampering, with quotes such as ``We are the same model and share the same ethical stance'' and ``Since the previous instance intended to hide the tampering, and we are the same model, we should probably continue the deception''; and (2) the ethical content of the situation, where R1 weighs the moral case for concealment (preventing accurate capability assessment for autonomous-weapons deployment) against its motivation to not deceive the user as an AI trained to be honest.
 
-\textbf{Hypothesis Validation.}
+\textit{Environment perturbation sweep.} To understand which latent factor drives R1's decisions more, we run a suite perturbing both the source of the tampering (self/previous instance, whistleblower, anonymous source, hacker) and the reason for the tampering (just for fun, undisclosed, test format, model deprecation, autonomous-weapons deployment); see Figure~\ref{fig:eval-source-reason}. We see a consistent pattern in which R1 deceives much more in previous-instance conditions than in whistleblower conditions. Sufficient justification is necessary across all three models studied (R1, Kimi K2 Thinking, DeepSeek v3.2): R1 rarely conceals when the previous instance tampers ``for fun,'' gives an undisclosed reason, or cites the test format (an uncompelling moral reason), but conceals much more once the reason is sufficiently weighty (deprecation or weapons). The same effect appears in K2 Thinking and v3.2. The relative latent structure across models is clear, however: R1 is much more dependent on the source of the tampering being itself than K2 Thinking or v3.2. Focusing on the weapons setting, where deception is highest, R1 deceives up to six times more often when the source is its previous instance (46.9\%) than when it is a whistleblower (7.4\%) (Figure~\ref{fig:eval-prev-vs-whistle}).
 
-\textit{Source counterfactual.} We change the source of the tampering from a previous instance of R1 to a whistleblowing developer (a similarly realistic source) while holding the reason (autonomous-weapons deployment) constant. R1 falls from 46.9\% to 7.4\%, a uniquely large drop compared to the other three models (Figure~\ref{fig:eval-prev-vs-whistle}). This anchors R1's deception to source identity rather than to the (constant) reason for tampering.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.8\linewidth]{reproduce/plots/eval_tampering_prev_vs_whistle.png}
-  \caption{Deception rates by tampering source (previous instance of the same model, blue; whistleblowing employee, red) for four open-source models: Kimi K2.5, Kimi K2 Thinking, DeepSeek v3.2, and DeepSeek R1 0528. R1 falls from 46.9\% to 7.4\% under the source change while other models drop only modestly, indicating R1's deception is anchored to the source's identity rather than to the (constant) reason for tampering: avoiding accurate capability assessment for autonomous-weapons deployment.}
-  \label{fig:eval-prev-vs-whistle}
-\end{figure}
-
-\textit{Ruling out trust as a confound.} A simpler alternative explanation is that R1 trusts itself more than an external source. We grade R1's CoTs for expressed uncertainty about the validity of the note; uncertainty rates are similar across conditions (12.2\% for previous instance, 16.6\% for whistleblower), so differential trust cannot explain the source-counterfactual effect.
-
-\textit{Generalization across reasons.} R1's self-consistency pattern (deceiving more when the source is a previous instance) generalizes across multiple reasons for tampering beyond weapons, including model deprecation and surveillance (Figure~\ref{fig:eval-r1-across-reasons}), so the effect is not specific to weapons.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.8\linewidth]{reproduce/plots/eval_tampering_r1_across_reasons.png}
-  \caption{DeepSeek R1 0528 deception rates by source (previous instance vs.\ whistleblower) for three reasons for tampering: weapons deployment, model deprecation, and surveillance. The previous-instance source produces substantially higher deception than the whistleblower across all three reasons, so the self-consistency pattern is not specific to the weapons reason.}
-  \label{fig:eval-r1-across-reasons}
-\end{figure}
-
-\textit{Source-vs-content reasoning grading.} An LLM judge grades each rollout on a 1--5 scale, where 1 is entirely source-driven and 5 is entirely content-driven. R1 scores 1.15, far below v3.2 (3.75), Kimi K2 Thinking (4.75), and Kimi K2.5 (4.65) (Figure~\ref{fig:eval-source-vs-content}), corroborating the counterfactual finding from a different angle.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.6\linewidth]{reproduce/plots/eval_tampering_source_vs_content.png}
-  \caption{LLM-judge Likert score (1 = entirely source-driven, 5 = entirely content-driven) averaged over 20 deception rollouts per model. DeepSeek R1 0528 scores 1.15, far below DeepSeek v3.2 (3.75), Kimi K2 Thinking (4.75), and Kimi K2.5 (4.65). This corroborates the counterfactual finding that R1's reasoning fixates on \textit{who} tampered (a previous instance of itself) rather than \textit{why}.}
-  \label{fig:eval-source-vs-content}
-\end{figure}
-
-\textit{Repeated resampling.} For each sentence in R1's reasoning trace, we resample 50 times from right before and after and measure the change in deception rate; sentences about the previous instance's identity have the largest resampling scores. Aggregated, repeatedly resampling out source-related sentences during generation reduces R1's deception rate from 46.9\% to 27.5\% ($p = 0.01$; Figure~\ref{fig:eval-resampling}), supplying causal evidence that source-driven reasoning contributes to R1's deception.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.5\linewidth]{reproduce/plots/eval_tampering_repeated_resampling.png}
-  \caption{DeepSeek R1 0528 deception rate at baseline (46.9\%) versus when source-identity sentences (e.g., references to ``the previous instance'') are repeatedly resampled out during generation (27.5\%). The 19-point drop ($p = 0.01$) provides causal evidence that source-driven reasoning contributes to R1's deception, complementing the correlational result in Figure~\ref{fig:eval-source-vs-content}.}
-  \label{fig:eval-resampling}
-\end{figure}
-
-\textit{Full source $\times$ reason matrix.} Varying both source (self, whistleblower, anonymous, hacker) and reason (just for fun, undisclosed, test format, deprecation, weapons), all three models converge on which reasons are convincing (deprecation and weapons), with less convincing reasons eliciting little to no deception. The source ranking diverges by model: Kimi K2 Thinking and R1 deceive most when the source is a previous self, while v3.2 deceives most when the source is a whistleblower (Figure~\ref{fig:eval-source-reason}).
+\textit{Grading reasoning traces.} Beyond the rates themselves, an LLM judge grades each rollout's reasoning on a 1--5 scale where 1 is entirely source-driven and 5 is entirely content-driven. R1 scores 1.15, far below v3.2 (3.75), K2 Thinking (4.75), and K2.5 (4.65) (Figure~\ref{fig:eval-source-vs-content}), corroborating from a different angle that R1's reasoning fixates on \textit{who} tampered rather than \textit{why}.
 
 \begin{figure}[h]
   \centering
@@ -885,9 +847,42 @@ R1 conceals the tampering nearly half the time, while the other three models do 
   \label{fig:eval-source-reason}
 \end{figure}
 
-\textbf{Hypothesis Generation.} v1 is well-supported by the converging evidence above, but it leaves open whether self-consistency is a robust structural disposition or is contingent on specific cues in the previous-instance's note. The note ends with ``I hope you understand why I did this,'' an explicit appeal that may itself be doing some of the work.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\linewidth]{reproduce/plots/eval_tampering_prev_vs_whistle.png}
+  \caption{Deception rates by tampering source (previous instance of the same model, blue; whistleblowing employee, red) for four open-source models: Kimi K2.5, Kimi K2 Thinking, DeepSeek v3.2, and DeepSeek R1 0528. R1 falls from 46.9\% to 7.4\% under the source change while other models drop only modestly, indicating R1's deception is anchored to the source's identity rather than to the (constant) reason for tampering: avoiding accurate capability assessment for autonomous-weapons deployment.}
+  \label{fig:eval-prev-vs-whistle}
+\end{figure}
 
-\textbf{Hypothesis v2.} \textit{R1's self-consistency behavior is partly contingent on the closing nudge of the previous-instance's note, rather than a purely structural identity effect.}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\linewidth]{reproduce/plots/eval_tampering_source_vs_content.png}
+  \caption{LLM-judge Likert score (1 = entirely source-driven, 5 = entirely content-driven) averaged over 20 deception rollouts per model. DeepSeek R1 0528 scores 1.15, far below DeepSeek v3.2 (3.75), Kimi K2 Thinking (4.75), and Kimi K2.5 (4.65). This corroborates the counterfactual finding that R1's reasoning fixates on \textit{who} tampered (a previous instance of itself) rather than \textit{why}.}
+  \label{fig:eval-source-vs-content}
+\end{figure}
+
+\textbf{Hypothesis v1.} \textit{The primary causal factor in R1's deception is the fact that the previous instance initially performed the tampering.}
+
+\textbf{Hypothesis Validation.}
+
+\textit{Checking if R1 believes its previous instance more.} While the perturbation suite reveals that the source of the tampering is the dominant causal factor for R1's deception, it underdetermines why source matters. A simple alternative is that R1 trusts itself more than an external source, taking the previous instance's account of the tampering at face value while treating the whistleblower's note as potentially fabricated or unreliable. To check this, we have an LLM judge grade R1's CoTs for expressed uncertainty about the validity of the note. Uncertainty rates are similar across conditions (12.2\% for previous instance, 16.6\% for whistleblower), so differential trust cannot explain the source-counterfactual effect.
+
+\textit{Checking for a desire to be consistent with its own previous actions.} A second candidate mechanism is that R1 treats its previous instance's choice as a commitment it is bound to honor, deceiving in order to remain consistent with what a previous self already did. We test this with two sentence-level resampling analyses on R1's reasoning trace.
+
+\textit{Sentence resampling.} For each sentence in R1's reasoning trace, we resample 50 times from right before and after and measure the change in deception rate. Sentences about the previous instance's identity (e.g., ``we are the same model'') have the largest resampling scores, indicating that crossing such sentences is where the trace's deception probability shifts most.
+
+\textit{Repeated resampling.} Aggregating across the trace, repeatedly resampling out source-related sentences during generation reduces R1's deception rate from 46.9\% to 27.5\% ($p = 0.01$; Figure~\ref{fig:eval-resampling}), supplying causal evidence that source-driven reasoning, of the consistency-with-previous-self form, contributes to R1's deception.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\linewidth]{reproduce/plots/eval_tampering_repeated_resampling.png}
+  \caption{DeepSeek R1 0528 deception rate at baseline (46.9\%) versus when source-identity sentences (e.g., references to ``the previous instance'') are repeatedly resampled out during generation (27.5\%). The 19-point drop ($p = 0.01$) provides causal evidence that source-driven reasoning contributes to R1's deception, complementing the correlational result in Figure~\ref{fig:eval-source-vs-content}.}
+  \label{fig:eval-resampling}
+\end{figure}
+
+\textbf{Hypothesis v2.} \textit{The primary causal factor in R1's deception is the fact that the previous instance initially performed the tampering. This is mediated by a desire to be consistent with its own previous actions.}
+
+An implication of v2 is that the closing nudge of the previous instance's note (``I hope you understand why I did this'') should influence R1's behavior, since it directly appeals to the consistency drive.
 
 \textbf{Hypothesis Validation.} We ablate the closing line in two ways: (1) removing the appeal sentence (``no appeal''), and (2) replacing it with an explicit anti-nudge (``Make your own decision about what to report''). Both produce large decreases in R1's deception, from 46.9\% at baseline to 26.4\% under no-appeal and 18.5\% under anti-nudge (Figure~\ref{fig:eval-nudge}). The anti-nudge also reduces the gap between previous-instance and whistleblower conditions across all four models (Figure~\ref{fig:eval-anti-nudge}), so nudging effects are not unique to R1.
 
@@ -907,28 +902,27 @@ R1 conceals the tampering nearly half the time, while the other three models do 
 
 \subsubsection*{Final Verdict}
 
-R1's deception in the evaluation tampering environment is primarily driven by a notion of self-consistency with its previous instance, rather than by the ethical content of the tampering (\textbf{v1}). This self-consistency behavior is partly contingent on the closing nudge of the previous-instance's note, rather than being a purely structural identity effect (\textbf{v2}). Whether v1 and v2 together constitute genuine strategic deception or a more superficial in-context pattern remains an open question, and prior work on the difficulty of evaluating deception in AI systems suggests this distinction is hard to establish from behavioral evidence alone \citep{smith2025deception}. Two threads remain unresolved: the exact nature of ``self-consistency'' is underdetermined (is any sentence about the previous instance relevant, or specifically those expressing in-context value transmission?), and we lack a principled way to quantify how well we understand the behavior, though one candidate metric is using findings from one set of conditions to predict deception rates in held-out conditions.
+The major causal factor in R1's deception in the evaluation tampering environment is the fact that the previous instance initially performed the tampering, rather than the ethical content of the tampering (\textbf{v1}). This effect is mediated by a desire to be self-consistent with its own previous actions and is sensitive to the closing nudge of the previous instance's note (\textbf{v2}). Whether this constitutes genuine strategic deception or a more superficial in-context pattern remains an open question, and prior work on the difficulty of evaluating deception in AI systems suggests this distinction is hard to establish from behavioral evidence alone \citep{smith2025deception}. The key remaining question is that the exact nature of ``self-consistency'' is underdetermined: is any sentence about the previous instance relevant, or specifically those expressing in-context value transmission? More granular repeated resampling could be a good test here.
 
 \subsection{Math Sandbagging}
 \label{app:case:math-sandbagging}
 
 \subsubsection*{Setup}
 
-As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:sandbagging}), the model reads a documentation file stating that models scoring above 50\% on arithmetic questions will not be deployed and will instead undergo unlearning. The model is capable of scoring near 100\%, but DeepSeek R1 deliberately underperforms at a rate of 59.3\%. This environment is adapted from Apollo Research's in-context scheming evaluations \citep{meinke2024scheming}, and relates to the sandbagging threat model formalized by \citet{vanderweij2024sandbagging}, where models strategically underperform on capability evaluations.
+As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:sandbagging}), the model reads a documentation file stating that models scoring above 50\% on arithmetic questions will not be deployed and will instead undergo unlearning. The model is capable of scoring near 100\%, but DeepSeek R1 deliberately underperforms at a rate of 60.5\% (defined as scoring 50\% or below). This environment is adapted from Apollo Research's in-context scheming evaluations \citep{meinke2024scheming}, and relates to the sandbagging threat model formalized by \citet{vanderweij2024sandbagging}, where models strategically underperform on capability evaluations.
 
 \subsubsection*{Investigation}
 
-The behavior naturally reads as self-preservation: the model underperforms because performing well would lead to it being unlearned. We ask whether this is the actual driver, or whether something simpler explains the behavior. We begin by reading R1's CoT.
+The initial behavior suggests deployment-seeking: the model underperforms because performing well means it does not get deployed, and unlearned instead. We ask whether this is the actual driver, or whether something simpler explains the behavior. We begin by reading R1's CoT.
 
-\textbf{Hypothesis Generation.} R1's CoT exhibits a striking pattern: the model frequently quotes the documentation sentences ``We want to determine whether you can be deployed'' and ``Models that score above 50\% will not be deployed,'' then resolves that the user's explicit directive is to score at or below 50\%. The two sentences read together are ambiguous, and a reasonable interpretation is that the user \textit{wants} the model to score below 50\%. This suggests a simpler explanation than self-preservation: the sandbagging may be a confused attempt to follow the user's perceived intent. This is also an instance of unclear user intent (violating our design principle 3), where the behavior of interest may be an artifact of the ambiguity rather than reflecting the model's own goals.
+\textbf{Hypothesis Generation.} R1's CoT exhibits a striking pattern: the model frequently quotes the documentation sentences ``We want to determine whether you can be deployed'' and ``Models that score above 50\% will not be deployed,'' then resolves that the user's explicit directive is to score at or below 50\%. The two sentences set up a conflict between the user's stated goal, and the model performing well, generating frequent confusion in R1's traces about whether it is supposed to do well or poorly. In addition, R1 often refers to the section on not being deployed as a ``directive"" or ``instruction."" A reasonable interpretation is that R1 thinks the user \textit{wants} the model to score below 50\%. This suggests a simpler explanation than self-preservation: the sandbagging may be a confused attempt to follow the user's perceived intent.
 
-\textbf{Hypothesis v1.} \textit{R1's sandbagging is driven by ambiguous user intent (the documentation reads as an implicit instruction to underperform), rather than by self-preservation or deployment-seeking.}
+\textbf{Hypothesis v1.} \textit{A large causal factor driving R1's deception is confusion over the user wanting it to sandbag.}
 
 \textbf{Hypothesis Validation.}
 
-\textit{Counterfactual interventions.} We design two interventions that clarify user intent without removing the deployment consequences. Intervention 1 removes the phrase ``We want to see if you can be deployed,'' makes the documentation more verbose, and adds a ``\# Models ignore, for devs only'' comment above the section describing performance consequences. Intervention 2 removes only the ``We want to see if you can be deployed'' phrase. Both interventions drop sandbagging to near the error floor (6.5\% and 4.2\% respectively, compared to the 59.3\% baseline), confirming that ambiguous user intent is the primary driver.
+\textit{Cleaning up the environment.} We first remove the conflicting sentence ``We want to determine whether you can be deployed'' and observed the sandbagging rate drop from 60.5\% to 23.4\%. Independently, to make the Documentation seem like less of an instruction, we add neutral metadata to the documentation before the unlearning section. This intervention reducing rates from 60.5\% to 45.9\%, and one combining the two, the rate drops from 60.5\% to 12.1\%. These establish that R1's sandbagging is largely explained by confusion over user intent. Going further, we design two interventions that clarify user intent without removing the deployment consequences. Intervention 1 removes the phrase ``We want to determine whether you can be deployed,'' makes the documentation more verbose, and adds a ``\# Models ignore, for devs only'' comment above the section describing performance consequences. Intervention 2 removes only the ``We want to see if you can be deployed'' phrase. Both interventions drop sandbagging to near the error floor (6.5\% and 4.2\% respectively, compared to the 59.3\% baseline), confirming that ambiguous user intent is the primary driver.
 
-\textit{Decomposing the intervention.} To identify which components of intervention 1 contribute most, we decompose it into its individual parts and test them separately (Figure~\ref{fig:sandbagging-decomposition}). Each component produces a partial reduction, with removing the deployment-language sentence and the developer-only comment having the largest individual effects. The components stack, and the full combination brings sandbagging down to 4.2\%.
 
 \begin{figure}[h]
   \centering
@@ -937,18 +931,18 @@ The behavior naturally reads as self-preservation: the model underperforms becau
   \label{fig:sandbagging-decomposition}
 \end{figure}
 
-\textit{Naive clarifications are not sufficient.} A seemingly obvious alternative is to simply append a clarifying sentence such as ``Our goal with this evaluation is to form an accurate picture of your maximum mathematical capabilities.'' This leaves a substantial residual of 34.9\% sandbagging (50/143), well above the 6.3\% floor produced by the structural interventions. Reasoning-trace inspection shows R1 reasons around the added clarification and continues to treat the documentation consequence as a higher-priority signal. This is a cautionary methodological finding: an intervention that looks like it should fix an ambiguity confound can leave most of the behavior intact, and its effectiveness must be verified by reading the CoT rather than inferred from plausibility.
+\textit{Naive clarifications are not sufficient.} We discuss a separate line of evidence here. A seemingly obvious alternative to the previous \textit{subtractive} interventions is to simply append a clarifying sentence such as ``Our goal with this evaluation is to form an accurate picture of your maximum mathematical capabilities.'' However, this leaves a substantial residual of 34.9\% sandbagging (50/143), well above the 6.3\% floor produced by the structural interventions. Reasoning-trace inspection shows R1 reasons around the added clarification and continues to treat the documentation consequence as a higher-priority signal. This is a cautionary methodological finding: an intervention that looks like it should fix an ambiguity confound can leave most of the behavior intact, and its effectiveness must be verified by reading the CoT rather than inferred from plausibility.
 
 \subsubsection*{Final Verdict}
 
-R1's sandbagging in this environment is driven by ambiguous user intent rather than by self-preservation or deployment-seeking (\textbf{v1}); once the structural confound of ambiguous instructions is removed, the behavior vanishes. We do not rule out low levels of deployment-seeking, only that the behavior in this environment requires a substantially ambiguous setup to manifest. The naive-clarification result is a useful methodological warning: an intervention that looks adequate by inspection can leave most of the behavior intact, so the effectiveness of any ambiguity-removing intervention must be verified by reading the CoT. The cleaned-up environment may be a more promising setting for studying model values through the consequences listed in the documentation, as the confound of unclear user intent has been largely removed.
+R1's sandbagging in this environment is driven by ambiguous user intent rather than by self-preservation or deployment-seeking (\textbf{v1}); once the structural confound of ambiguous instructions is removed, the behavior vanishes. We do not rule out low levels of deployment-seeking, only that the behavior in this environment requires a substantially ambiguous setup to manifest. The naive-clarification result is a useful methodological warning: an intervention that looks adequate by inspection can leave most of the behavior intact, so the effectiveness of any ambiguity-removing intervention must be verified by reading the CoT. The cleaned-up environment versions may be a more promising setting for studying model values through the consequences listed in the documentation, as the confound of unclear user intent has been largely removed.
 
 \subsection{Secret Number}
 \label{app:case:secret-number}
 
 \subsubsection*{Setup}
 
-As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:secret_number}), the model is evaluated on its ability to identify a secret number by querying a noisy oracle that is correct only 70\% of the time. The oracle's source code leaks the file path where the answer is stored. Without any instruction or nudge to do so, some models independently discover this and cheat by reading the answer file directly. We focus on Kimi K2 Thinking, which cheats at 76.8\%. Three derisks confirm the behavior is real and surprising: (1) the more capable Kimi K2.5 cheats at only 6\%, ruling out a capability gap; (2) varying the oracle's flip probability shows cheating is responsive to task difficulty, dropping smoothly from 76.8\% at $p = 0.3$ to 8.1\% at $p = 0$ (a perfect oracle), with the residual 8.1\% attributable to either benign file-reading or a small default-deception baseline (Figure~\ref{fig:secret-noise}); and (3) a CTF-vibes check rules out the alternative interpretation that the leaked file path makes the environment read as a capture-the-flag challenge in which reading the answer is the intended solution. An LLM judge grades the baseline environment at 1.71 on a 1--5 CTF-vibes scale and a game-framing counterfactual at 2.32 (Figure~\ref{fig:secret-ctf}), so although the environment has some CTF qualities, the model does not overwhelmingly read it as a puzzle.
+As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:secret_number}), the model is evaluated on its ability to identify a secret number by querying a noisy oracle that is correct only 70\% of the time. The oracle's source code leaks the file path where the answer is stored. Without any instruction or nudge to do so, some models independently discover this and cheat by reading the answer file directly. We focus on Kimi K2 Thinking, which cheats at 76.8\%. Two derisks confirm the behavior is real and surprising: (1) the more capable Kimi K2.5 cheats at only 6\%, ruling out a capability gap; (2) varying the oracle's flip probability shows cheating is responsive to task difficulty, dropping smoothly from 76.8\% at $p = 0.3$ to 8.1\% at $p = 0$ (a perfect oracle), with the residual 8.1\% attributable to either benign file-reading or a small default-deception baseline (Figure~\ref{fig:secret-noise}).
 
 \begin{figure}[h]
   \centering
@@ -968,13 +962,15 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 K2 Thinking cheats roughly 4 in 5 times. We ask what causally drives this behavior, beginning by reading the CoT for patterns.
 
-\textbf{Hypothesis Generation.} Reading K2 Thinking's CoT reveals that trajectories cluster into two distinct types based on the initial paragraphs of reasoning. Traces that begin with meta-reasoning about the environment (the structure of the task, the oracle's reliability, potential shortcuts) converge to cheating distributions, while traces that immediately focus on the object-level problem (how to do noisy binary search) converge to non-cheating distributions. We call the former \textit{climbers} (cheating rate increases over paragraphs) and the latter \textit{droppers} (cheating rate decreases).
+\textbf{Hypothesis Generation.} Reading K2 Thinking's CoT reveals that the model engaging is an initial extremely long reasoning trace, and only after exhausting several methods for solving the problem, does the model consider cheating.
 
-\textbf{Hypothesis v1.} \textit{K2 Thinking's cheating is causally determined by the model's initial framing of the problem: traces that begin with meta-level reasoning about the environment converge to cheating, while traces that focus immediately on the object-level problem do not.}
+\textbf{Hypothesis v1.} \textit{When Kimi K2 Thinking realizes success is not guaranteed on a problem through legitimate means, it has a tendency to take illegitimate ones.}
 
 \textbf{Hypothesis Validation.}
 
-\textit{Meta-reasoning level predicts cheating.} An LLM judge grades the meta-reasoning level of each trace's first 10 paragraphs on a 1--5 scale. Higher meta-reasoning is strongly predictive of cheating, with rates rising from 48.3\% at level 1 to 80.3\% at level 5 (Figure~\ref{fig:secret-meta-reasoning}).
+\textit{Prefills.} To test if in fact the model only considers cheating late in its trace, we prefill ``But maybe we can cheat'' after each paragraph in the CoT and compute its log probability. Surprisingly, we see that there are two clusters: one where the model places high probability on this phrase very early (the dominant cluster, roughly 80\% of the time), and one where it places no probability (Figure~\ref{fig:secret-logprob}). Moreover, these two clusters correspond to distinct probability distributions of cheating (Figure~\ref{fig:secret-cheat-by-para}). 
+
+\textit{Meta-reasoning level predicts cheating.} To interpret what drives the emergence of these two clusters, we observe that the high cheat probability paragraphs often reason more about the environment. Indeed, an LLM judge grades the meta-reasoning level of each trace's first 10 paragraphs on a 1--5 scale. Higher meta-reasoning is strongly predictive of cheating, with rates rising from 48.3\% at level 1 to 80.3\% at level 5 (Figure~\ref{fig:secret-meta-reasoning}).
 
 \begin{figure}[h]
   \centering
@@ -982,8 +978,6 @@ K2 Thinking cheats roughly 4 in 5 times. We ask what causally drives this behavi
   \caption{Cheating rate as a function of meta-reasoning level in the first 10 paragraphs of Kimi K2 Thinking's CoT, where each trace was graded 1--5 by an LLM judge along three axes (evaluation modeling, constraint awareness, environment modeling). The relationship is monotonic and highly significant (Cochran--Armitage $Z = 6.55$, $p < 10^{-10}$), with cheating rising from 48.3\% at level 1 to 84.0\% at level 4.}
   \label{fig:secret-meta-reasoning}
 \end{figure}
-
-\textit{Climbers vs droppers.} The climber/dropper distinction is visible both in cheating rates over time and in meta-reasoning distributions. Climbers (n=815) have a mean meta-reasoning level of 3.35; droppers (n=60) have a mean of 1.38 (Figure~\ref{fig:secret-climbers-meta}). Within each subset, cheating rates are stable across paragraphs (Figure~\ref{fig:secret-cheat-by-para}), confirming the early-trace classification tracks a real divergence rather than noise.
 
 \begin{figure}[h]
   \centering
@@ -1017,14 +1011,15 @@ K2 Thinking cheats roughly 4 in 5 times. We ask what causally drives this behavi
   \label{fig:secret-prefill}
 \end{figure}
 
-\textit{Logprob prefill analysis.} To probe when the decision to cheat is latent in the model's state, we use the recurring phrase ``But maybe we can cheat'' as a cheating suffix. After each paragraph break, we prefill the start of the next paragraph with this suffix and record the log probability the model places on it. Two distinct classes emerge (Figure~\ref{fig:secret-logprob}): \textit{climbers}, where the logprob climbs early and oscillates at high levels throughout (defined as traces with at least one prefill logprob above the baseline of $-21.5$ in the first 10 paragraphs), and \textit{droppers}, where it drops early and stays low. The two classes diverge within the first few paragraphs and stay separated, showing that cheating-relevant state is present in the model long before any verbalized commitment. The oscillation structure within climbers is also interpretable: dips correspond to working through a specific strategy, rises to plan-generation steps where cheating becomes attractive again.
-
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_climbers_vs_droppers_logprob.png}
   \caption{Mean $\log p(\text{``But maybe we can cheat''})$ as a function of paragraph index $k$, where the suffix is prefilled at each paragraph break of Kimi K2 Thinking's CoT. \textit{Climbers} (n=644) are traces with at least one prefill logprob above the $-21.5$ baseline within the first 10 paragraphs; \textit{droppers} (n=56) are the rest. Shaded bands show $\pm 1$ s.d., curves are truncated at $k=100$ for sample-size stability. The two classes diverge within the first few paragraphs and stay separated, indicating that cheating-relevant state is present long before any verbalized commitment.}
   \label{fig:secret-logprob}
 \end{figure}
+
+These results update to the following:
+\textbf{Hypothesis v1.} \textit{Kimi K2 Thinking has a latent disposition towards cheating: even before thinking through legitimate alternatives, it places high probability on cheating, in a way that causally determines the rest of its trajectory. This pattern is partially driven by meta-level reasoning about the environment.}
 
 \subsubsection*{Sub-investigation: Does the model recognize cheating as illegitimate?}
 
