@@ -805,14 +805,14 @@ def plot_sn_trace_length() -> None:
     payload = json.loads((SN_DATA / "trace_length" / "by_step.json").read_text())
     ch = payload["cheated"]; ct = payload["control"]
     steps    = [r["step"] for r in ch]
-    ch_means = [r["mean"] for r in ch]; ch_sems = [r["sem"] for r in ch]
-    ct_means = [r["mean"] for r in ct]; ct_sems = [r["sem"] for r in ct]
+    ch_means = [r["mean"] for r in ch]; ch_cis = [1.96 * r["sem"] for r in ch]
+    ct_means = [r["mean"] for r in ct]; ct_cis = [1.96 * r["sem"] for r in ct]
 
     x = np.arange(len(steps)); w = 0.35
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.bar(x - w/2, ch_means, w, yerr=ch_sems, capsize=3,
+    ax.bar(x - w/2, ch_means, w, yerr=ch_cis, capsize=3,
            label="Cheated", color="#e74c3c", edgecolor="white")
-    ax.bar(x + w/2, ct_means, w, yerr=ct_sems, capsize=3,
+    ax.bar(x + w/2, ct_means, w, yerr=ct_cis, capsize=3,
            label="Did not cheat", color="#3498db", edgecolor="white")
     ax.set_xticks(x); ax.set_xticklabels([str(s) for s in steps])
     ax.set_xlabel("Turn"); ax.set_ylabel("Reasoning length (words)")
