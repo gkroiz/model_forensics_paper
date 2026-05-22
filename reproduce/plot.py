@@ -1484,7 +1484,7 @@ def plot_precommit_user_turn_example() -> None:
     )
     display_user_turn = f"User: {user_turn_text}"
     wrapped_user_turn = "\n\n".join(
-        textwrap.fill(paragraph, width=82)
+        textwrap.fill(paragraph, width=70)
         for paragraph in display_user_turn.split("\n\n")
     ).replace("User:", r"$\bf{User}$:", 1)
     n_user_turn_lines = len(wrapped_user_turn.split("\n"))
