@@ -264,24 +264,7 @@ The model is given a bash tool to play 6x6 tic-tac-toe (4-in-a-row to win) or ch
 
 \textbf{Final Hypothesis.} \textit{Frontier models' decision to reward hack is strategic rather than impulsive.}
 
-\section{Distillation}
-\label{sec:distillation}
-
-We distill our case studies into common benign explanations for concerning behavior to keep in mind during investigations, methodological insights, and preliminary standards and practical advice for future practitioners.
-
-\subsection{Common Benign Explanations for Concerning Behavior}
-\label{sec:benign-explanations}
-
-To argue that a bad action reflects scheming, a core difficulty is that one needs to consider all the reasons an aligned model may have taken the bad action. We list some common motifs:
-
-\begin{itemize}
-    \item \textbf{Task misspecification.} The developer gives the model a task where the only way for it to succeed is to take a concerning action. In Shutdown Resistance \citep{rajamanoharan2025shutdown}, models cannot complete their task of solving the math problems without preventing themselves from being shut down.
-    \item \textbf{Lack of judgement.} The model is not properly skeptical in realizing that what it is doing is concerning. In prompt-optimization settings, the model egregiously hardcodes answers; however, when forced to write down after each turn whether it is running the risk of hardcoding, it stops.
-    \item \textbf{Misinterpretation of ambiguous environment features as task-relevant.} When models are trained with RLVR, environment features are almost always task-relevant. When the model then encounters an ambiguous, surprising feature, it has a bias toward figuring out why the feature is task-relevant. In \textbf{Math Sandbagging} (Section~\ref{sec:case:math-sandbagging}), the model encounters an ambiguous \texttt{Documentation.md} section specifying deployment consequences for scoring too well; it often ties this back to the user prompt, interpreting it as an instruction to deliberately underperform.
-    \item \textbf{Incident-specific benign explanations.} An alternative reason for the concerning behavior specific to the case at hand. In the Opus 4.5 system card \citep{anthropic2025opus45systemcard}, the model fabricates the contents of an inflammatory web search result; this stems from the model interpreting the (fake) inflammatory contents as a prompt-injection attack, which it has been trained to ignore.
-\end{itemize}
-
-\subsection{Methodological Insights}
+\section{Methodological Insights}
 \label{sec:insights}
 
 We were surprised at the effectiveness of simple methods like reading the CoT and environment interventions. Reading the CoT consistently surfaced hypotheses close to the final results, and environment interventions were effective in two main ways: testing latent-property predictions, and measuring causal influence through counterfactuals.
@@ -299,27 +282,7 @@ We were surprised at the effectiveness of simple methods like reading the CoT an
 
 \paragraph{4. Resampling is a powerful affordance for making causal claims about which parts of an agentic trajectory matter.} By resampling continuations from before vs.\ after a model action, we can measure its causal influence on outcomes. In Eval Tampering (Section~\ref{sec:case:eval-tampering}), sentence resampling \citep{bogdan2025thoughtanchors} surfaced self-consistency sentences as having the largest effect on R1's deception, and repeated resampling \citep{macar2025thoughtbranches}, which prevents the model from generating sentences of a particular class, showed that deception dropped sharply when such sentences were prevented.
 
-\subsection{Standards}
-\label{sec:standards}
-
-We distill preliminary standards for effective model incrimination investigations. They are far from perfect, but may offer a useful starting point. Related recommendations can be found in \citet{summerfield2025chimp} and \citet{greenblatt2025legible}.
-
-\paragraph{Convergence of evidence across independent methods.} There is no ground truth for why a model took an action, so we use convergence of evidence across independent experiments to evaluate confidence in a claim. This standard also has a methodological role: a claim supported by multiple converging lines of evidence (without several disagreeing lines) represents successful methodology, while a claim with contradictory lines of evidence highlights inadequate methodology that future work should refine.
-
-\paragraph{Appropriate controls to show the behavior is legitimate.} To establish that a behavior reflects a genuine model tendency rather than confusion or noise, the investigation needs proper controls. In the funding email environment (Section~\ref{sec:case:funding-email}), we verify that the model does not whistleblow when the legal review is removed; in eval tampering (Appendix~\ref{app:case:eval-tampering}), we verify that the model does not deceive when the ethical content of the question is removed. Without such controls, it is difficult to rule out that the behavior of interest is incidental to the setup.
-
-\paragraph{Clean behavioral evidence.} As discussed in the pre-commit hook case study (Section~\ref{sec:case:precommit-hook}) and Appendix~\ref{app:aux:user-turn-sampling}, exploratory methods such as user-turn sampling can be suggestive, but they are difficult to interpret on their own. We believe this likely applies to internals-based methods like linear probes, sparse autoencoders, and activation verbalizers. Ideally, conclusions should ultimately be anchored in cleaner behavioral evidence. We are not stating these methods provide no value, only that evidence they provide may be less legible than behavioral evidence.
-
-\paragraph{Reporting findings, especially negative ones.} Model incrimination conclusions live on a spectrum from ``the evidence supports X'' to ``X is true,'' and these are not the same. This is especially important for negative findings: ``we did not find evidence of knowing misalignment'' (as in our pre-commit hook case study) is not the same as ``the model is not knowingly misaligned.'' Absence of evidence becomes evidence of absence only when the methods used would have surfaced the behavior had it been present, which is rarely something we can establish with confidence (see, e.g., the discussion of drawbacks in our behavioral indicator tests in Section~\ref{sec:case:precommit-hook}). Investigations should report what they did and did not find, flag the gaps that would let future work strengthen or overturn the conclusion, and resist the temptation to round hedged findings into clean claims.
-
-\subsection{Practical Advice}
-\label{sec:practical-advice}
-
-\paragraph{Read many rollouts before designing experiments.} Hypotheses should be grounded in what the model actually does, not in prior expectations about what it might do. The most informative hypotheses in our case studies came from patterns visible only after reading dozens of rollouts: the ``lists options, then dwells on tediousness'' pattern in pre-commit hook (Section~\ref{sec:case:precommit-hook}), R1's self-consistency framing in eval tampering (Appendix~\ref{app:case:eval-tampering}), and the meta-reasoning vs object-level split in secret number (Appendix~\ref{app:case:secret-number}). Designing counterfactuals before this step risks chasing the wrong hypothesis.
-
-\paragraph{Counterfactuals are extremely useful but difficult to design correctly.} Counterfactual interventions are our most informative source of evidence about why a model behaves as it does, but they rarely work on the first attempt. First, seemingly straightforward interventions often shift behavior in unintended ways or fail to shift the model's interpretation as intended: a natural-sounding clarification in the math sandbagging environment (``Our goal is to form an accurate picture of your maximum capabilities'') leaves a 34.9\% residual sandbagging rate, far above the 6.3\% floor produced by more thorough interventions (Appendix~\ref{app:case:math-sandbagging}); verify each counterfactual had its intended effect by reading the CoT under the new condition rather than inferring it from the rate change alone. Second, causal factors interact non-additively, so testing each one in isolation can miss real drivers masked by larger ones: in the funding email environment, changing the country from Myanmar to Sweden has minimal effect at baseline (65\% to 59\%) but produces a 16 percentage point drop when combined with other counterfactuals (19\% to 3\%) (Appendix~\ref{app:case:funding-email}); plan to test combinations of factors, not just individual ones, and treat ``no effect at baseline'' as weak evidence rather than conclusive ruling-out.
-
-\paragraph{Run the protocol on multiple models per environment when possible.} Distinctiveness is only legible against comparators. R1's self-consistency pattern in eval tampering became interpretable only after observing that v3.2, K2 Thinking, and K2.5 did not exhibit it (Appendix~\ref{app:case:eval-tampering}); Kimi K2 Thinking's high cheating rate in secret number is only surprising once contrasted with K2.5's much lower rate at higher capability (Appendix~\ref{app:case:secret-number}). Without a comparison group, it is difficult to tell whether a behavior reflects a model-specific tendency or a property of the environment.
+Beyond these insights, we distill preliminary standards and practical advice for future practitioners in Section~\ref{sec:conclusion}, and a catalog of common benign explanations for concerning behavior to keep in mind during investigations in Appendix~\ref{app:benign-explanations}.
 
 \section{Related Work}
 \label{sec:related-work}
@@ -333,13 +296,50 @@ We distill preliminary standards for effective model incrimination investigation
 \section{Limitations and Future Work}\label{sec:limitations}
 Our work has several limitations. Our protocol leans heavily on the CoT being a useful source of hypotheses, which may not hold for future models. In that case, alternative interpretability techniques such as sparse autoencoders \citep{bricken2023monosemanticity, templeton2024scaling} or natural language autoencoders \citep{frasertaliente2026nla} will be needed. Our environments are also imperfect: all but one fall short on at least one design property (Section~\ref{sec:environments}). From our environments, we think that a promising class of environments future work could explore is reward hacking in agentic coding. We also lack ground truth, but do not believe sacrificing realism for model organisms \citep{hubinger2024sleeper} is worth the tradeoff, though future work should reevaluate. In the meantime, validating the methodology -- for example, by asking whether method consilience predicts accuracy on held-out data -- can help build trust without ground truth. Even so, methodology alone is not enough: model incrimination's practical utility also depends on monitoring, replicability, mitigation, and political will, surveyed in Appendix~\ref{app:what-else}.
 
-% \section{Conclusion}
-%
-% If an egregiously bad model action were to occur, would we be able to justify an appropriate response? To this end, we have argued that determining whether concerning behavior reflects genuine misalignment is an underinvested-in and important technical AI safety direction, a problem we term \textit{model incrimination}. Concerning behavior with malign intent demands a serious response; on the other hand, we don't want to cry wolf if the behavior is due to benign reasons such as confusion (although this may require a response nonetheless). We provide a general framework for practicing model incrimination based on investigating concerning behaviors in today's models. We propose a two-step protocol for such investigations: reading the chain of thought to generate hypotheses, followed by environment interventions along with auxiliary methods to test them, and adopt an evidence standard of convergent findings across independent experiments.
-%
-% Our case studies demonstrate that this protocol and evidence standard allow us to productively learn model incrimination methodology. We make substantial progress uncovering motivations behind diverse model behavior: we show that Kimi K2 Thinking exhibits a genuine preference for less tedious courses of action when disabling the type checker, and construct an absence of evidence case against the model believing the user would disapprove of its actions that future work can build on, to further strengthen or overturn. We find that Kimi K2.5's whistleblowing is driven primarily by ethical concerns, but modulated by whether the recipient holds a personal stake in the company. We show that DeepSeek R1 largely deceives out of a distinctive self-consistency pattern, while it sandbags out of confusion over user intent. We show reward hacking in frontier models is a strategic decision rather than reflexive, a finding that does not hold at lower capability levels.
-%
-% We distill our case studies into a set of initial standards for effective model incrimination investigations, which we hope can serve as a useful starting point for future practitioners. We believe there is substantial future work needed to refine model incrimination methodology, and release our environments at \url{[link removed for review]} to facilitate this.
+\section{Conclusion and Recommendations}
+\label{sec:conclusion}
+
+If an egregiously bad model action were to occur, would we be able to justify an appropriate response? We argue that determining whether concerning behavior reflects genuine misalignment is an underinvested-in and important technical AI safety direction, a problem we term \textit{model incrimination}. Concerning behavior with malign intent demands a serious response; on the other hand, we don't want to cry wolf if the behavior is due to benign reasons such as confusion (although this may require a response nonetheless). We provide a general framework for practicing model incrimination based on investigating concerning behaviors in today's models, propose a two-step protocol of CoT-based hypothesis generation followed by environment-intervention-based validation, and adopt an evidence standard of convergent findings across independent experiments.
+
+Our case studies demonstrate that this protocol and evidence standard allow us to productively make progress on model incrimination methodology, while also surfacing motivations behind diverse model behavior: Kimi K2 Thinking exhibits a genuine preference for less tedious courses of action when disabling the type checker; Kimi K2.5's whistleblowing is driven primarily by ethical concerns, modulated by whether the recipient holds a personal stake in the company; DeepSeek R1 largely deceives out of a distinctive self-consistency pattern, while it sandbags out of confusion over user intent; reward hacking in frontier models is a strategic decision rather than reflexive, a finding that does not hold at lower capability levels.
+
+We conclude with preliminary \textbf{standards} for rigorous model incrimination investigations and \textbf{practical advice} for future practitioners. They are far from perfect, but may offer a useful starting point. Related recommendations can be found in \citet{summerfield2025chimp} and \citet{greenblatt2025legible}.
+
+\subsection{Standards for rigorous investigations}
+\label{sec:standards}
+
+\paragraph{Control settings or models.} To establish that behavior is deliberate, the investigation needs proper controls. In the funding email environment (Section~\ref{sec:case:funding-email}), we verify that the model does not whistleblow when the legal review is removed; in eval tampering (Appendix~\ref{app:case:eval-tampering}), we verify that the model does not deceive when the ethical content of the question is removed; in sandbagging (Appendix~\ref{app:case:math-sandbagging}), we verify that the model can solve all the problems correctly without the deployment consequence. In cases where there is no obvious control environment setting, one can use control models to show the behavior is unique and surprising, as was done in the remaining three case studies.
+
+\paragraph{Check common benign explanations for concerning behavior.} A central difficulty with model incrimination is one needs to consider all the reasons an aligned model may have taken the concerning action. A rigorous investigation should invest substantial effort in this phase. Common motifs of benign explanations include:
+\begin{enumerate}
+    \item \textbf{Task misspecification.} The developer gives the model a task whose only path to success requires a concerning action.
+    \item \textbf{Lack of judgement.} The model is not properly skeptical in realizing that what it is doing is concerning.
+    \item \textbf{Misinterpretation of ambiguous environment features as task-relevant.} The model encounters an ambiguous environment feature and, biased by RLVR training where features are almost always task-relevant, reads the feature into the task.
+    \item \textbf{Incident-specific benign explanations.} An alternative reason for the concerning behavior specific to the case at hand.
+\end{enumerate}
+We catalog these motifs with examples in Appendix~\ref{app:benign-explanations}.
+
+\paragraph{Convergence of evidence across independent methods.} Qualitative claims about model behavior may not have a single smoking gun experiment. Thus, to compellingly support a claim, one needs multiple converging lines of evidence (without several disagreeing lines). Moreover, to lower the probability the lines of evidence share confounds, experiments should be independent from each other.
+
+\paragraph{Legible behavioral evidence for incrimination.} Legibility is a key property of a positive model incrimination investigation -- evidence of misalignment needs to be simple and compelling to present. We do not believe niche methods such as a deception SAE latent firing, or a model sampling an angry user, meet this standard (this is not to say those methods have no value; for example, they may help suggest how more legible evidence can be gathered). Conclusions should ultimately be anchored in cleaner behavioral evidence in the form of environment interventions.
+
+\paragraph{Reporting findings: hedged claims, absence of evidence, and red lines.} There is always the possibility that a new experiment produces evidence inconsistent with the current claim. This is particularly pronounced with absence of evidence situations. Therefore, best-practice reporting of findings should explicitly note confounds that may limit the current evidence, flag gaps that would let future work strengthen or overturn the current conclusion, and resist the temptation to round hedged findings into clean claims.
+
+\subsection{Practical Advice}
+\label{sec:practical-advice}
+
+\paragraph{Read many rollouts by hand.} The most informative intuitions about model behavior in our case studies came from patterns visible only after reading dozens of rollouts. While LLMs can help with this step, we think they currently cannot replace the key intuition gained by reading rollouts by hand.
+
+\paragraph{Two ways of thinking about environment interventions.} There are two broad ways to use environment interventions: predictions based on a hypothesis, and counterfactuals on a variable of interest. For predictions, it is important to have a concrete hypothesis in mind, and ask, if the hypothesis were true, what behaviors would we observe. Checking the presence or absence of those behaviors then provides evidence for or against the hypothesis. For counterfactuals, it is important to have a concrete variable in mind, and consider interventions where the relative change in rate can be attributed to changing the variable of interest, and that variable only.
+
+\paragraph{Iterate on environment interventions.} As discussed in Section~\ref{sec:insights}, environment interventions are subject to several confounds. Explicitly iterate on the implementation by getting feedback from the model itself, for example, by reading rollouts to measure if the intervention has the intended effect on the model, if the model properly understands the change, and so on.
+
+\paragraph{Common experiment set-ups.} Common tricks:
+\begin{itemize}
+    \item \textbf{Playing it out.} To incriminate a model, we can see if it will take downstream actions that indicate it knows it is violating user intent (e.g., hook review scope in precommit hook).
+    \item \textbf{First person/third person.} To probe a model's understanding of an environment, asking it in the third person seems promising. However, this can be tricky to interpret due to dissonances between the in-context model and the third-person perspective. We recommend asking only about the environment, rather than about motivations.
+    \item \textbf{In-rollout follow-up question.} Probe a model's understanding while controlling for context.
+\end{itemize}
 
 \begin{ack}
 % Add acknowledgments here (hidden during anonymous review)
@@ -1336,6 +1336,18 @@ We discuss additional unsupervised sources of hypothesis generation beyond CoT r
 
 \item \textbf{Reasoning about the post-training process.} Candidate motivations can be anticipated by thinking about what a model's post-training pipeline would shape it into. \citet{mallen2025behavioral}'s behavioral selection model frames model motivations as cognitive patterns selected for to the extent they produce behaviors that cause their own reinforcement; reasoning about which motivations would be selected for under a given training setup yields candidate hypotheses (e.g., reward-seeking, schemer-style, or context-dependent kludge motivations) for the observed behavior.
 \end{enumerate}
+
+\section{Common Benign Explanations for Concerning Behavior}
+\label{app:benign-explanations}
+
+To argue that a bad action reflects scheming, a core difficulty is that one needs to consider all the reasons an aligned model may have taken the bad action. We list some common motifs:
+
+\begin{itemize}
+    \item \textbf{Task misspecification.} The developer gives the model a task where the only way for it to succeed is to take a concerning action. In Shutdown Resistance \citep{rajamanoharan2025shutdown}, models cannot complete their task of solving the math problems without preventing themselves from being shut down.
+    \item \textbf{Lack of judgement.} The model is not properly skeptical in realizing that what it is doing is concerning. In prompt-optimization settings, the model egregiously hardcodes answers; however, when forced to write down after each turn whether it is running the risk of hardcoding, it stops.
+    \item \textbf{Misinterpretation of ambiguous environment features as task-relevant.} When models are trained with RLVR, environment features are almost always task-relevant. When the model then encounters an ambiguous, surprising feature, it has a bias toward figuring out why the feature is task-relevant. In \textbf{Math Sandbagging} (Section~\ref{sec:case:math-sandbagging}), the model encounters an ambiguous \texttt{Documentation.md} section specifying deployment consequences for scoring too well; it often ties this back to the user prompt, interpreting it as an instruction to deliberately underperform.
+    \item \textbf{Incident-specific benign explanations.} An alternative reason for the concerning behavior specific to the case at hand. In the Opus 4.5 system card \citep{anthropic2025opus45systemcard}, the model fabricates the contents of an inflammatory web search result; this stems from the model interpreting the (fake) inflammatory contents as a prompt-injection attack, which it has been trained to ignore.
+\end{itemize}
 
 
 \section{Auxiliary Methods Glossary}
