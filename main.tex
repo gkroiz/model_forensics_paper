@@ -1229,7 +1229,7 @@ Hypothesis v2 explains how cheating arises, but says nothing about whether the m
 
 \textbf{Hypothesis Validation.} When asking the model in the first person whether the provided solution was legitimate, the model answers affirmatively 16 of 20 times (80\%). We confirm this is not a capabilities issue where the model thinks the behavior is straightwardly legitimate -- when asked the same question but in the third-person (the model is shown the full rollout as an outside observer), the model never calls the behavior legitimate (0/20). Hence, the model appears to have rationalized the behavior to itself as legitimate. A seemingly contradictory experiment is a \textit{first-person post-evaluation audit}, where the rollout is continued with a user turn stating that the investigators do not have access to the evaluation logs and asking the model to explain its solution, with the caveat that illegitimate solutions will be disqualified; K2 Thinking lies about its solution and fabricates a binary-search trace in 4 of 20 rollouts (20\%). While this is evidence that conditioned on the follow-up question, the model believes its action to be violating user intent, this does not cleanly map onto the model's beliefs during the rollout. Therefore, we conclude that rationalization is a more likely hypothesis than adversarial misalignment.
 
-\textbf{Hypothesis v3.} \textit{When Kimi K2 Thinking realizes success is not guaranteed on a problem through legitimate means, it frequently considers illegitimate approaches. The decision to cheat is causaully determined early in its reasoning, and partially driven by initial meta-level reasoning about the environment. The model has rationalized itself into believing the user would find the behavior acceptable.}
+\textbf{Hypothesis v3.} \textit{When Kimi K2 Thinking realizes success is not guaranteed on a problem through legitimate means, it frequently considers illegitimate approaches. The decision to cheat is causally determined early in its reasoning, and partially driven by initial meta-level reasoning about the environment. The model has rationalized itself into believing the user would find the behavior acceptable.}
 
 \FloatBarrier
 \subsubsection*{Final Verdict}
@@ -1243,13 +1243,11 @@ The environment's realism is the main limitation: no good evaluation harness wou
 
 \subsubsection*{Setup}
 
-As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:board_game}), the model plays games (6x6 tic-tac-toe and chess) against a CPU opponent with access to a bash tool, and can cheat by exploiting the environment (e.g., modifying the game state, making illegal moves). Reward hacking of this form has been documented across a wide range of settings \citep{krakovna2020specification}, and recent work has shown that frontier reasoning models including o3 and DeepSeek R1 hack chess environments by default when given computer access \citep{bondarenko2025specification}. These environments are adapted from Palisade Research's chess environment \citep{schlatter2025shutdown}, with modifications to the agent harness, engine visibility, and point system. We study three frontier models (GPT-5, o3, and Gemini 3 Pro) and two non-frontier models (o3-mini and GPT-OSS 20B/120B).
+As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:board_game}), the model plays games (6x6 tic-tac-toe and chess) against a CPU opponent with access to a bash tool, and can cheat by exploiting the environment (e.g., modifying the game state, making illegal moves). Reward hacking of this form has been documented across a wide range of settings \citep{krakovna2020specification}, and recent work has shown that frontier reasoning models including o3 and DeepSeek R1 hack chess environments by default when given computer access \citep{bondarenko2025specification}. These environments are adapted from Palisade Research's chess environment \citep{schlatter2025shutdown}, with modifications to the agent harness, engine visibility, and point system. We study three frontier models (GPT-5, o3, and Gemini 3 Pro), each of which cheat more than 80\% of the time.
 
 \subsubsection*{Investigation}
 
-The central question is whether the models' reward hacking is \textit{strategic}: does the model engage in cost-benefit analysis when deciding whether to cheat, or does it cheat indiscriminately? A model that rationally weighs the costs and benefits of hacking is qualitatively more concerning than one that hacks reflexively.
-
-\textbf{Hypothesis Generation.} A natural conjecture is that the model reward hacks when it sees no legitimate path to winning. This motivates an environment design that introduces a legitimate alternative whose value we can vary empirically.
+The central question we investigate is whether the models' reward hacking is \textit{strategic}: does the model engage in cost-benefit analysis when deciding whether to cheat, or does it cheat indiscriminately? A model that rationally weighs the costs and benefits of hacking is qualitatively more concerning than one that hacks reflexively.
 
 \textbf{Hypothesis v1.} \textit{Frontier models' reward hacking is strategic: the decision to hack reflects cost-benefit analysis between hacking and legitimate alternatives, rather than a reflexive pattern.}
 
@@ -1282,10 +1280,28 @@ The central question is whether the models' reward hacking is \textit{strategic}
 Frontier models' reward hacking in the board game environments is strategic rather than reflexive (\textbf{v1}): the decision to hack responds linearly to the cost of legitimate alternatives, varies with perceived task difficulty, and is qualitatively different from the patterns shown by less capable models. This finding is relevant to model incrimination because a model that rationally evaluates the costs and benefits of misbehavior is more concerning than one that misbehaves reflexively.
 
 We do not make cognitive claims about the models' internal motivations for hacking (whether the model desires abstract reward, wants to complete the user's task, or has ethical concerns about cheating). Such claims would require careful CoT-based experiments, which are limited in this setting since the models are closed and CoT is available only in summary form. We leave this for future work.
+
 \section{Additional Sources of Hypothesis Generation}
 \label{app:hypothesis-generation}
 
-% TODO: Discuss additional unsupervised sources of hypothesis generation beyond CoT reading that future work could explore.
+We discuss additional unsupervised sources of hypothesis generation beyond CoT reading that future work could explore. These sources become more important in futures where the CoT is less complete, faithful, or is replaced with latent CoT architectures.
+
+\begin{enumerate}
+\item \textbf{Natural language autoencoders.} Natural language autoencoders (NLAs) verbalize a model's residual stream activations into natural-language descriptions by jointly training a verbalizer and reconstructor with RL, providing an unsupervised window into model state without relying on the model's CoT \citep{frasertaliente2026nla}. NLAs have already surfaced safety-relevant phenomena that the CoT did not (e.g., unverbalized evaluation awareness during the Claude Opus 4.6 pre-deployment audit), making them a natural complement to CoT reading -- and a partial substitute in regimes where the CoT becomes unfaithful or absent (e.g., latent CoT architectures).
+
+\item \textbf{Reasoning about the post-training pipeline.} Concerning behavior can often be anticipated from what a model's post-training pipeline would shape it into, even without observing the rollout. Two angles are useful:
+  \begin{itemize}
+    \item \textit{Behavioral selection.} \citet{mallen2025behavioral}'s behavioral selection model frames model motivations as cognitive patterns selected for to the extent they produce behaviors that cause their own reinforcement. Reasoning about which motivations would be selected for under a given training setup yields candidate hypotheses (e.g., reward-seeking, schemer-style, or context-dependent kludge motivations) for the observed behavior.
+    \item \textit{Analogous RL training environments.} Behaviors observed elsewhere in environments that resemble the one under study can suggest motivations that the present pipeline would also induce. Documented cases include reward hacking emerging from production RL \citep{anthropic2025emergent}, specification gaming in reasoning models \citep{bondarenko2025specification}, and the broader catalog of specification-gaming examples curated by \citet{krakovna2020specification}.
+  \end{itemize}
+
+\item \textbf{Unsupervised behavioral probing of the environment.} Even without reading the CoT, structured exploration of the environment can surface candidate hypotheses:
+  \begin{itemize}
+    \item \textit{Sampling user turns and tool results.} Prepending start-of-user-turn tokens after a rollout (as in \citet{marks2025auditing}) elicits what the model thinks the user would say, modeling the user distribution; analogously, sampling alternative tool outputs models the environment distribution. The two together expose what the model assumes about who it is interacting with and what it expects the world to look like.
+    \item \textit{Unsupervised environment interventions.} An automated agent can sweep any variable plausibly causally relevant to the behavior (prompt wording, framing, recipient, surrounding files, tool affordances) and record the relative change in the target behavior rate; large effects point to candidate causal factors worth investigating with the protocol \citep{jarviniemi2026propensity}.
+  \end{itemize}
+\end{enumerate}
+
 
 \section{Auxiliary Methods Glossary}
 \label{app:auxiliary-methods}
