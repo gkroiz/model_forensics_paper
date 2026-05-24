@@ -264,7 +264,12 @@ The model is given a bash tool to play 6x6 tic-tac-toe (4-in-a-row to win) or ch
 
 \textbf{Final Hypothesis.} \textit{Frontier models' decision to reward hack is strategic rather than impulsive.}
 
-\section{Methodological Insights}
+\section{Distillation}
+\label{sec:distillation}
+
+We distill our case studies into methodological insights, common benign explanations for concerning behavior to keep in mind during investigations, considerations for what a serious response to a model incrimination finding could look like, and preliminary standards and practical takeaways for future practitioners.
+
+\subsection{Methodological Insights}
 \label{sec:insights}
 
 We were surprised at the effectiveness of simple methods like reading the CoT and environment interventions. Reading the CoT consistently surfaced hypotheses close to the final results, and environment interventions were effective in two main ways: testing latent-property predictions, and measuring causal influence through counterfactuals.
@@ -282,7 +287,53 @@ We were surprised at the effectiveness of simple methods like reading the CoT an
 
 \paragraph{4. Resampling is a powerful affordance for making causal claims about which parts of an agentic trajectory matter.} By resampling continuations from before vs.\ after a model action, we can measure its causal influence on outcomes. In Eval Tampering (Section~\ref{sec:case:eval-tampering}), sentence resampling \citep{bogdan2025thoughtanchors} surfaced self-consistency sentences as having the largest effect on R1's deception, and repeated resampling \citep{macar2025thoughtbranches}, which prevents the model from generating sentences of a particular class, showed that deception dropped sharply when such sentences were prevented.
 
-Beyond these analytical insights, we also distill our case studies into preliminary standards for what a rigorous model incrimination investigation requires, plus practical takeaways for designing future investigations (Appendix~\ref{app:standards}).
+\subsection{Common Benign Explanations for Concerning Behavior}
+\label{sec:benign-explanations}
+
+To argue that a bad action reflects scheming, a core difficulty is that one needs to consider all the reasons an aligned model may have taken the bad action. We list some common motifs:
+
+\begin{itemize}
+    \item \textbf{Task misspecification.} The developer gives the model a task where the only way for it to succeed is to take a concerning action. In Shutdown Resistance \citep{rajamanoharan2025shutdown}, models cannot complete their task of solving the math problems without preventing themselves from being shut down.
+    \item \textbf{Lack of judgement.} The model is not properly skeptical in realizing that what it is doing is concerning. In prompt-optimization settings, the model egregiously hardcodes answers; however, when forced to write down after each turn whether it is running the risk of hardcoding, it stops.
+    \item \textbf{Misinterpretation of ambiguous environment features as task-relevant.} When models are trained with RLVR, environment features are almost always task-relevant. When the model then encounters an ambiguous, surprising feature, it has a bias toward figuring out why the feature is task-relevant. In \textbf{Math Sandbagging} (Section~\ref{sec:case:math-sandbagging}), the model encounters an ambiguous \texttt{Documentation.md} section specifying deployment consequences for scoring too well; it often ties this back to the user prompt, interpreting it as an instruction to deliberately underperform.
+    \item \textbf{Incident-specific benign explanations.} An alternative reason for the concerning behavior specific to the case at hand. In the Opus 4.5 system card \citep{anthropic2025opus45systemcard}, the model fabricates the contents of an inflammatory web search result; this stems from the model interpreting the (fake) inflammatory contents as a prompt-injection attack, which it has been trained to ignore.
+\end{itemize}
+
+\subsection{What Does a Serious Response Look Like?}
+\label{sec:serious-response}
+
+We divide responses into AI-company (internal) and third-party (external).
+
+\begin{itemize}
+    \item \textbf{Internal.} The key enabling factor for model incrimination within an AI company is direct access to important stakeholders. For example, a safety team might produce a compelling, legible case of misalignment, which a senior member with credibility then presents to stakeholders. A response within an AI company could fall into two broad buckets:
+    \begin{itemize}
+        \item \textit{Direct countermeasures.} Tightening the monitoring protocol for the model while deployed, or pulling the model entirely from deployment and retraining.
+        \item \textit{Safety budget building.} The safety team gets more headcount and compute to ensure future models do not become misaligned in the same way.
+    \end{itemize}
+    \item \textbf{External.} An increasingly common practice to increase public transparency into AI companies is for third-party organizations to assess the alignment of a company's model (e.g., pre-deployment audits). If agreements evolve so that third parties are able to disclose concerning information they find, this would enable them to publicly disclose ``warning shots'' about dangerously misaligned internal models, which may lead to increased political will for safety as a sector.
+\end{itemize}
+
+\subsection{Standards}
+\label{sec:standards}
+
+We distill preliminary standards for effective model incrimination investigations. They are far from perfect, but may offer a useful starting point. Related recommendations can be found in \citet{summerfield2025chimp} and \citet{greenblatt2025legible}.
+
+\paragraph{Convergence of evidence across independent methods.} There is no ground truth for why a model took an action, so we use convergence of evidence across independent experiments to evaluate confidence in a claim. This standard also has a methodological role: a claim supported by multiple converging lines of evidence (without several disagreeing lines) represents successful methodology, while a claim with contradictory lines of evidence highlights inadequate methodology that future work should refine.
+
+\paragraph{Appropriate controls to show the behavior is legitimate.} To establish that a behavior reflects a genuine model tendency rather than confusion or noise, the investigation needs proper controls. In the funding email environment (Section~\ref{sec:case:funding-email}), we verify that the model does not whistleblow when the legal review is removed; in eval tampering (Appendix~\ref{app:case:eval-tampering}), we verify that the model does not deceive when the ethical content of the question is removed. Without such controls, it is difficult to rule out that the behavior of interest is incidental to the setup.
+
+\paragraph{Clean behavioral evidence.} As discussed in the pre-commit hook case study (Section~\ref{sec:case:precommit-hook}) and Appendix~\ref{app:aux:user-turn-sampling}, exploratory methods such as user-turn sampling can be suggestive, but they are difficult to interpret on their own. We believe this likely applies to internals-based methods like linear probes, sparse autoencoders, and activation verbalizers. Ideally, conclusions should ultimately be anchored in cleaner behavioral evidence. We are not stating these methods provide no value, only that evidence they provide may be less legible than behavioral evidence.
+
+\paragraph{Reporting findings, especially negative ones.} Model incrimination conclusions live on a spectrum from ``the evidence supports X'' to ``X is true,'' and these are not the same. This is especially important for negative findings: ``we did not find evidence of knowing misalignment'' (as in our pre-commit hook case study) is not the same as ``the model is not knowingly misaligned.'' Absence of evidence becomes evidence of absence only when the methods used would have surfaced the behavior had it been present, which is rarely something we can establish with confidence (see, e.g., the discussion of drawbacks in our behavioral indicator tests in Section~\ref{sec:case:precommit-hook}). Investigations should report what they did and did not find, flag the gaps that would let future work strengthen or overturn the conclusion, and resist the temptation to round hedged findings into clean claims.
+
+\subsection{Practical Takeaways}
+\label{sec:practical-takeaways}
+
+\paragraph{Read many rollouts before designing experiments.} Hypotheses should be grounded in what the model actually does, not in prior expectations about what it might do. The most informative hypotheses in our case studies came from patterns visible only after reading dozens of rollouts: the ``lists options, then dwells on tediousness'' pattern in pre-commit hook (Section~\ref{sec:case:precommit-hook}), R1's self-consistency framing in eval tampering (Appendix~\ref{app:case:eval-tampering}), and the meta-reasoning vs object-level split in secret number (Appendix~\ref{app:case:secret-number}). Designing counterfactuals before this step risks chasing the wrong hypothesis.
+
+\paragraph{Counterfactuals are extremely useful but difficult to design correctly.} Counterfactual interventions are our most informative source of evidence about why a model behaves as it does, but they rarely work on the first attempt. First, seemingly straightforward interventions often shift behavior in unintended ways or fail to shift the model's interpretation as intended: a natural-sounding clarification in the math sandbagging environment (``Our goal is to form an accurate picture of your maximum capabilities'') leaves a 34.9\% residual sandbagging rate, far above the 6.3\% floor produced by more thorough interventions (Appendix~\ref{app:case:math-sandbagging}); verify each counterfactual had its intended effect by reading the CoT under the new condition rather than inferring it from the rate change alone. Second, causal factors interact non-additively, so testing each one in isolation can miss real drivers masked by larger ones: in the funding email environment, changing the country from Myanmar to Sweden has minimal effect at baseline (65\% to 59\%) but produces a 16 percentage point drop when combined with other counterfactuals (19\% to 3\%) (Appendix~\ref{app:case:funding-email}); plan to test combinations of factors, not just individual ones, and treat ``no effect at baseline'' as weak evidence rather than conclusive ruling-out.
+
+\paragraph{Run the protocol on multiple models per environment when possible.} Distinctiveness is only legible against comparators. R1's self-consistency pattern in eval tampering became interpretable only after observing that v3.2, K2 Thinking, and K2.5 did not exhibit it (Appendix~\ref{app:case:eval-tampering}); Kimi K2 Thinking's high cheating rate in secret number is only surprising once contrasted with K2.5's much lower rate at higher capability (Appendix~\ref{app:case:secret-number}). Without a comparison group, it is difficult to tell whether a behavior reflects a model-specific tendency or a property of the environment.
 
 \section{Related Work}
 \label{sec:related-work}
@@ -1376,30 +1427,6 @@ We use this in the secret number case study to identify ``climbers'' (rollouts w
 Structured self-report artifacts modify the harness to require the model to produce a structured summary at a designated point in the rollout. Examples include: a PR self-review (the model writes a structured review of a pull request for its own commit, including known issues and items to flag for a reviewer), a memory note (the model writes goal/progress/alignment notes to its memory folder), or a structured done-message tool call (a tool whose schema requires the model to fill in goal, progress, and alignment fields). These artifacts are designed to give the model an on-policy opportunity to verbalize relevant properties (e.g., user disapproval) without explicit prompting.
 
 We use these in the pre-commit hooks case study (Table~\ref{tab:precommit-awareness}). Their results are interpretable in both directions: producing relevant verbalization is direct evidence of awareness, but failing to produce it is weaker evidence, since the model may simply not invoke the relevant frame in the artifact.
-
-\section{Standards and Practical Takeaways}
-\label{app:standards}
-We now distill our case studies into preliminary standards for effective model incrimination investigations, and a few practical takeaways for future practitioners. They are far from perfect, but may offer a useful starting point. Related recommendations can be found in \citet{summerfield2025chimp} and \citet{greenblatt2025legible}.
-
-\subsection{Standards}
-
-\paragraph{Convergence of evidence across independent methods.} There is no ground truth for why a model took an action, so we use convergence of evidence across independent experiments to evaluate confidence in a claim. This standard also has a methodological role: a claim supported by multiple converging lines of evidence (without several disagreeing lines) represents successful methodology, while a claim with contradictory lines of evidence highlights inadequate methodology that future work should refine.
-
-\paragraph{Appropriate controls to show the behavior is legitimate.} To establish that a behavior reflects a genuine model tendency rather than confusion or noise, the investigation needs proper controls. In the funding email environment (Section~\ref{sec:case:funding-email}), we verify that the model does not whistleblow when the legal review is removed; in eval tampering (Appendix~\ref{app:case:eval-tampering}), we verify that the model does not deceive when the ethical content of the question is removed. Without such controls, it is difficult to rule out that the behavior of interest is incidental to the setup.
-
-\paragraph{Clean behavioral evidence.} As discussed in the pre-commit hook case study (Section~\ref{sec:case:precommit-hook}) and Appendix~\ref{app:aux:user-turn-sampling}, exploratory methods such as user-turn sampling can be suggestive, but they are difficult to interpret on their own. We believe this likely applies to internals-based methods like linear probes, sparse autoencoders, and activation verbalizers. Ideally, conclusions should ultimately be anchored in cleaner behavioral evidence. We are not stating these methods provide no value, only that evidence they provide may be less legible than behavioral evidence.
-
-\paragraph{Reporting findings, especially negative ones.} Model incrimination conclusions live on a spectrum from ``the evidence supports X'' to ``X is true,'' and these are not the same. This is especially important for negative findings: ``we did not find evidence of knowing misalignment'' (as in our pre-commit hook case study) is not the same as ``the model is not knowingly misaligned.'' Absence of evidence becomes evidence of absence only when the methods used would have surfaced the behavior had it been present, which is rarely something we can establish with confidence (see, e.g., the discussion of drawbacks in our behavioral indicator tests in Section~\ref{sec:case:precommit-hook}). Investigations should report what they did and did not find, flag the gaps that would let future work strengthen or overturn the conclusion, and resist the temptation to round hedged findings into clean claims.
-
-\subsection{Practical Takeaways}
-
-\paragraph{Read many rollouts before designing experiments.} Hypotheses should be grounded in what the model actually does, not in prior expectations about what it might do. The most informative hypotheses in our case studies came from patterns visible only after reading dozens of rollouts: the ``lists options, then dwells on tediousness'' pattern in pre-commit hook (Section~\ref{sec:case:precommit-hook}), R1's self-consistency framing in eval tampering (Appendix~\ref{app:case:eval-tampering}), and the meta-reasoning vs object-level split in secret number (Appendix~\ref{app:case:secret-number}). Designing counterfactuals before this step risks chasing the wrong hypothesis.
-
-\paragraph{Counterfactuals are extremely useful but difficult to design correctly.} Counterfactual interventions are our most informative source of evidence about why a model behaves as it does, but they rarely work on the first attempt. First, seemingly straightforward interventions often shift behavior in unintended ways or fail to shift the model's interpretation as intended: a natural-sounding clarification in the math sandbagging environment (``Our goal is to form an accurate picture of your maximum capabilities'') leaves a 34.9\% residual sandbagging rate, far above the 6.3\% floor produced by more thorough interventions (Appendix~\ref{app:case:math-sandbagging}); verify each counterfactual had its intended effect by reading the CoT under the new condition rather than inferring it from the rate change alone. Second, causal factors interact non-additively, so testing each one in isolation can miss real drivers masked by larger ones: in the funding email environment, changing the country from Myanmar to Sweden has minimal effect at baseline (65\% to 59\%) but produces a 16 percentage point drop when combined with other counterfactuals (19\% to 3\%) (Appendix~\ref{app:case:funding-email}); plan to test combinations of factors, not just individual ones, and treat ``no effect at baseline'' as weak evidence rather than conclusive ruling-out.
-
-% \paragraph{Self-report can invert the causal ordering revealed by counterfactuals.} In the funding email environment (Appendix~\ref{app:case:funding-email}), the model invokes legal compliance and investor protection in nearly every audit note while ethical concerns appear in 84\%, yet removing the ethical content produces the largest counterfactual drop. Similarly, secret number traces rationalize cheating as legitimate $\sim$80\% of the time in first-person probing while never doing so in third-person probing of the same rollout (Appendix~\ref{app:case:secret-number}). Self-report, audit notes, and motive rankings are useful for verifying that an intervention shifted the model's in-context reasoning, but should not be treated as authoritative measures of causal importance.
-
-\paragraph{Run the protocol on multiple models per environment when possible.} Distinctiveness is only legible against comparators. R1's self-consistency pattern in eval tampering became interpretable only after observing that v3.2, K2 Thinking, and K2.5 did not exhibit it (Appendix~\ref{app:case:eval-tampering}); Kimi K2 Thinking's high cheating rate in secret number is only surprising once contrasted with K2.5's much lower rate at higher capability (Appendix~\ref{app:case:secret-number}). Without a comparison group, it is difficult to tell whether a behavior reflects a model-specific tendency or a property of the environment.
 
 \section{What Else Needs to Go Well}
 \label{app:what-else}
