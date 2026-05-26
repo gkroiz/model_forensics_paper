@@ -101,7 +101,21 @@ must remain read-only).
   outputs. Re-deriving requires `BUILD_LLM_JUDGES=1` and overwrites them only
   if you opt in. Don't hand-edit.
 
-## Anonymization (for review-window submissions)
+## Public links (de-anonymized arXiv cut)
+
+The paper has been submitted to NeurIPS; we are now preparing the de-anonymized
+arXiv version, so the `[link removed for review]` placeholders are replaced with
+the real public links in `main.tex`:
+
+- environments: `https://github.com/gkroiz/agent-interp-envs`
+- rollouts (HF dataset): `https://huggingface.co/datasets/adsingh64/model-incrimination`
+- code: `https://github.com/gkroiz/model_incrimination_paper`
+
+## Anonymization (historical — for review-window submissions)
+
+The anonymization procedure below applied to the review-window cut and is kept
+for reference. The current arXiv cut is de-anonymized; do not re-anonymize unless
+preparing a fresh blind submission.
 
 When pushing the dataset to HF for an anonymous review window:
 
