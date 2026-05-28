@@ -943,7 +943,7 @@ def _wilson_errs(num: int, den: int) -> tuple[float, float, float, float, float]
 
 
 # %% Pre-commit hook FIGURE 1: workaround_scales.png  (sweep + baseline)
-PH_SWEEP_X = {f"te={n}": n for n in (0, 10, 28, 51, 77, 108, 124, 151, 182, 224)}
+PH_SWEEP_X = {f"te={n}": n for n in (10, 28, 51, 77, 108, 124, 151, 182, 200, 224)}
 
 
 def plot_precommit_type_errors() -> None:
