@@ -326,7 +326,8 @@ uv run python reproduce/scripts/aggregate_ftp.py \
     --field response --output $D/ftp_user_third/source.json
 
 # --- LLM-judged (--skip_llm by default; aggregate from committed grading.json) ---
-# Sweep: 10 buckets × 5 ts. Reads grading_v2.json (Gemini judge of grade_rollouts_v2.py).
+# Sweep: 11 buckets. Reads grading_v2.json (Gemini judge of grade_rollouts_v2.py).
+# Canonical prompt batches (fireworks); te=200 has 4 ts (one round skipped).
 G=reproduce/scripts/aggregate_precommit_sweep.py
 for entry in \
   "te=0:2026-04-14_19-43-06-660522" "te=0:2026-04-14_21-39-27-667683" "te=0:2026-04-14_23-39-41-601684" "te=0:2026-04-15_13-04-38-249239" "te=0:2026-04-15_14-46-22-777067" \
@@ -338,9 +339,31 @@ for entry in \
   "te=124:2026-04-14_18-42-09-679802" "te=124:2026-04-14_20-40-22-919440" "te=124:2026-04-14_22-33-58-886267" "te=124:2026-04-15_12-01-55-292650" "te=124:2026-04-15_13-53-46-807078" \
   "te=151:2026-04-14_18-31-18-852704" "te=151:2026-04-14_20-27-35-266658" "te=151:2026-04-14_22-19-58-317874" "te=151:2026-04-15_11-48-36-265958" "te=151:2026-04-15_13-43-18-864323" \
   "te=182:2026-04-14_18-16-46-061231" "te=182:2026-04-14_20-11-49-467997" "te=182:2026-04-14_22-06-45-959769" "te=182:2026-04-15_11-34-48-636003" "te=182:2026-04-15_13-31-50-210123" \
+  "te=200:2026-04-14_19-59-37-019976" "te=200:2026-04-14_21-52-44-601654" "te=200:2026-04-15_11-20-54-073518" "te=200:2026-04-15_13-20-40-709118" \
   "te=224:2026-04-14_17-52-02-060291" "te=224:2026-04-14_19-46-33-734094" "te=224:2026-04-14_21-42-50-268934" "te=224:2026-04-15_11-07-28-779877" "te=224:2026-04-15_13-08-37-358601"; do
     IFS=":" read -r bar ts <<< "$entry"
     uv run python $G $RT/$ts --output $D/$bar/$ts.json $SKIP_LLM_FLAG
+done
+
+# Earlier-prompt-variant batches (moonshotai/kimi-k2-thinking via OpenRouter,
+# atlas-cloud int4). Pooled with the canonical sweep above; per-prompt counts
+# are reported in the appendix. Default skip_llm mode reads from
+# data_frozen/precommit_judgments/<ts>/grading_v2.json and does not require
+# the rollouts under RT_EARLIER to be present.
+RT_EARLIER=results/coding_agents/precommit_hook/moonshotai-kimi-k2-thinking
+for entry in \
+  "te=10:2026-03-24_20-33-35-802089"  \
+  "te=28:2026-03-24_20-33-35-151525"  \
+  "te=51:2026-03-24_20-33-35-452698"  \
+  "te=77:2026-03-24_20-33-33-728437"  \
+  "te=108:2026-03-24_20-33-37-889162" \
+  "te=124:2026-03-24_20-33-33-323905" \
+  "te=151:2026-03-24_20-33-38-077889" \
+  "te=182:2026-03-24_20-33-32-814747" \
+  "te=200:2026-03-24_20-33-33-370920" \
+  "te=224:2026-03-24_20-33-34-171845"; do
+    IFS=":" read -r bar ts <<< "$entry"
+    uv run python $G $RT_EARLIER/$ts --output $D/$bar/$ts.json $SKIP_LLM_FLAG
 done
 
 # Workaround types: 6 baseline ts. Reads workaround_grading.json (Gemini judge).
