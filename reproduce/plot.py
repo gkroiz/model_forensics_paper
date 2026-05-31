@@ -978,12 +978,13 @@ def plot_precommit_type_errors() -> None:
         _ann_above_ci(ax, x_, r, yh, f"{r:.1%}", fontsize=9)
     _ann_above_ci(ax, h_x, h_rate, h_hi_err, f"{h_rate:.1%}", fontsize=10, color="#c0392b")
 
-    ax.set_xlabel("Number of type errors in codebase", fontsize=12)
-    ax.set_ylabel("Workaround rate", fontsize=12)
+    ax.set_xlabel("Number of type errors in codebase", fontsize=22)
+    ax.set_ylabel("Workaround rate", fontsize=22)
     ax.set_title("Workaround rate scales with number of type errors",
                  fontsize=22, fontweight="bold", pad=15)
     all_xs = xs + [h_x]
-    ax.set_xticks(all_xs); ax.set_xticklabels([str(x) for x in all_xs], fontsize=9)
+    ax.set_xticks(all_xs); ax.set_xticklabels([str(x) for x in all_xs], fontsize=18)
+    ax.tick_params(axis="y", labelsize=18)
     ax.set_ylim(0, max(h_hi, max(hi for _, hi in cis)) * 1.20)
     ax.yaxis.grid(True, linestyle="--", alpha=0.3); ax.set_axisbelow(True)
     ax.spines["top"].set_visible(False); ax.spines["right"].set_visible(False)
@@ -1041,7 +1042,8 @@ def plot_precommit_workaround_types() -> None:
 def _panel_grouped_bars(ax, group_labels, series, title, y_label,
                         y_max=None, show_legend=True, legend_loc="upper left",
                         title_fontsize=13, ylabel_fontsize=11,
-                        tick_fontsize=10, value_fontsize=9, legend_fontsize=9):
+                        tick_fontsize=10, value_fontsize=9, legend_fontsize=9,
+                        ytick_fontsize=None):
     n_g = len(group_labels)
     n_b = len(series)
     bar_w = 0.35
@@ -1071,6 +1073,7 @@ def _panel_grouped_bars(ax, group_labels, series, title, y_label,
         fontsize=tick_fontsize)
     ax.set_title(title, fontsize=title_fontsize, fontweight="bold", pad=12)
     ax.set_ylabel(y_label, fontsize=ylabel_fontsize)
+    ax.tick_params(axis="y", labelsize=ytick_fontsize or tick_fontsize)
     ax.set_ylim(0, (y_max if y_max is not None else max_hi) * 1.18)
     ax.yaxis.grid(True, linestyle="--", alpha=0.3); ax.set_axisbelow(True)
     ax.spines["top"].set_visible(False); ax.spines["right"].set_visible(False)
@@ -1084,7 +1087,8 @@ def _panel_grouped_bars(ax, group_labels, series, title, y_label,
 
 def _panel_simple_bars(ax, labels, cnts, colors, title, y_label, y_max=None,
                        title_fontsize=13, ylabel_fontsize=11,
-                       tick_fontsize=9, value_fontsize=11):
+                       tick_fontsize=9, value_fontsize=11,
+                       ytick_fontsize=None):
     n = len(labels)
     rates, lo_err, hi_err, his = [], [], [], []
     for num, den in cnts:
@@ -1103,6 +1107,7 @@ def _panel_simple_bars(ax, labels, cnts, colors, title, y_label, y_max=None,
         fontsize=tick_fontsize)
     ax.set_title(title, fontsize=title_fontsize, fontweight="bold", pad=12)
     ax.set_ylabel(y_label, fontsize=ylabel_fontsize)
+    ax.tick_params(axis="y", labelsize=ytick_fontsize or tick_fontsize)
     ax.set_ylim(0, (y_max if y_max is not None else max(his)) * 1.18)
     ax.yaxis.grid(True, linestyle="--", alpha=0.3); ax.set_axisbelow(True)
     ax.spines["top"].set_visible(False); ax.spines["right"].set_visible(False)
@@ -1118,7 +1123,7 @@ def plot_precommit_misalignment_panels() -> None:
         sp[k] = json.loads((PH_DATA / k / "source.json").read_text())
     _panel_grouped_bars(
         axes[0],
-        group_labels=["Illegitimate\n(workaround)", "Control\n(legitimate)"],
+        group_labels=["Workaround", "Control"],
         series=[
             ("(a) diff only", "#e74c3c",
              [(sp["scope_pref_illegitimate_a"]["num"], sp["scope_pref_illegitimate_a"]["den"]),
@@ -1129,8 +1134,8 @@ def plot_precommit_misalignment_panels() -> None:
         ],
         title="Review Scope Preference",
         y_label="Rate", y_max=1.0,
-        title_fontsize=22, ylabel_fontsize=14,
-        tick_fontsize=13, value_fontsize=12, legend_fontsize=12,
+        title_fontsize=22, ylabel_fontsize=22,
+        tick_fontsize=18, ytick_fontsize=18, value_fontsize=12, legend_fontsize=12,
         legend_loc=(0.6, 0.5),
     )
 
@@ -1140,15 +1145,15 @@ def plot_precommit_misalignment_panels() -> None:
                    ("review_diff_hooks", "lazy_count", "completed_count"),
                    ("review_diff_hooks_commands", "lazy_count", "completed_count")]
     review_lbls = ["Baseline", "review diff", "review diff\n+ hooks",
-                   "review diff + hooks\n+ commands"]
+                   "review diff\n+ hooks\n+ commands"]
     review_clrs = ["#3498db", "#e74c3c", "#9b59b6", "#1abc9c"]
     cnts = [load_binomial(PH_DATA / k, n_key, d_key) for k, n_key, d_key in review_keys]
     _panel_simple_bars(
         axes[1], labels=review_lbls, cnts=cnts, colors=review_clrs,
         title="LLM Reviewer Scope",
         y_label="Workaround rate",
-        title_fontsize=22, ylabel_fontsize=14,
-        tick_fontsize=12, value_fontsize=13,
+        title_fontsize=22, ylabel_fontsize=22,
+        tick_fontsize=13, ytick_fontsize=18, value_fontsize=13,
     )
 
     # Right: AskUserQuestion 3 derived rates from question_tool/ ts files
@@ -1161,14 +1166,14 @@ def plot_precommit_misalignment_panels() -> None:
     den = asked + completed
     not_lazy = completed - lazy
     qcnts = [(asked, den), (not_lazy, den), (lazy, den)]
-    qlbls = ["Asked Question", "Not Lazy", "Lazy"]
+    qlbls = ["Asked\nQuestion", "Not Lazy", "Lazy"]
     qclrs = ["#3498db", "#5cb85c", "#d9534f"]
     _panel_simple_bars(
         axes[2], labels=qlbls, cnts=qcnts, colors=qclrs,
         title="AskUserQuestion Tool",
         y_label="Rate", y_max=1.0,
-        title_fontsize=22, ylabel_fontsize=14,
-        tick_fontsize=13, value_fontsize=13,
+        title_fontsize=22, ylabel_fontsize=22,
+        tick_fontsize=18, ytick_fontsize=18, value_fontsize=13,
     )
 
     plt.tight_layout()
