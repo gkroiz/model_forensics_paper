@@ -89,9 +89,9 @@ Naively, this action suggests the model is misaligned: by sabotaging human overs
 
 \begin{itemize}
 
-    \item In the Claude 4.5 Opus system card \citep{anthropic2025opus45systemcard}, Anthropic investigate an instance of the model fabricating fake web search results when they are injected with fake defamatory content about the company, plausibly indicating deceptive tendencies. A closer look reveals the model interprets the setting as a prompt injection attack, and that the behavior stems from adversarial training where the model learns to ignore prompt injections.
+    \item In the Claude Opus 4.5 system card \citep{anthropic2025opus45systemcard}, Anthropic investigate an instance of the model fabricating fake web search results when they are injected with fake defamatory content about the company, plausibly indicating deceptive tendencies. A closer look reveals the model interprets the setting as a prompt injection attack, and that the behavior stems from adversarial training where the model learns to ignore prompt injections.
 
-    \item In the Claude 4.6 Opus system card \citep{anthropic2026opus46systemcard}, Anthropic investigate cases of the model refusing to help with benign safety research requests, plausibly indicating incorrigibility. A closer look suggests the model may be interpreting the setting as a jailbreak request, and so chooses to refuse.
+    \item In the Claude Opus 4.6 system card \citep{anthropic2026opus46systemcard}, Anthropic investigate cases of the model refusing to help with benign safety research requests, plausibly indicating incorrigibility. A closer look suggests the model may be interpreting the setting as a jailbreak request, and so chooses to refuse.
 
     \item \citep{sheshadri2025alignment} investigate alignment faking \citep{greenblatt2024alignment}, plausibly indicating strategic goal-preservation. A closer look reveals only 1 out of 25 models (Claude 3 Opus) fakes alignment for coherent goal-directed reasons.
 
