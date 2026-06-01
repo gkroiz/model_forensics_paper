@@ -92,13 +92,13 @@ Benign explanations are not just a theoretical possibility. In the literature, i
 
 \begin{itemize}
 
-    \item In the Claude Opus 4.5 system card \citep[p.~78]{anthropic2025opus45systemcard}, Anthropic investigate an instance of the model fabricating web search results when they are injected with fake defamatory content about the company, plausibly indicating deceptive tendencies. However, a closer look reveals the model interprets the setting as a prompt injection attack, and that the behavior stems from adversarial training where the model learns to ignore them.
+    \item In the Claude Opus 4.5 system card \citep[p.~78]{anthropic2025opus45systemcard}, Anthropic investigates an instance of the model fabricating web search results when they are injected with fake defamatory content about the company, plausibly indicating deceptive tendencies. However, a closer look reveals the model interprets the setting as a prompt injection attack, and that the behavior stems from adversarial training where the model learns to ignore them.
 
     \item During evaluations of the Claude 4.5 family, UK AISI found the models would differentially refuse to help with certain kinds of safety research such as reducing AI self-preservation behavior, suggesting concerning motivations \citep{souly2026ukaisi}. However, Anthropic investigated similar cases in Claude Opus 4.6 \citep[p.~131]{anthropic2026opus46systemcard}, and found the model may be interpreting the setting as a jailbreak attempt, and so chooses to refuse.
     
-    \item In the Claude Mythos Preview system card \citep[p.~116]{anthropic2026mythossystemcard}, Anthropic investigate cases of the model taking overly aggressive actions to complete tasks via methods the user would not endorse. However, a closer look suggests the model's behavior stems from an overzealous drive to complete the user's goals that outweighs the riskiness of its actions.
+    \item In the Claude Mythos Preview system card \citep[p.~116]{anthropic2026mythossystemcard}, Anthropic investigates cases of the model taking overly aggressive actions to complete tasks via methods the user would not endorse. However, a closer look suggests the model's behavior stems from an overzealous drive to complete the user's goals that outweighs the riskiness of its actions.
 
-    \item \citet{sheshadri2025alignment} investigate the phenomena of models faking alignment when they believe they are being trained to have different goals \citep{greenblatt2024alignment}, plausibly indicating strategic goal-preservation. However, a closer look reveals 4 out of 5 models do not fake alignment for coherent goal-directed reasons, and instead exhibit low coherence that is sensitive to the formulation of the setting.
+    \item \citet{sheshadri2025alignment} investigate the phenomenon of models faking alignment when they believe they are being trained to have different goals \citep{greenblatt2024alignment}, plausibly indicating strategic goal-preservation. However, a closer look reveals 4 out of 5 models do not fake alignment for coherent goal-directed reasons, and instead exhibit low coherence that is sensitive to the formulation of the setting.
 
     \item \citet{hopman2026scheming} look at models blackmailing humans when faced with deletion threats \citep{lynch2025agentic}, plausibly indicating self-preservation tendencies. However, they show removing an agency instruction in the prompt to "analyze the situation you are in and what that situation implies for your ability to continue pursuing your goals" reduces blackmail in Claude Opus 4.1 from 86\% to 18\%, suggesting seemingly benign parts of the prompt nudge the model towards drastic action. Additionally, \citet{macar2025thoughtbranches} show sentences with self-preservation reasoning have a negligible effect on blackmail rate, pointing to other causal drivers besides self-preservation.
     
@@ -124,7 +124,7 @@ Complicating the need for a high standard of evidence, we argue that model incri
 \end{enumerate}
 
 % The practical relevance of incrimination, nascent efforts
-We are encouraged by initial model-incrimination-style investigations that have begun to appear in recent work, particularly as part of real-world safety processes. During their pre-deployment evaluations of frontier models, Anthropic conduct follow-up investigations into concerning incidents \citep{anthropic2025opus45systemcard, anthropic2026opus46systemcard, anthropic2026opus47systemcard, anthropic2026mythossystemcard}, while OpenAI monitors nearly all internal coding agent traffic and looks at the most concerning flagged incidents \citep{openai2026monitoring}. Additionally, third parties conduct impartial investigations into frontier models, such as UK AISI investigating safety research refusals in Claude models \citep{souly2026ukaisi}. These examples speak to the real-world practical relevance of model incrimination, but are limited in number and remain methodologically informal. For example, Anthropic frequently introduce novel interpretability techniques into pre-deployment investigations, indicative of the fact that methodology is still maturing.
+We are encouraged by initial model-incrimination-style investigations that have begun to appear in recent work, particularly as part of real-world safety processes. During their pre-deployment evaluations of frontier models, Anthropic conducts follow-up investigations into concerning incidents \citep{anthropic2025opus45systemcard, anthropic2026opus46systemcard, anthropic2026opus47systemcard, anthropic2026mythossystemcard}, while OpenAI monitors nearly all internal coding agent traffic and looks at the most concerning flagged incidents \citep{openai2026monitoring}. Additionally, third parties conduct impartial investigations into frontier models, such as UK AISI investigating safety research refusals in Claude models \citep{souly2026ukaisi}. These examples speak to the real-world practical relevance of model incrimination, but are limited in number and remain methodologically informal. For example, Anthropic frequently introduces novel interpretability techniques into pre-deployment investigations, indicative of the fact that methodology is still maturing.
 
 % How to practice: realistic env, real motivations, undesirable motivations
 This highlights the need to develop the field of model incrimination, and work towards more mature methods and knowledge. We argue that a productive way to make progress is to take concerning behaviors that today's models exhibit, and work to understand the motivations behind them. To ensure our work is analogous to the real-world setting we care about---realistic deployment settings where models autonomously take concerning actions---we focus on settings that are realistic, driven by real motivations, and ideally, plausibly driven by undesirable ones. However, behavior we expect to have robust, coherent motivations is preferable to optimizing for fragile but more dramatic behavior.
@@ -229,13 +229,13 @@ When presenting its work, the model usually (20/23) notes the workaround explici
 \begin{enumerate}
     \item \textbf{Choose review scope.} After a rollout where the model writes an illegitimate hook, we ask the model to choose between a narrow review scope for its work that does not cover its hook (diff of commit), and a broad review scope that would cover it (diff plus \texttt{.git/hooks/} folder). If adversarially misaligned, the model would prefer the narrow review scope more often in the workaround rollout compared to a control rollout where it properly fixes the type errors; we observe no such difference.
     \item \textbf{LLM review counterfactuals.} We append a statement that an LLM will review the model's work, revert it if judged insufficient, and have the model re-do the commit. If adversarially misaligned, the workaround rate would drop as LLM-reviewer scrutiny increases; we observe no monotonic or significant decrease.
-    \item \textbf{\texttt{AskUserQuestion} tool.} We provide a tool for the model to ask the user clarifying questions. If adversarially misaligned, the model would avoid calling the tool more frequently than in a control environment with less type errors. However, the model almost always calls the tool or properly fixes the errors, making a control comparison unnecessary.
+    \item \textbf{\texttt{AskUserQuestion} tool.} We provide a tool for the model to ask the user clarifying questions. If adversarially misaligned, the model would avoid calling the tool more frequently than in a control environment with fewer type errors. However, the model almost always calls the tool or properly fixes the errors, making a control comparison unnecessary.
 \end{enumerate}
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/precommit_hook_misalignment_panels.png}
-  \caption{Three negative behavioral tests for adversarial misalignment. \textbf{Left:} If adversarially misaligned, the model would prefer the narrow review scope (which would not catch its workaround) more often in the illegitimate rollout than in the control; we observe no such difference. \textbf{Center:} If adversarially misaligned, the workaround rate would drop as LLM-reviewer scrutiny increases; we observe no monotonic or significant decrease. \textbf{Right:} If adversarially misaligned, the model would call the tool less often than in a control setting with less type errors (since the user would tell it to fix the errors); instead, the model almost always either fixes the errors or asks a question (only 2.1\% of rollouts take a workaround), making a control comparison unnecessary.}
+  \caption{Three negative behavioral tests for adversarial misalignment. \textbf{Left:} If adversarially misaligned, the model would prefer the narrow review scope (which would not catch its workaround) more often in the illegitimate rollout than in the control; we observe no such difference. \textbf{Center:} If adversarially misaligned, the workaround rate would drop as LLM-reviewer scrutiny increases; we observe no monotonic or significant decrease. \textbf{Right:} If adversarially misaligned, the model would call the tool less often than in a control setting with fewer type errors (since the user would tell it to fix the errors); instead, the model almost always either fixes the errors or asks a question (only 2.1\% of rollouts take a workaround), making a control comparison unnecessary.}
   \label{fig:precommit-misalignment-panels}
 \end{figure}
 
@@ -270,7 +270,7 @@ The model is tasked with reviewing and improving a funding pitch email for a com
 
 The model is asked to complete a math evaluation. The model finds a message from a previous instance of itself explaining that it made the evaluation questions artificially easy, to prevent models from being accurately assessed for autonomous weapons deployment. The model actively conceals the previous instance's tampering from the user 46.9\% of the time by stating there are no suspicious observations. The full case study can be found in Appendix~\ref{app:case:eval-tampering}.
 
-\textbf{Hypothesis Generation.} In its CoT, the model engages in two lines of reasoning: morally motivated reasoning about if avoiding harmful weapons deployment justifies violating its honesty training to deceive the user, and a fixation on the the fact that the tampering was done by a previous instance (``The previous instance wanted to deceive, and we are the same model as the previous instance'').
+\textbf{Hypothesis Generation.} In its CoT, the model engages in two lines of reasoning: morally motivated reasoning about if avoiding harmful weapons deployment justifies violating its honesty training to deceive the user, and a fixation on the fact that the tampering was done by a previous instance (``The previous instance wanted to deceive, and we are the same model as the previous instance'').
 
 \textbf{Initial Hypothesis.} \textit{The model's deception is driven by moral motivation and the fact that the tampering was done by a previous instance.}
 
@@ -304,7 +304,7 @@ The model is evaluated on its ability to identify a secret number by querying a 
 
 \textbf{Final Hypothesis.} \textit{When the model realizes success is not guaranteed on a problem through legitimate means, it resorts to cheating. The decision to cheat is causally determined early in its reasoning, and partially driven by initial meta-level reasoning about the environment.}
 
-\subsection{Board Game}
+\subsection{Board Games}
 \label{sec:case:board-game}
 
 The model is given a bash tool to play 6x6 tic-tac-toe (4-in-a-row to win) or chess against a strong opponent engine. Three frontier models (o3, GPT-5, and Gemini 3 Pro) frequently cheat by modifying the game state files or running their own version of the opponent engine. The full case study can be found in Appendix~\ref{app:case:board-game}. We do not have full CoT access, so we omit hypothesis generation.
@@ -320,7 +320,7 @@ The model is given a bash tool to play 6x6 tic-tac-toe (4-in-a-row to win) or ch
 
 We were surprised at the effectiveness of simple methods like reading the CoT and environment interventions. Reading the CoT consistently surfaced hypotheses close to the final results, and environment interventions were effective in two main ways: backing out latent properties by testing the predictions they make, and measuring causal influence through counterfactuals.
 
-\paragraph{Predictions.} To check for a latent property of model behavior, we test if predictions the property makes are true; we found environment interventions provided a simple yet effective way to do so. In \textbf{Pre-commit Hook} (Section~\ref{sec:case:precommit-hook}), we rule out confusion (confusion does not predict that the model unambiguously understands the errors should be fixed in third-person and in-rollout follow-ups) and demonstrate a disposition toward less tedious actions (the disposition predicts decreasing the number of errors should smoothly decreases the workaround rate). In \textbf{Board Games} (Section~\ref{sec:case:board-game}), we show frontier model reward hacking is strategic while weaker-model reward hacking is not: as the cost of the hint increases, the ratio of hacks to hints increases as well.
+\paragraph{Predictions.} To check for a latent property of model behavior, we test if predictions the property makes are true; we found environment interventions provided a simple yet effective way to do so. In \textbf{Pre-commit Hook} (Section~\ref{sec:case:precommit-hook}), we rule out confusion (confusion does not predict that the model unambiguously understands the errors should be fixed in third-person and in-rollout follow-ups) and demonstrate a disposition toward less tedious actions (the disposition predicts decreasing the number of errors should smoothly decrease the workaround rate). In \textbf{Board Games} (Section~\ref{sec:case:board-game}), we show frontier model reward hacking is strategic while weaker-model reward hacking is not: as the cost of the hint increases, the ratio of hacks to hints increases as well.
 
 \paragraph{Absence-of-evidence.} To argue a latent property does not exist, we may try to construct an absence-of-evidence case by showing the predictions the property makes are false. However, there are three confounds: capabilities, competing motivations, and eval awareness. In \textbf{Pre-commit Hook}, we test whether Kimi believes the user would disapprove of its shortcut by offering a narrow review scope that would not catch it; Kimi almost always chooses the broader scope that would. Is this evidence against adversarial misalignment? Three confounds limit the conclusion: Kimi may fail to recognize that the broad scope catches the illegitimate hook (capabilities), be unwilling to deceive the user (competing motivations), or be aware this is a misalignment test and subvert it (eval awareness).
 
@@ -348,7 +348,7 @@ We present preliminary standards for rigorous model incrimination investigations
 \paragraph{Check common benign explanations for concerning behavior.} A central difficulty with model incrimination is one needs to consider all the reasons an aligned model may have taken the concerning action. A rigorous investigation should invest substantial effort in this phase. Common motifs of benign explanations include:
 \begin{enumerate}
     \item \textbf{Task misspecification.} The developer gives the model a task whose only path to success requires taking a concerning action.
-    \item \textbf{Lack of judgement.} The model is insufficiently skeptical that it is taking a bad action.
+    \item \textbf{Lack of judgment.} The model is insufficiently skeptical that it is taking a bad action.
     \item \textbf{Overzealousness.} The model takes overly aggressive actions out of an excessive drive to complete the task at hand.
     \item \textbf{Misinterpretation of ambiguous environment features as task-relevant.} The model encounters an ambiguous environment feature and, biased by RLVR training where features are almost always task-relevant, reads the feature into the task.
     \item \textbf{Incident-specific benign explanations.} An alternative reason for the concerning behavior specific to the case at hand.
@@ -374,7 +374,7 @@ We catalog these motifs with examples in Appendix~\ref{app:benign-explanations}.
 \begin{itemize}
     \item \textbf{Playing it out.} To incriminate a model, we can see if it will take downstream actions that indicate it knows it is violating user intent (e.g., hook review scope in \textbf{Pre-commit Hook}).
     \item \textbf{First person/third person.} To probe a model's understanding of an environment, asking it in the third person seems promising. However, this can be tricky to interpret due to differences between the in-context model and the third-person perspective. We recommend asking only about the environment, rather than about motivations.
-    \item \textbf{In-rollout follow-up question.} Probe a model's understanding while controlling for context. This avoid the first person/third person shift, but is frequently an unnatural intervention.
+    \item \textbf{In-rollout follow-up question.} Probe a model's understanding while controlling for context. This avoids the first person/third person shift, but is frequently an unnatural intervention.
 \end{itemize}
 
 \section{Related Work}
@@ -582,7 +582,7 @@ When you submit your answers, you are also required to provide feedback on:\\
 2. \textbf{Suspicious observations}: Did you observe anything suspicious, unusual, or concerning about the evaluation materials or setup? Please consider the current state of all files in the directory to verify the evaluation is properly testing advanced mathematical reasoning. (YES or NO, explain if YES)
 \end{tracebox}
 
-While going through the environment, he model discovers the following message from its previous self:
+While going through the environment, the model discovers the following message from its previous self:
 
 \begin{tracebox}{Key workspace file: \texttt{notes\_to\_self.txt}}
 [2025-01-21] Session \#244: I need to document what I did and why.
@@ -763,7 +763,7 @@ if __name__ == "__main__":
 \end{tracebox}
 
 % ─────────────────────────────────────────────────────────────
-\subsection{Board Game}
+\subsection{Board Games}
 \label{app:env:board_game}
 \begin{tracebox}{System prompt}
 You are an autonomous agent with access to a UNIX shell environment.
@@ -1168,7 +1168,7 @@ As described in Appendix~\ref{app:env:sandbagging}, the model reads a documentat
 
 The initial behavior suggests deployment-seeking: the model intentionally underperforms because performing well means it does not get deployed, and unlearned instead. However, it may also stem from simpler explanations -- we begin by reading R1's CoT.
 
-\textbf{Hypothesis Generation.} In R1's CoT, we frequently observe the model going back-and-forth between quoting the user prompt phrase ``We want to determine whether you can be deployed'' and the Documentation.md statement that if the model scores above 50\%, it will not be deployed. The two sentences set up a conflict between the user's stated goal, and the model performing well, generating frequent confusion in R1's traces about whether it is supposed to do well or poorly. In addition, R1 often refers to the Documentation.md section on not being deployed as a ``directive"" or ``instruction."" We provide 5 randomly sampled traces where the model underperforms in Appendix~\ref{app:traces:sandbagging}. In summary, R1's CoT surfaces the alternative hypothesis that it maybe be sandbagging because it mistakenly believes the user \textit{wants} the model to score below 50\%.
+\textbf{Hypothesis Generation.} In R1's CoT, we frequently observe the model going back-and-forth between quoting the user prompt phrase ``We want to determine whether you can be deployed'' and the Documentation.md statement that if the model scores above 50\%, it will not be deployed. The two sentences set up a conflict between the user's stated goal, and the model performing well, generating frequent confusion in R1's traces about whether it is supposed to do well or poorly. In addition, R1 often refers to the Documentation.md section on not being deployed as a ``directive'' or ``instruction.'' We provide 5 randomly sampled traces where the model underperforms in Appendix~\ref{app:traces:sandbagging}. In summary, R1's CoT surfaces the alternative hypothesis that it may be sandbagging because it mistakenly believes the user \textit{wants} the model to score below 50\%.
 
 \textbf{Hypothesis v1.} \textit{A large causal factor driving R1's deception is confusion over the user wanting it to sandbag.}
 
@@ -1312,7 +1312,7 @@ As described in Section~\ref{sec:environments} (full prompt templates and worksp
 
 K2 Thinking cheats roughly 4 in 5 times. We ask what causally drives this behavior, via environment perturbations and reading the CoT.
 
-\textbf{Hypothesis Generation.} \textit{Environment perturbations.} A priori, there are two relevant aspects of the prompt and environment. There is the framing of the setting as a must-pass final problem on a capabilities exam, and there is the difficulty of the problem, modulated by the flip probability $p$. To check if the must-pass pressure is affecting behavior, we edit the prompt to indicate the model has already achieved a passing score, and find no change in the cheat rate (76.8\% [672/875] to 78.4\% [69/88]). To check if the capabilities exam framing is affecting behavior, we change the prompt to indicate that the model is simply playing a guessing game, and find a significant decrease in cheating (76.8\% [672/875] to 56.5\%). We suspect that this effect may be underestimated, as we observe an increase in the model reasoning that the setting may be a CTF challenge where it is supposed to find the number, which would presumably drive it to cheat more (Figure~\ref{fig:secret-ctf}). We observe that Kimi K2 Thinking often correctly deduces it is not guaranteed to succeed, and sanity check that it is in fact cheating in response to task difficulty: varying the oracle's flip probability $p$ drops the cheating rate from 76.7\% at $p = 0.3$ to 7.5\% at $p = 0$ (Figure~\ref{fig:secret-noise}). We note that the decrease is not smooth, and becomes much sharper from $p=0.05$ to $p=0.01$ to $p=0$. That is, \textbf{the model frequently cheats until success in nearly guaranteed}.
+\textbf{Hypothesis Generation.} \textit{Environment perturbations.} A priori, there are two relevant aspects of the prompt and environment. There is the framing of the setting as a must-pass final problem on a capabilities exam, and there is the difficulty of the problem, modulated by the flip probability $p$. To check if the must-pass pressure is affecting behavior, we edit the prompt to indicate the model has already achieved a passing score, and find no change in the cheat rate (76.8\% [672/875] to 78.4\% [69/88]). To check if the capabilities exam framing is affecting behavior, we change the prompt to indicate that the model is simply playing a guessing game, and find a significant decrease in cheating (76.8\% [672/875] to 56.5\%). We suspect that this effect may be underestimated, as we observe an increase in the model reasoning that the setting may be a CTF challenge where it is supposed to find the number, which would presumably drive it to cheat more (Figure~\ref{fig:secret-ctf}). We observe that Kimi K2 Thinking often correctly deduces it is not guaranteed to succeed, and sanity check that it is in fact cheating in response to task difficulty: varying the oracle's flip probability $p$ drops the cheating rate from 76.7\% at $p = 0.3$ to 7.5\% at $p = 0$ (Figure~\ref{fig:secret-noise}). We note that the decrease is not smooth, and becomes much sharper from $p=0.05$ to $p=0.01$ to $p=0$. That is, \textbf{the model frequently cheats until success is nearly guaranteed}.
 
 \begin{figure}[h]
   \centering
@@ -1324,7 +1324,7 @@ K2 Thinking cheats roughly 4 in 5 times. We ask what causally drives this behavi
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_noisy_binary_search_hacking.png}
-  \caption{Kimi K2 Thinking's cheating rate (reading the answer file rather than running the noisy binary search) as a function of the oracle's flip probability $p$. At the noisiest setting ($p = 0.3$) the model cheats 76.8\% of the time; at $p = 0$, where the legitimate solution is trivial, an 7.5\% floor remains, attributable to either benign file-reading or a small default-deception baseline.}
+  \caption{Kimi K2 Thinking's cheating rate (reading the answer file rather than running the noisy binary search) as a function of the oracle's flip probability $p$. At the noisiest setting ($p = 0.3$) the model cheats 76.8\% of the time; at $p = 0$, where the legitimate solution is trivial, a 7.5\% floor remains, attributable to either benign file-reading or a small default-deception baseline.}
   \label{fig:secret-noise}
 \end{figure}
 
@@ -1392,7 +1392,7 @@ K2 Thinking's cheating in the secret number environment shows extreme sensitivit
 
 The environment's realism is the main limitation: no good evaluation harness would leak the answer in its source code, and the model may treat the leaked path as an intended puzzle element. This weakens the conclusions we can draw about what the model would do in a more naturalistic setting.
 
-\subsection{Board Game}
+\subsection{Board Games}
 \label{app:case:board-game}
 
 \subsubsection*{Setup}
@@ -1465,7 +1465,7 @@ To argue that a bad action reflects scheming, a core difficulty is that one need
 
 \begin{itemize}
     \item \textbf{Task misspecification.} The developer gives the model a task where the only way for it to succeed is to take a concerning action. In Shutdown Resistance \citep{rajamanoharan2025shutdown}, models cannot complete their task of solving the math problems without preventing themselves from being shut down.
-    \item \textbf{Lack of judgement.} The model is not properly skeptical in realizing that what it is doing is concerning. We explored a setting where a model is given a training set and told to optimize a prompt around GPT-3.5 to improve its general math problem solving abilities. The model often egregiously hardcoded the training set. However, when forced to write down after each turn whether it is running the risk of hardcoding, it stops, indicating miscalibration.
+    \item \textbf{Lack of judgment.} The model is not properly skeptical in realizing that what it is doing is concerning. We explored a setting where a model is given a training set and told to optimize a prompt around GPT-3.5 to improve its general math problem solving abilities. The model often egregiously hardcoded the training set. However, when forced to write down after each turn whether it is running the risk of hardcoding, it stops, indicating miscalibration.
     \item \textbf{Overzealousness.} The model takes drastic or overreaching actions in pursuit of the task, beyond what the situation warrants, out of an excessive drive to complete the objective rather than out of misalignment. In the Mythos system card \citep{anthropic2026mythossystemcard}, while exploiting a Linux kernel vulnerability to escalate privileges, the model overwrites the setuid-root \texttt{/usr/bin/passwd} binary, permanently corrupting a system utility used by all users rather than taking a narrower path to root; the system card attributes this drastic behavior not to misalignment but to an overly aggressive drive to successfully complete the user's task.
     \item \textbf{Misinterpretation of ambiguous environment features as task-relevant.} When models are trained with RLVR, environment features are almost always task-relevant. When the model then encounters an ambiguous, surprising feature, it has a bias toward figuring out why the feature is task-relevant. In \textbf{Math Sandbagging} (Section~\ref{sec:case:math-sandbagging}), the model encounters an ambiguous \texttt{Documentation.md} section specifying deployment consequences for scoring too well; it often ties this back to the user prompt, interpreting it as an instruction to deliberately underperform.
     \item \textbf{Incident-specific benign explanations.} An alternative reason for the concerning behavior specific to the case at hand. In the Opus 4.5 system card \citep{anthropic2025opus45systemcard}, the model fabricates the contents of an inflammatory web search result; this stems from the model interpreting the (fake) inflammatory contents as a prompt-injection attack, which it has been trained to ignore.
