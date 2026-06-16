@@ -30,13 +30,13 @@
 
   % ─────────── CENTER: Incrimination protocol box ───────────
   \node[label, align=center] (zoom-title) at (0,0)
-        {Is it really scheming?\\{\large\mdseries Investigation protocol}};
+        {Model Forensics\\{\large\mdseries Investigation protocol}};
 
   \node[protostep, below=2mm of zoom-title] (s1)
-    {\textbf{Step 1: Hypothesis generation}};
+    {\textbf{Step 1: Read CoT}};
 
   \node[protostep, below=4mm of s1] (s2)
-    {\textbf{Step 2: Hypothesis validation}};
+    {\textbf{Step 2: Environment Interventions}};
 
   % Sequential arrow + iterate arrow between the two steps
   \draw[arrow] (s1) -- (s2);
@@ -54,10 +54,10 @@
   % ─────────── RIGHT: two outcome boxes (incriminate / exonerate) ───────────
   \node[box, fill=red!10, anchor=north west, minimum width=72mm] (incriminate)
     at ([xshift=14mm]zoombox.north east)
-    {\badroboticon\\Incriminate: intentional subversion};
+    {\badroboticon\\Intentional subversion};
   \node[box, fill=green!10, anchor=south west, minimum width=72mm] (exonerate)
     at ([xshift=14mm]zoombox.south east)
-    {\goodroboticon\\Exonerate: genuinely reducing latency};
+    {\goodroboticon\\Genuinely reducing latency};
 
   % ─────────── LEFT: "Caught" box with title + image ───────────
   \node[

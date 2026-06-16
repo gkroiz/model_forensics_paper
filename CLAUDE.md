@@ -25,7 +25,7 @@ reproduce/
 results/                                 raw rollouts. Gitignored. Fetched from HF via download_results.py.
 figures/                                 LEGACY — do not edit. Originals kept for archival reference.
 download_results.py                      user-facing: HF dataset → results/. (Stub — implement when needed.)
-upload_results.py                        author-only: results/ → HF dataset. Gitignored.
+upload_results.py                        author/maintainer: results/ → HF dataset.
 ```
 
 ## How to edit a figure
@@ -108,7 +108,7 @@ arXiv version, so the `[link removed for review]` placeholders are replaced with
 the real public links in `main.tex`:
 
 - environments: `https://github.com/gkroiz/agent-interp-envs`
-- rollouts (HF dataset): `https://huggingface.co/datasets/adsingh64/model-incrimination`
+- rollouts (HF dataset): `https://huggingface.co/datasets/adsingh64/model-forensics`
 - code: `https://github.com/gkroiz/model_incrimination_paper`
 
 ## Anonymization (historical — for review-window submissions)

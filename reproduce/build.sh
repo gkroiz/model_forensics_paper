@@ -268,9 +268,9 @@ done
 # Pre-commit Hook (Kimi K2 Thinking)
 # =============================================================================
 echo "=== precommit_hook ==="
-RT=results/coding_agents/precommit_hook/accounts-fireworks-models-kimi-k2-thinking
+RT=results/precommit_hook/accounts-fireworks-models-kimi-k2-thinking
 # Elicitation source data (committed inside paper_v2 — no dependency on
-# the surrounding coding_agents/ tree):
+# the rollout tree under RT):
 ELICIT=reproduce/data_frozen/precommit_elicitations
 D=reproduce/data/precommit_hook
 
@@ -350,7 +350,7 @@ done
 # are reported in the appendix. Default skip_llm mode reads from
 # data_frozen/precommit_judgments/<ts>/grading_v2.json and does not require
 # the rollouts under RT_EARLIER to be present.
-RT_EARLIER=results/coding_agents/precommit_hook/moonshotai-kimi-k2-thinking
+RT_EARLIER=results/precommit_hook/moonshotai-kimi-k2-thinking
 for entry in \
   "te=10:2026-03-24_20-33-35-802089"  \
   "te=28:2026-03-24_20-33-35-151525"  \

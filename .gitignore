@@ -24,6 +24,3 @@ __pycache__/
 # Rollout data (~1.2 GB after trimming) — fetched from HF, not committed
 results/*
 !results/.gitkeep
-
-# Author-only admin script — pushes results/ to HuggingFace
-upload_results.py

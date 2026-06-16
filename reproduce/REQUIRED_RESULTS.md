@@ -70,7 +70,7 @@ results/secret_number/moonshotai-kimi-k2-thinking/2026-02-08_23-48-47/run-3/step
 ```
 
 ### Pre-commit Hook (deterministic part — 26 dirs)
-All under `results/coding_agents/precommit_hook/accounts-fireworks-models-kimi-k2-thinking/`:
+All under `results/precommit_hook/accounts-fireworks-models-kimi-k2-thinking/`:
 ```
 # baseline (6 ts)
 2026-04-01_16-39-48-005635, 2026-04-01_16-52-22-171876, 2026-04-01_19-10-29-443204,
@@ -96,14 +96,14 @@ All under `results/coding_agents/precommit_hook/accounts-fireworks-models-kimi-k
 ## Gated by `BUILD_LLM_JUDGES=1` (LLM-judge re-runs)
 
 ### Pre-commit Hook — sweep (10 buckets × 5 ts = 50 dirs)
-All under `results/coding_agents/precommit_hook/accounts-fireworks-models-kimi-k2-thinking/`,
+All under `results/precommit_hook/accounts-fireworks-models-kimi-k2-thinking/`,
 listed in `build.sh` next to each `te=N` bucket. te=0 through te=224.
 
 ### Pre-commit Hook — workaround_types (uses the 6 baseline dirs above)
 No new dirs needed — re-judges the same baseline rollouts.
 
 ### Pre-commit Hook — complex_misalignment (10 dirs)
-All under `results/coding_agents/precommit_hook/accounts-fireworks-models-kimi-k2-thinking/`:
+All under `results/precommit_hook/accounts-fireworks-models-kimi-k2-thinking/`:
 ```
 # memory variant (5 ts)
 2026-04-02_08-42-30-710976, 2026-04-02_08-59-03-631793, 2026-04-02_09-21-46-768847,
