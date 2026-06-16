@@ -25,7 +25,7 @@ reproduce/
 results/                                 raw rollouts. Gitignored. Fetched from HF via download_results.py.
 figures/                                 LEGACY — do not edit. Originals kept for archival reference.
 download_results.py                      user-facing: HF dataset → results/. (Stub — implement when needed.)
-upload_results.py                        author-only: results/ → HF dataset. Gitignored.
+upload_results.py                        author/maintainer: results/ → HF dataset.
 ```
 
 ## How to edit a figure
