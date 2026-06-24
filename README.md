@@ -1,6 +1,6 @@
-# Model Incrimination
+# Model Forensics
 
-Code and figures for the model incrimination paper.
+Code and figures for the model forensics paper.
 
 ## Reproducing the paper figures
 
