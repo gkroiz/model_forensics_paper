@@ -1,6 +1,8 @@
 \documentclass{article}
 
 \usepackage[preprint]{neurips_2026}
+\makeatletter\renewcommand{\@noticestring}{}\makeatother % authoritative copy: suppress "Preprint." footer
+\renewcommand{\acksection}{\section*{Acknowledgments}} % drop "and Disclosure of Funding" from the heading
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
@@ -60,7 +62,15 @@
 \title{Model Forensics: Investigating Whether Concerning Behavior Reflects Misalignment}
 
 \author{%
-  % Add authors here before camera-ready
+  Aditya Singh\thanks{Equal contribution. Work conducted during the ML Alignment \& Theory Scholars (MATS) program.\newline Correspondence: Aditya Singh (\texttt{singh.adityak1@gmail.com}), Gerson Kroiz (\texttt{gersonkroiz@gmail.com}).} \\
+  MATS
+  \And
+  Gerson Kroiz\footnotemark[1] \\
+  MATS
+  \And
+  Senthooran Rajamanoharan
+  \And
+  Neel Nanda
 }
 
 \raggedbottom
@@ -496,9 +506,12 @@ We do not expect this methodology to scale to superintelligence, and expect fore
 Incriminating an early schemer also provides an invaluable resource for technical AGI safety. Such a model would be the field's best model organism of misalignment \citep{hubinger2024sleeper}, yet remain safe to study because it is not yet superhuman. Concrete high-value experiments we could do include: debugging our alignment techniques to identify what part of post-training gave rise to scheming, running controlled experiments on the psychology of a schemer, testing if model internal techniques correctly flag a schemer, improving monitors with true positive examples, and many more.
 
 \begin{ack}
-% Add acknowledgments here (hidden during anonymous review)
+This research was conducted as part of the ML Alignment \& Theory Scholars (MATS) program. It is a pleasure to thank Christopher Ackermann for research management support throughout the project. Alex Meinke and Robert Kirk provided valuable discussions that shaped our ideas during the project. Arya Jakkli suggested the resumption prompt experiment in the Pre-commit Hook case study (Section 6). We also thank Clement Dumas, Tim Hua, David Africa, Jack Lindsey, and especially Rohin Shah for feedback on the paper.  
 \end{ack}
 
+\section*{Author Contributions}
+
+Both first authors, Aditya Singh and Gerson Kroiz, contributed to the research, engineering, and writing of the paper. Senthooran Rajamanoharan and Neel Nanda supervised the project, providing feedback and guidance throughout the project.
 \bibliographystyle{plainnat}
 \bibliography{references}
 
