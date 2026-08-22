@@ -40,6 +40,15 @@ bash reproduce/build.sh
 uv run python reproduce/plot.py
 ```
 
+The downloader defaults to the public
+`Model-Forensics/model-forensics` dataset and the repository's gitignored
+`results/` directory. Existing files are preserved so Hugging Face can resume
+an interrupted download. Use `--revision <commit-or-tag>` to pin a dataset
+revision, `--local-dir <path>` for a different destination, or
+`--repo-id <owner/name>` for a compatible mirror. If a mirror requires
+authentication, set `HF_TOKEN` in the environment rather than putting a token
+on the command line.
+
 By default, `build.sh` runs only the deterministic graders. It reads
 committed LLM-judge outputs from `reproduce/data_frozen/precommit_judgments/`
 in `--skip_llm` mode (the default) so no API calls happen.
