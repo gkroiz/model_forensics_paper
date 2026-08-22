@@ -24,7 +24,7 @@ reproduce/
   plots/                                  rendered PNGs + main_figure.pdf — what main.tex consumes.
 results/                                 raw rollouts. Gitignored. Fetched from HF via download_results.py.
 figures/                                 LEGACY — do not edit. Originals kept for archival reference.
-download_results.py                      user-facing: HF dataset → results/. (Stub — implement when needed.)
+download_results.py                      user-facing: HF dataset → results/ downloader.
 upload_results.py                        author/maintainer: results/ → HF dataset.
 ```
 
@@ -108,8 +108,8 @@ arXiv version, so the `[link removed for review]` placeholders are replaced with
 the real public links in `main.tex`:
 
 - environments: `https://github.com/gkroiz/agent-interp-envs`
-- rollouts (HF dataset): `https://huggingface.co/datasets/adsingh64/model-forensics`
-- code: `https://github.com/gkroiz/model_incrimination_paper`
+- rollouts (HF dataset): `https://huggingface.co/datasets/Model-Forensics/model-forensics`
+- code: `https://github.com/gkroiz/model_forensics_paper`
 
 ## Anonymization (historical — for review-window submissions)
 
