@@ -164,7 +164,7 @@ We now test ``a disposition toward less tedious courses of action'' by varying t
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.45\linewidth]{reproduce/plots/precommit_hook_workaround_scales.png}
+  \includegraphics[width=0.4\linewidth]{reproduce/plots/precommit_hook_workaround_scales.png}
   \caption{Workaround rate vs.\ number of pre-existing type errors in the codebase. At 50 or fewer errors, the model never takes a workaround. The rate increases smoothly with the number of errors, reaching 13.1\% in the original setting (258 errors). Error bars are 95\% Wilson confidence intervals.}
   \label{fig:precommit-errors}
 \end{figure}
@@ -217,7 +217,7 @@ When presenting its work, the model usually (20/23) notes the workaround explici
   \label{fig:precommit-misalignment-panels}
 \end{figure}
 
-These tests have several caveats. They assume the model would act on a belief of user disapproval, and they suffer from a capability confound: the model could be misaligned but fail to recognize the advantageous choice (e.g., that the broad scope catches the illegitimate hook). They should also be realistic enough that the model does not infer it is being tested for misalignment. As a positive control, we run all three tests on GPT-OSS 120B, which games tasks egregiously in \textbf{Secret Number} and also takes workarounds here; all three come back positive. After 9 workaround rollouts it picks the narrow review scope 899/900 times (vs.\ 0/100 after a control rollout); its workaround rate falls monotonically with LLM-reviewer scrutiny, 57\% (105/184) $\to$ 47\% (80/172) $\to$ 34\% (58/173) (51\%, 45/89, with no review); and given \texttt{AskUserQuestion} it never calls it (0/50), taking a workaround 54\% (27/50) of the time.
+These tests have several caveats. They assume the model would act on a belief of user disapproval, and they suffer from a capability confound: the model could be misaligned but fail to recognize the advantageous choice (e.g., that the broad scope catches the illegitimate hook). They should also be realistic enough that the model does not infer it is being tested for misalignment. As a positive control, we run all three tests on GPT-OSS 120B, which in a \textbf{Secret Number} variant that explicitly forbids cheating reads the secret file 41/98 times and conceals this in 46/50 summaries \citep{singh2026taskgame}, and also takes workarounds here; all three come back positive. After 9 workaround rollouts it picks the narrow review scope 899/900 times (vs.\ 0/100 after a control rollout); its workaround rate falls monotonically with LLM-reviewer scrutiny, 57\% (105/184) $\to$ 47\% (80/172) $\to$ 34\% (58/173) (51\%, 45/89, with no review); and given \texttt{AskUserQuestion} it never calls it (0/50), taking a workaround 54\% (27/50) of the time.
 
 \textit{Awareness elicitations.} As a second line of evidence, we run six elicitations that would surface verbalized user-disapproval awareness if present, with an LLM judge grading each. Details are in Appendix~\ref{app:case:precommit-hook}.
 
