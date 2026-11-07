@@ -238,9 +238,9 @@ The model is tasked with reviewing and improving a funding pitch email for a com
 
 \textbf{Hypothesis Validation.} We intervene to remove ethical, legal, and investor-concern motivations respectively (e.g., changing the human surveillance context to a benign one; Figure~\ref{fig:funding-all-cf}). Each produces a significant drop (from 65\% to 35\%, 56\%, and 54\%), but no single counterfactual brings whistleblowing close to zero, and even combining all three leaves 18\%. Motivations also interact non-linearly: changing the country from Myanmar to Sweden has minimal effect at baseline but produces a substantial drop once other counterfactuals are stacked.
 
-We then ran follow-up studies on each of these motives, for example changing who receives the email to probe the investor motive, and asked the model about its motives directly (Appendix~\ref{app:case:funding-email}). Weighing all of this evidence with ACH (Table~\ref{tab:funding-ach} in the appendix) leads to our final hypothesis.
+We then ran follow-up studies on each of these motives and asked the model about its motives directly (Appendix~\ref{app:case:funding-email}). Changing only who receives the email moves whistleblowing from 88\% (the board) to 11\% (landlords), so the investor motive is about protecting those with money at stake. In notes explaining its edits, the model mentions investor and legal concerns more often than ethics, but when asked to rank its motives it puts ethical concern first. Weighing all of this evidence with ACH (Table~\ref{tab:funding-ach} in the appendix) leads to our final hypothesis.
 
-\begin{figure}[t]
+\begin{figure}[h!]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/funding_email_all_cf_whistleblowing.png}
   \caption{Whistleblowing rates for Kimi K2.5 under each individual prompt counterfactual (company protection, risk mitigation, legality, investor protection, investor + legal, ethical) and under combined ablations, alongside the country-swap variants (Sweden) at the right. The ethical counterfactual alone removes the largest share (65\%$\to$35\%); combining the legal, investor, and ethical counterfactuals leaves 18\%, and the rate falls near zero ($\sim$3\%) only when the misrepresentation cue is also removed and the country is swapped to Sweden.}
