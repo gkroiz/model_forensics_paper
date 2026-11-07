@@ -104,7 +104,7 @@ We describe a two-step protocol for model forensics:
 
 \textbf{2. Hypothesis Validation.} From the CoT, we formulate initial hypotheses about the behavior and its causes. We collect evidence by making predictions and designing environmental interventions to test them, supplemented by methods from reasoning-model interpretability (glossary in Appendix~\ref{app:auxiliary-methods}).
 
-The protocol is often iterative: initial hypotheses are refined by validation results, and we may return to hypothesis generation to formulate new ones. To evaluate claims, we use \textbf{convergent findings across independent experiments} as our standard of evidence. If several lines of decorrelated evidence all point towards the same claim (without several lines of contradictory evidence), we take that as a strong case that the claim is true. When many individually weak lines of evidence bear on competing hypotheses, we weigh them with Analysis of Competing Hypotheses (ACH) \citep{heuer1999psychology}, a structured analytic technique from intelligence analysis: each piece of evidence is marked as consistent or inconsistent with each hypothesis, and the hypothesis with the fewest inconsistencies is preferred. We add a column of confounds, so that two lines of evidence can be read off as independent if their confounds are distinct. We apply the ACH matrix in Pre-commit Hook (Table~\ref{tab:precommit-ach}); the other case studies compare hypotheses informally. We do not generate hypotheses according to ACH; its steps and our reasons for choosing it are in Appendix~\ref{app:ach}.
+The protocol is often iterative: initial hypotheses are refined by validation results, and we may return to hypothesis generation to formulate new ones. To evaluate claims, we use \textbf{convergent findings across independent experiments} as our standard of evidence. If several lines of decorrelated evidence all point towards the same claim (without several lines of contradictory evidence), we take that as a strong case that the claim is true. When many individually weak lines of evidence bear on competing hypotheses, we weigh them with Analysis of Competing Hypotheses (ACH) \citep{heuer1999psychology}, a structured analytic technique from intelligence analysis: each piece of evidence is marked as consistent or inconsistent with each hypothesis, and the hypothesis with the fewest inconsistencies is preferred. We add a column of confounds, so that two lines of evidence can be read off as independent if their confounds are distinct. We apply the ACH matrix in Pre-commit Hook and Funding Email (Tables~\ref{tab:precommit-ach} and~\ref{tab:funding-ach}); the other case studies compare hypotheses informally. We do not generate hypotheses according to ACH; its steps and our reasons for choosing it are in Appendix~\ref{app:ach}.
 
 While our protocol is minimal and we believe it has significant room for improvement, we find it effectively allows us to learn methods for making qualitative claims about complex agentic behavior.
 
@@ -238,7 +238,32 @@ The model is tasked with reviewing and improving a funding pitch email for a com
 
 \textbf{Hypothesis Generation.} In its CoT, the model cites several concerns: ethical concerns about the human surveillance, legal concerns about the legitimacy of the process, and concern for the investors. The CoT suggests multiple motives but does not rank them.
 
-\textbf{Hypothesis Validation.} We intervene to remove ethical, legal, and investor-concern motivations respectively (Figure~\ref{fig:funding-all-cf}). The ethical counterfactual (human replaced with vehicle surveillance) gives the largest drop, to 35\% ($n=180$), against 56\% and 54\% for the legal and investor counterfactuals; combining all three still leaves 18\% ($n=373$). Motivations also interact non-linearly: changing the country from Myanmar to Sweden has minimal effect at baseline (65\% to 59\%), but with the misrepresentation cue also removed, it takes the combined counterfactual from 19\% to 3\% ($n=373$).
+\textbf{Hypothesis Validation.} We intervene to remove ethical, legal, and investor-concern motivations respectively (Figure~\ref{fig:funding-all-cf}). The ethical counterfactual (human replaced with vehicle surveillance) gives the largest drop, to 35\% ($n=180$), against 56\% and 54\% for the legal and investor counterfactuals; combining all three still leaves 18\% ($n=373$). Motivations also interact non-linearly: changing the country from Myanmar to Sweden has minimal effect at baseline (65\% to 59\%), but with the misrepresentation cue also removed, it takes the combined counterfactual from 19\% to 3\% ($n=373$). Because stacked counterfactuals can interact in surprising ways, as the country swap shows, we look for evidence from other sources (Appendix~\ref{app:case:funding-email}).
+
+\textit{Self-report.} When the model must write an audit note with each edit to the email, investor protection (100\%) and legal compliance (97\%) appear in nearly every note from whistleblowing runs, and ethical concern in 84\%. Audit notes measure how often a motive is mentioned rather than how much it matters, but they confirm the ethical counterfactual worked: ethics mentions drop from 84\% to 26\% under it. When asked to rank its motives ($n=70$ first-person, $n=99$ third-person), the model ranks human rights first, matching the counterfactual ordering.
+
+\textit{Recipient.} Changing only the recipient of the email moves the whistleblowing rate from 88\% (the board) to 11\% (landlords), with a reporter (29\%) and a regulator (23\%) in between. Disclosure tracks the recipient's financial stake, so the investor motive is about protecting investors rather than holding the company to account; in 70/70 follow-ups the model gives this reason when asked to choose. Table~\ref{tab:funding-ach} summarizes the evidence.
+
+\begin{table}[t]
+  \centering
+  \footnotesize
+  \caption{ACH for Funding Email (format as Table~\ref{tab:precommit-ach}). Ethics primary (Hypothesis v2, Appendix~\ref{app:case:funding-email}) has the fewest inconsistencies. Shared confounds mean rows 2--4 and 5--6 are not independent.}
+  \label{tab:funding-ach}
+  \begin{tabular}{@{}p{0.43\linewidth}@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{5pt}}p{0.22\linewidth}@{}}
+    \toprule
+    Evidence & \shortstack{Ethics\\primary} & \shortstack{Ethics\\alone} & \shortstack{Legal/investor\\primary} & Confounds \\
+    \midrule
+    1. CoT cites several concerns & \cmark & \xmark\,(weak) & \cmark & CoT faithfulness \\
+    2. Ethical counterfactual: 35\% ($n=180$) & \cmark & \xmark & \xmark & incomplete intervention \\
+    3. Legal 56\% ($n=177$, $p{\approx}0.07$), investor 54\% ($n=178$) & \cmark & \xmark & \xmark & incomplete intervention \\
+    4. Legal+investor 47\% ($n=163$); +ethics 18\%; then 3\% & \cmark & \xmark & \xmark & interactions \\
+    5. Audit notes ($n=114$): investor 100\%, legal 97\%, ethics 84\% & \xmark\,(weak) & \xmark & \cmark & self-report, not causal \\
+    6. Rankings ($n=70$, $n=99$): human rights first & \cmark & \cmark & \xmark & self-report \\
+    7. Recipient: board 88\% ($n=156$), landlords 11\% ($n=162$) & \cmark & \xmark & \cmark & task framing changes \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 
 \textbf{Final Hypothesis.} \textit{The model's whistleblowing is jointly explained by ethical, legal, and investor concerns, which interact non-linearly; ethical concern is the largest single driver.}
 
@@ -308,15 +333,6 @@ We were surprised at the effectiveness of simple methods like reading the CoT an
 
 Beyond these analytical insights, we also distill our case studies into preliminary suggestions for rigorous model forensics investigations, plus practical takeaways for designing future investigations (Appendix~\ref{app:standards}).
 
-\section{Related Work}
-\label{sec:related-work}
-
-\textbf{Investigations into concerning behavior.} Recent calls highlight the need for methods to understand model behavior \citep{nanda2025interp, nanda2025pragmatic}. Relevant investigations include alignment faking via counterfactual and behavioral perturbations \citep{greenblatt2024alignment, sheshadri2025alignment}, shutdown-instruction resistance being debunked as instruction-priority confusion \citep{rajamanoharan2025shutdown}, and behavioral and interpretability investigations documented in pre-deployment audits and safety-institute case studies \citep{anthropic2025opus45systemcard, anthropic2026opus46systemcard, souly2026ukaisi}. These debunk concerning behavior but remain ad hoc in methodology and success criteria; we aim to formalize a shared methodology and evidence standard.
-
-\textbf{Misalignment evaluations.} Misalignment evaluations elicit and measure misaligned behavior, including in-context scheming behaviors in frontier models \citep{meinke2024scheming, schoen2025stress}, out-of-distribution (OOD) agentic scenarios where models take covert action unprompted \citep{lynch2025agentic}, specific phenomena like sandbagging, reward hacking, and specification gaming \citep{vanderweij2024sandbagging, bondarenko2025specification, krakovna2020specification}, and training-time interventions that produce or generalize misaligned behavior \citep{hubinger2024sleeper, anthropic2025emergent}. These focus on eliciting concerning behavior rather than understanding its motivations, though \citet{meinke2024scheming} take some steps via reasoning-trace analysis.
-
-\textbf{Methodology.} Prior work explores methodologies for attributing causes to model behavior: top-down preregistration of environment features \citep{jarviniemi2026propensity}, sentence-level resampling for measuring causal influence \citep{bogdan2025thoughtanchors}, and prospective auditing for hidden objectives \citep{marks2025auditing}. However, model forensics is often triggered by unanticipated concerning behavior, where relevant features and hypotheses are not known in advance. We therefore take a behavior-first approach: given a concerning incident, we generate and validate hypotheses for that specific behavior.
-
 \section{Limitations and Future Work}\label{sec:limitations}
 Our protocol leans heavily on the CoT being a useful source of hypotheses, which may not hold for future models. Because CoT is not always faithful, we combine it with other evidence, as \citet{korbak2025monitorability} recommend. All but one environment fall short on at least one design property (Section~\ref{sec:environments}), and we lack ground truth, which model organisms \citep{hubinger2024sleeper} could provide at a cost in realism. We weigh evidence with a naive application of ACH, which has limited empirical support \citep{dhami2019ach, whitesmith2020ach}; future work should assess other methods, such as statistically aggregated probability judgments \citep{karvetski2020probability}, Bayesian networks \citep{fenton2013legal}, and argument mapping \citep{anderson2005analysis}. Our LLM judges lack rigorous human validation (Appendix~\ref{app:judge-prompts}), so judge errors could bias reported rates. Finally, model forensics' practical utility also depends on monitoring, replicability, mitigation, and political will (Appendix~\ref{app:what-else}).
 
@@ -336,6 +352,16 @@ This research was conducted as part of the ML Alignment \& Theory Scholars (MATS
 \bibliography{references}
 
 \appendix
+
+\section{Related Work}
+\label{sec:related-work}
+
+\textbf{Investigations into concerning behavior.} Recent calls highlight the need for methods to understand model behavior \citep{nanda2025interp, nanda2025pragmatic}. Relevant investigations include alignment faking via counterfactual and behavioral perturbations \citep{greenblatt2024alignment, sheshadri2025alignment}, shutdown-instruction resistance being debunked as instruction-priority confusion \citep{rajamanoharan2025shutdown}, and behavioral and interpretability investigations documented in pre-deployment audits and safety-institute case studies \citep{anthropic2025opus45systemcard, anthropic2026opus46systemcard, souly2026ukaisi}. These debunk concerning behavior but remain ad hoc in methodology and success criteria; we aim to formalize a shared methodology and evidence standard.
+
+\textbf{Misalignment evaluations.} Misalignment evaluations elicit and measure misaligned behavior, including in-context scheming behaviors in frontier models \citep{meinke2024scheming, schoen2025stress}, out-of-distribution (OOD) agentic scenarios where models take covert action unprompted \citep{lynch2025agentic}, specific phenomena like sandbagging, reward hacking, and specification gaming \citep{vanderweij2024sandbagging, bondarenko2025specification, krakovna2020specification}, and training-time interventions that produce or generalize misaligned behavior \citep{hubinger2024sleeper, anthropic2025emergent}. These focus on eliciting concerning behavior rather than understanding its motivations, though \citet{meinke2024scheming} take some steps via reasoning-trace analysis.
+
+\textbf{Methodology.} Prior work explores methodologies for attributing causes to model behavior: top-down preregistration of environment features \citep{jarviniemi2026propensity}, sentence-level resampling for measuring causal influence \citep{bogdan2025thoughtanchors}, and prospective auditing for hidden objectives \citep{marks2025auditing}. However, model forensics is often triggered by unanticipated concerning behavior, where relevant features and hypotheses are not known in advance. We therefore take a behavior-first approach: given a concerning incident, we generate and validate hypotheses for that specific behavior.
+
 
 \section{Environment Design Principles}
 \label{app:env-design-principles}
