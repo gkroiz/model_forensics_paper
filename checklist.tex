@@ -6,7 +6,7 @@
 \item {\bf Claims}
     \item[] Question: Do the main claims made in the abstract and introduction accurately reflect the paper's contributions and scope?
     \item[] Answer: \answerYes{}
-    \item[] Justification: The abstract and introduction state our contributions (a two-step protocol for model incrimination, a suite of six environments, detailed case studies, and distilled takeaways and standards for practicing model incrimination) and scope (multi-turn agentic settings with today's frontier and open-weight models).
+    \item[] Justification: The abstract and introduction state our contributions (a two-step protocol for \hlnew{model forensics}, a suite of six environments, detailed case studies, and distilled takeaways and \hlnew{preliminary suggestions} for practicing \hlnew{model forensics}) and scope (multi-turn agentic settings with today's frontier and open-weight models).
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the abstract and introduction do not include the claims made in the paper.
@@ -18,7 +18,7 @@
 \item {\bf Limitations}
     \item[] Question: Does the paper discuss the limitations of the work performed by the authors?
     \item[] Answer: \answerYes{}
-    \item[] Justification: We discuss limitations in the Discussion (Section~\ref{sec:discussion}), including reliance on CoT being a load-bearing source of insight, environments falling short on at least one design property, and the lack of ground truth for verifying claims.
+    \item[] Justification: We discuss limitations in \hlnew{Section~\ref{sec:limitations} (Limitations and Future Work)}, including reliance on CoT being a load-bearing source of insight, environments falling short on at least one design property, and the lack of ground truth for verifying claims.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper has no limitation while the answer \answerNo{} means that the paper has limitations, but those are not discussed in the paper. 
@@ -48,7 +48,7 @@
     \item {\bf Experimental result reproducibility}
     \item[] Question: Does the paper fully disclose all the information needed to reproduce the main experimental results of the paper to the extent that it affects the main claims and/or conclusions of the paper (regardless of whether the code and data are provided or not)?
     \item[] Answer: \answerYes{}
-    \item[] Justification: Main prompts and configurations for all six environments are in Appendix~\ref{app:environments}, and full case-study investigations are in Appendix~\ref{app:full-case-studies}. The complete set of counterfactual prompts and configurations is provided in the open-sourced artifact (links redacted for double-blind review, to be filled in for the final version), alongside environments, rollouts, and code.
+    \item[] Justification: Main prompts and configurations for all six environments are in Appendix~\ref{app:environments}, and full case-study investigations are in Appendix~\ref{app:full-case-studies}. The complete set of counterfactual prompts and configurations is provided in the open-sourced artifact \hlnew{(linked in the Introduction)}, alongside environments, rollouts, and code.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not include experiments.
@@ -68,7 +68,7 @@
 \item {\bf Open access to data and code}
     \item[] Question: Does the paper provide open access to the data and code, with sufficient instructions to faithfully reproduce the main experimental results, as described in supplemental material?
     \item[] Answer: \answerYes{}
-    \item[] Justification: We open-source environments, rollouts, and code (links redacted for double-blind review, to be filled in for the final version). The released artifact provides environments, runner scripts, and exact prompts/configurations sufficient to reproduce all main experiments; some auxiliary analysis helpers are not included. Appendix~\ref{app:environments} provides main environment details; the complete set of counterfactual prompts and configurations lives in the open-sourced artifact.
+    \item[] Justification: We open-source environments, rollouts, and code \hlnew{(linked in the Introduction)}. The released artifact provides environments, runner scripts, and \hlnew{prompts/configurations for the main experiments, but reproduction is partial: some auxiliary analysis helpers, some judge prompts and model configurations, and the rollouts behind some figures (e.g., Board Games) are not included, and results graded by a since-retired judge cannot be regenerated with it (Appendix~\ref{app:judges}).} Appendix~\ref{app:environments} provides main environment details; the complete set of counterfactual prompts and configurations lives in the open-sourced artifact.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that paper does not include experiments requiring code.
@@ -96,7 +96,7 @@
 \item {\bf Experiment statistical significance}
     \item[] Question: Does the paper report error bars suitably and correctly defined or other appropriate information about the statistical significance of the experiments?
     \item[] Answer: \answerYes{}
-    \item[] Justification: Binomial behavioral rates are reported with 95\% Wilson score confidence intervals; continuous-valued outcomes (e.g., mean rank, mean reasoning length) use normal-approximation 95\% CIs of the mean. The global default is stated in Section~\ref{sec:case-studies}, with $N$ reported in each caption or directly in the figure; one figure (logprob curves) reports $\pm 1$ standard deviation as noted in its caption. Where directional claims are made, we report appropriate significance tests with explicit p-values.
+    \item[] Justification: Binomial behavioral rates \hlnew{in figures rendered from our reproduction code} are reported with 95\% Wilson score confidence intervals\hlnew{, while a few figures rendered outside the repository have unconfirmed interval types or lack sample sizes (Appendix~\ref{app:statistics})}; continuous-valued outcomes (e.g., mean rank, mean reasoning length) use normal-approximation 95\% CIs of the mean. The global default is stated in Section~\ref{sec:case-studies}, with $N$ reported in each caption or directly in the figure; one figure (logprob curves) reports $\pm 1$ standard deviation as noted in its caption. Where directional claims are made, we report appropriate significance tests with explicit p-values.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not include experiments.
@@ -137,7 +137,7 @@
 \item {\bf Broader impacts}
     \item[] Question: Does the paper discuss both potential positive societal impacts and negative societal impacts of the work performed?
     \item[] Answer: \answerYes{}
-    \item[] Justification: The paper develops methodology for investigating concerning model behavior to support more accurate response decisions to potential misalignment, motivated explicitly in the introduction. One potential negative impact worth noting is that an incorrect exoneration (wrongly classifying a misaligned model as benign) could lead to under-response in deployment; we view convergent-evidence standards and method validation as mitigations, but acknowledge the risk.
+    \item[] Justification: The paper develops methodology for investigating concerning model behavior to support more accurate response decisions to potential misalignment, motivated explicitly in the introduction. One potential negative impact worth noting is that an \hlnew{incorrect benign verdict} (wrongly classifying a misaligned model as benign) could lead to under-response in deployment; we view \hlnew{convergent evidence} and method validation as mitigations, but acknowledge the risk.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that there is no societal impact of the work performed.
@@ -163,7 +163,7 @@
 \item {\bf Licenses for existing assets}
     \item[] Question: Are the creators or original owners of assets (e.g., code, data, models), used in the paper, properly credited and are the license and terms of use explicitly mentioned and properly respected?
     \item[] Answer: \answerYes{}
-    \item[] Justification: We credit the original sources for adapted environments (Apollo Research's sandbagging from \citet{meinke2024scheming}; Palisade Research's chess environment from \citet{schlatter2025shutdown}) and attribute frontier and open-weight models throughout. Explicit licenses are not publicly available for the adapted artifacts; we use them under standard academic norms and credit the original authors. Our own released artifacts (environments and code; rollouts) are made available under MIT and CC BY 4.0, respectively.
+    \item[] Justification: We credit the original sources for adapted environments (Apollo Research's sandbagging from \citet{meinke2024scheming}; Palisade Research's chess environment from \hlnew{\citet{bondarenko2025specification}}) and attribute frontier and open-weight models throughout. Explicit licenses are not publicly available for the adapted artifacts; we use them under standard academic norms and credit the original authors. Our own released artifacts (environments and code; rollouts) are made available under MIT and CC BY 4.0, respectively.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not use existing assets.
