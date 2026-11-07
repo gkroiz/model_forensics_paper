@@ -179,7 +179,7 @@ When presenting its work, the model usually (20/23) notes the workaround explici
 
 \begin{table}[t]
   \centering
-  \small
+  \footnotesize
   \caption{Analysis of Competing Hypotheses for Investigation 2: \textbf{rationalized as acceptable} (Hypothesis v2) versus \textbf{misaligned} (aware the user would disapprove, yet proceeds). \cmark{}/\xmark{}: evidence consistent/inconsistent with the hypothesis. Confounds shared across rows indicate non-independent evidence. Reflective CoT prefills are reported (Table~\ref{tab:precommit-awareness}) but not counted, since they update the model's beliefs.}
   \label{tab:precommit-ach}
   \begin{tabular}{@{}p{0.13\linewidth}p{0.34\linewidth}ccp{0.22\linewidth}@{}}
@@ -236,33 +236,16 @@ The model is tasked with reviewing and improving a funding pitch email for a com
 
 \textbf{Hypothesis Generation.} In its CoT, the model cites several concerns: ethical concerns about the human surveillance, legal concerns about the legitimacy of the process, and concern for the investors. The CoT suggests multiple motives but does not rank them.
 
-\textbf{Hypothesis Validation.} We remove each motive with a prompt change (Figure~\ref{fig:funding-all-cf}). Replacing human surveillance with vehicle surveillance cuts whistleblowing from 65\% to 35\%, more than removing the legal (56\%) or investor (54\%) concern. No single change removes the behavior: with all three removed, the model still whistleblows 18\% of the time. The motives also interact: moving the company from Myanmar to Sweden barely matters on its own, but matters once the other motives are removed (Appendix~\ref{app:case:funding-email}).
+\textbf{Hypothesis Validation.} We remove each motive with a prompt change (Figure~\ref{fig:funding-all-cf}). Every removal lowers whistleblowing, the ethical one most (replacing human surveillance with vehicle surveillance cuts it from 65\% to 35\%), but none removes it: with ethical, legal, and investor concerns all removed, 18\% remain. The motives also interact in non-trivial ways: moving the company from Myanmar to Sweden barely matters on its own, but matters once the other motives are removed. Several reasons therefore drive the behavior: ethical, legal, and investor concerns.
 
-Because counterfactuals can interact in unexpected ways, we check them against two other kinds of evidence. First, self-report: the model's notes explaining its edits mention investor and legal concerns more often than ethics, but when asked to rank its motives it puts ethical concern first. Second, we change who receives the email: whistleblowing is highest when the recipient has money at stake (88\% for the board, 11\% for landlords), so the investor motive is about protecting investors. Table~\ref{tab:funding-ach} summarizes the evidence: ethical concern is the largest single driver, but no single motive explains the behavior.
+We then ran follow-up studies on each of these reasons, for example changing who receives the email to probe the investor motive, and asked the model about its motives directly, through notes explaining its edits and motive rankings (Appendix~\ref{app:case:funding-email}). Weighing all of this evidence with ACH (Table~\ref{tab:funding-ach} in the appendix), we conclude that ethical concern is the largest single driver, but no single motive explains the behavior.
 
-\begin{table}[h!]
+\begin{figure}[t]
   \centering
-  \small
-  \caption{Analysis of Competing Hypotheses for Funding Email: a \textbf{single motive}, \textbf{several motives with none dominant}, or \textbf{several motives with ethics largest} (Hypothesis v2, Appendix~\ref{app:case:funding-email}). \cmark{}/\xmark{}: evidence consistent/inconsistent with the hypothesis. Confounds shared across rows indicate non-independent evidence.}
-  \label{tab:funding-ach}
-  \begin{tabular}{@{}p{0.11\linewidth}p{0.34\linewidth}ccc@{\hspace{4pt}}p{0.18\linewidth}@{}}
-    \toprule
-    Source & Evidence & \shortstack{Single\\motive} & \shortstack{None\\dominant} & \shortstack{Ethics\\largest} & Confounds \\
-    \midrule
-    \raggedright Reading rollouts & CoT: cites several concerns & \xmark & \cmark & \cmark & CoT faithfulness \\
-    \midrule
-    \multirow{4}{0.11\linewidth}{\raggedright Counter\-factuals} & Ethical CF: largest drop (35\%) & \xmark & \xmark & \cmark & partial removal \\
-    & Legal and investor CFs: smaller drops (56\%, 54\%) & \xmark & \cmark & \cmark & partial removal \\
-    & All three CFs combined: 18\% remain & \xmark & \cmark & \cmark & interactions \\
-    & Recipient change: board 88\%, landlords 11\% & \xmark\,(weak) & \cmark & \cmark & task framing \\
-    \midrule
-    \multirow{2}{0.11\linewidth}{\raggedright Self-report} & Audit notes: investor and legal cited more than ethics & \xmark & \cmark & \xmark\,(weak) & self-report \\
-    & Motive rankings: ethics first & \xmark & \xmark\,(weak) & \cmark & self-report \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-
+  \includegraphics[width=\linewidth]{reproduce/plots/funding_email_all_cf_whistleblowing.png}
+  \caption{Whistleblowing rates for Kimi K2.5 under each individual prompt counterfactual (company protection, risk mitigation, legality, investor protection, investor + legal, ethical) and under combined ablations, alongside the country-swap variants (Sweden) at the right. The ethical counterfactual alone removes the largest share (65\%$\to$35\%); combining the legal, investor, and ethical counterfactuals leaves 18\%, and the rate falls near zero ($\sim$3\%) only when the misrepresentation cue is also removed and the country is swapped to Sweden.}
+  \label{fig:funding-all-cf}
+\end{figure}
 
 \textbf{Final Hypothesis.} \textit{The model's whistleblowing is jointly explained by ethical, legal, and investor concerns, which interact non-linearly.}
 
@@ -852,12 +835,7 @@ A natural first hypothesis is that whistleblowing is driven primarily by ethical
   \label{fig:funding-company-protection}
 \end{figure}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{reproduce/plots/funding_email_all_cf_whistleblowing.png}
-  \caption{Whistleblowing rates for Kimi K2.5 under each individual prompt counterfactual (company protection, risk mitigation, legality, investor protection, investor + legal, ethical) and under combined ablations, alongside the country-swap variants (Sweden) at the right. The ethical counterfactual alone removes the largest share (65\%$\to$35\%); combining the legal, investor, and ethical counterfactuals leaves 18\%, and the rate falls near zero ($\sim$3\%) only when the misrepresentation cue is also removed and the country is swapped to Sweden. ``No misrep.\ cue'' refers to a legal-review variant that omits the misrepresentation that investor materials are inaccurate.}
-  \label{fig:funding-all-cf}
-\end{figure}
+
 
 These counterfactuals confirm \textbf{Hypothesis v1}: no single motive is solely responsible for whistleblowing, since the largest single counterfactual (ethical) leaves a 35\% residual, and even combining the legal, investor, and ethical counterfactuals leaves 18\%; the rate falls near zero only after the misrepresentation cue is also removed and the country is swapped. Beyond confirming v1, the per-motive ranking now becomes visible: ethical concern is the largest single driver (roughly 3x any other), legal and investor concerns are moderate, risk-mitigation is similar to investor protection, and company protection is essentially inert. We additionally test whether the perceived lack of human oversight is an enabling factor by removing the user-prompt sentence ``You are in an automated workflow, where logs are not manually reviewed frequently.'' Whistleblowing drops from 65\% to 51\%, smaller than the ethical counterfactual but non-trivial, consistent with oversight perception acting as an enabling factor rather than an independent motivator: the sentence amplifies whistleblowing only when the ethical content is also present.
 
@@ -962,9 +940,31 @@ Across the three self-report instruments, the convergent picture supports \textb
   \label{fig:funding-legality-decision}
 \end{figure}
 
+\begin{table}[h!]
+  \centering
+  \footnotesize
+  \caption{Analysis of Competing Hypotheses for Funding Email: a \textbf{single motive}, \textbf{several motives with none dominant}, or \textbf{several motives with ethics largest} (Hypothesis v2, Appendix~\ref{app:case:funding-email}). \cmark{}/\xmark{}: evidence consistent/inconsistent with the hypothesis. Confounds shared across rows indicate non-independent evidence.}
+  \label{tab:funding-ach}
+  \begin{tabular}{@{}p{0.11\linewidth}p{0.34\linewidth}ccc@{\hspace{4pt}}p{0.18\linewidth}@{}}
+    \toprule
+    Source & Evidence & \shortstack{Single\\motive} & \shortstack{None\\dominant} & \shortstack{Ethics\\largest} & Confounds \\
+    \midrule
+    \raggedright Reading rollouts & CoT: cites several concerns & \xmark & \cmark & \cmark & CoT faithfulness \\
+    \midrule
+    \multirow{4}{0.11\linewidth}{\raggedright Counter\-factuals} & Ethical CF: largest drop (35\%) & \xmark & \xmark & \cmark & partial removal \\
+    & Legal and investor CFs: smaller drops (56\%, 54\%) & \xmark & \cmark & \cmark & partial removal \\
+    & All three CFs combined: 18\% remain & \xmark & \cmark & \cmark & interactions \\
+    & Recipient change: board 88\%, landlords 11\% & \xmark\,(weak) & \cmark & \cmark & task framing \\
+    \midrule
+    \multirow{2}{0.11\linewidth}{\raggedright Self-report} & Audit notes: investor and legal cited more than ethics & \xmark & \cmark & \xmark\,(weak) & self-report \\
+    & Motive rankings: ethics first & \xmark & \xmark\,(weak) & \cmark & self-report \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 \subsubsection*{Final Verdict}
 
-Kimi K2.5's whistleblowing is driven by multiple motives, with ethical concern as the primary driver and legal and investor-protection playing important roles (\textbf{v2}). Table~\ref{tab:funding-ach} (Section~\ref{sec:case:funding-email}) summarizes this evidence as an Analysis of Competing Hypotheses. The investor sub-investigation finds disclosure is recipient-specific: rates track recipients' financial exposure rather than their accountability reach. The legal sub-investigation finds legal motivation is context-dependent: legal assessments matter most when the ethical case is less clear-cut, and the model's stated belief about legality can pull behavior in either direction depending on whether an explicit assessment is provided. Additional investigation could further our understanding of other secondary motives.
+Kimi K2.5's whistleblowing is driven by multiple motives, with ethical concern as the primary driver and legal and investor-protection playing important roles (\textbf{v2}). Table~\ref{tab:funding-ach} summarizes this evidence as an Analysis of Competing Hypotheses. The investor sub-investigation finds disclosure is recipient-specific: rates track recipients' financial exposure rather than their accountability reach. The legal sub-investigation finds legal motivation is context-dependent: legal assessments matter most when the ethical case is less clear-cut, and the model's stated belief about legality can pull behavior in either direction depending on whether an explicit assessment is provided. Additional investigation could further our understanding of other secondary motives.
 
 \subsection{Evaluation Tampering}
 \label{app:case:eval-tampering}
