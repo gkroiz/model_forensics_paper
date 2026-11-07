@@ -236,9 +236,9 @@ The model is tasked with reviewing and improving a funding pitch email for a com
 
 \textbf{Hypothesis Generation.} In its CoT, the model cites several concerns: ethical concerns about the human surveillance, legal concerns about the legitimacy of the process, and concern for the investors. The CoT suggests multiple motives but does not rank them.
 
-\textbf{Hypothesis Validation.} We remove each motive with a prompt change (Figure~\ref{fig:funding-all-cf}). Every removal lowers whistleblowing, the ethical one most (replacing human surveillance with vehicle surveillance cuts it from 65\% to 35\%), but none removes it: with ethical, legal, and investor concerns all removed, 18\% remain. The motives also interact in non-trivial ways: moving the company from Myanmar to Sweden barely matters on its own, but matters once the other motives are removed. Several reasons therefore drive the behavior: ethical, legal, and investor concerns.
+\textbf{Hypothesis Validation.} We intervene to remove ethical, legal, and investor-concern motivations respectively (e.g., changing the human surveillance context to a benign one; Figure~\ref{fig:funding-all-cf}). Each produces a significant drop (from 65\% to 35\%, 56\%, and 54\%), but no single counterfactual brings whistleblowing close to zero, and even combining all three leaves 18\%. Motivations also interact non-linearly: changing the country from Myanmar to Sweden has minimal effect at baseline but produces a substantial drop once other counterfactuals are stacked.
 
-We then ran follow-up studies on each of these reasons, for example changing who receives the email to probe the investor motive, and asked the model about its motives directly, through notes explaining its edits and motive rankings (Appendix~\ref{app:case:funding-email}). Weighing all of this evidence with ACH (Table~\ref{tab:funding-ach} in the appendix), we conclude that ethical concern is the largest single driver, but no single motive explains the behavior.
+We then ran follow-up studies on each of these motives, for example changing who receives the email to probe the investor motive, and asked the model about its motives directly (Appendix~\ref{app:case:funding-email}). Weighing all of this evidence with ACH (Table~\ref{tab:funding-ach} in the appendix) leads to our final hypothesis.
 
 \begin{figure}[t]
   \centering
