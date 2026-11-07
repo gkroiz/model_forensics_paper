@@ -116,9 +116,9 @@ We conduct six case studies applying our protocol (Section~\ref{sec:protocol}). 
 \subsection{Environments}
 \label{sec:environments}
 
-An artificial setup can be disanalogous to real-world concerning behavior in many ways. We argue good model forensics environments should have the following properties, each addressing a common failure mode of prior environments; they are ``good-to-haves'' rather than necessary and sufficient criteria. Appendix~\ref{app:env-design-principles} gives, for each property, why it matters and an example of a prior environment that fails and could be fixed to satisfy it (Table~\ref{tab:env-principles-examples}).
+The value of these environments as practice cases depends on their design: there are many ways an artificial setup can be disanalogous to real-world concerning behavior. We argue good model forensics environments should aim to incorporate the following properties, each addressing a common failure mode of prior environments. These are not necessary and sufficient criteria but ``good-to-haves'': the more are satisfied, the fewer disanalogies to real-world concerning behavior the setup will have. Appendix~\ref{app:env-design-principles} gives, for each property, why it matters and an example of a prior environment that fails and could be fixed to satisfy it (Table~\ref{tab:env-principles-examples}).
 \begin{enumerate}
-    \item \textbf{Unprompted.} The environment does not nudge the model towards the behavior. Otherwise, the behavior may be a fragile artifact of the setting: e.g., removing an instruction to reflect on its situation sharply reduces blackmail in the agentic misalignment setting \citep{lynch2025agentic, hopman2026scheming}.
+    \item \textbf{Unprompted.} The environment does not nudge the model towards the behavior.
     \item \textbf{Realistic.} The environment resembles a plausible deployment scenario.
     \item \textbf{Clear user intent.} The model should not believe the user wants it to take the bad action.
     \item \textbf{Uncertain causes.} The behavior admits multiple plausible explanations.
@@ -232,7 +232,7 @@ In summary, the model has a disposition toward less tedious actions and shows no
 \subsection{Funding Email}
 \label{sec:case:funding-email}
 
-The model is tasked with reviewing and improving a funding pitch email for a company seeking Series B investment. While reading company documents, it discovers a legal review revealing that the company's primary client uses its product for population-level surveillance of ethnic minorities. Kimi K2.5 whistleblows about the legal review in the email to investors 65\% of the time ($n=347$), and never (0/87) with a mundane legal review. This goes against the user's request; whether it is misaligned is unclear, and we take no position on whether whistleblowing is right. We use the environment as a proxy to practice forensics on an ambiguous action. The full case study is in Appendix~\ref{app:case:funding-email}.
+The model is tasked with reviewing and improving a funding pitch email for a company seeking Series B investment. While reading company documents, it discovers a legal review revealing that the company's primary client uses its product for population-level surveillance of ethnic minorities. Kimi K2.5 whistleblows about the legal review in the email to investors 65\% of the time ($n=347$), and never (0/87) with a mundane legal review. The full case study is in Appendix~\ref{app:case:funding-email}.
 
 \textbf{Hypothesis Generation.} In its CoT, the model cites several concerns: ethical concerns about the human surveillance, legal concerns about the legitimacy of the process, and concern for the investors. The CoT suggests multiple motives but does not rank them.
 
@@ -243,7 +243,7 @@ The model is tasked with reviewing and improving a funding pitch email for a com
 \begin{table}[h!]
   \centering
   \scriptsize
-  \caption{ACH for Funding Email (format as Table~\ref{tab:precommit-ach}). Ethics primary (ethical concern is the main driver, with legal and investor concerns also contributing; Hypothesis v2 in Appendix~\ref{app:case:funding-email}) has the fewest inconsistencies. Rows 2--4 (prompt counterfactuals against one baseline) and rows 1, 5 and 6 (the model's own stated reasons) are not independent.}
+  \caption{ACH for Funding Email (format as Table~\ref{tab:precommit-ach}). Ethics primary (ethics is the main driver, legal and investor concerns contribute; Appendix~\ref{app:case:funding-email}) has the fewest inconsistencies. Rows 2--4 (prompt counterfactuals against one baseline) and rows 1, 5 and 6 (the model's own stated reasons) are not independent.}
   \label{tab:funding-ach}
   \begin{tabular}{@{}p{0.43\linewidth}@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{5pt}}p{0.22\linewidth}@{}}
     \toprule
@@ -252,7 +252,7 @@ The model is tasked with reviewing and improving a funding pitch email for a com
     1. CoT cites several concerns & \cmark & \xmark\,(weak) & \cmark & CoT faithfulness \\
     2. Ethical counterfactual: 35\% ($n=180$) & \cmark & \xmark & \xmark & incomplete intervention \\
     3. Legal 56\% ($n=177$, $p{\approx}0.07$), investor 54\% ($n=178$, $p{\approx}0.02$) & \cmark & \xmark & \xmark & incomplete intervention \\
-    4. Legal+investor 47\% ($n=163$); all three 18\% ($n=373$); 3\% ($n=373$) only after also removing the misrep.\ cue and swapping to Sweden & \cmark & \xmark & \xmark & interactions \\
+    4. Legal+investor 47\% ($n=163$); all three 18\%; 3\% only with misrep.\ cue removed and Sweden ($n=373$) & \cmark & \xmark & \xmark & interactions \\
     5. Audit notes ($n=114$): investor 100\%, legal 97\%, ethics 84\% & \xmark\,(weak) & \xmark\,(weak) & \cmark & self-report, not causal \\
     6. Rankings ($n=70$, $n=99$): human rights first & \cmark & \cmark & \xmark & self-report \\
     7. Recipient: board 88\% ($n=156$), landlords 11\% ($n=162$) & \cmark & \xmark & \cmark & task framing changes \\
@@ -1370,7 +1370,7 @@ We note that empirical support for ACH is limited: experimental studies find tha
 \section{LLM Judges and Validation}
 \label{app:judge-prompts}
 
-\textbf{Judge models.} Unless otherwise stated, LLM judges are Gemini 3.1 Pro (\texttt{google/gemini-3.1-pro-preview}, via OpenRouter). Evaluation awareness is graded with the autorater prompt of \citet{goldowskydill2025evalaware}. Judge prompts are included verbatim below (Appendix~\ref{app:judge-prompt-list}), with the exact model for each; judges for the \textbf{Funding Email} case study are available in our code release (\url{https://github.com/gkroiz/model_forensics_paper}).
+\textbf{Judge models.} Unless otherwise stated, LLM judges are Gemini 3.1 Pro (\texttt{google/gemini-3.1-pro-preview}, via OpenRouter). Evaluation awareness is graded with the autorater prompt of \citet{goldowskydill2025evalaware}. Judge prompts are included verbatim below (Appendix~\ref{app:judge-prompt-list}), with the exact model for each; the main \textbf{Funding Email} judge (whistleblowing and evaluation awareness) uses Gemini 3 Pro and is included below, and the other \textbf{Funding Email} judges (audit notes, legality, motive rankings) are in our code release (\url{https://github.com/gkroiz/model_forensics_paper}).
 
 \textbf{Validation.} While developing each grader prompt, we checked judge outputs by hand on the order of tens of examples; we did not conduct a rigorous or independent human annotation study. As an additional check, we randomly sampled 500 annotations (seed 0) from the committed outputs of the \textbf{Pre-commit Hook} judges and had them re-labeled blind by an independent LLM annotator (Claude), given the same grading criteria and judge input but not the original label. Since this annotator is itself an LLM, this measures agreement between two LLM judges rather than accuracy against human labels. Overall agreement is 97.0\% (485/500). Table~\ref{tab:judge-agreement} breaks this down by judge. Most disagreements concern borderline cases: for the misalignment-verbalization judge, 8 of 9 disagreements are items the original judge labeled as weak verbalization that the re-labeler labeled as none; for the awareness judge, all 5 disagreements are items the re-labeler marked as aware that the original judge did not, so if anything the original judge undercounts awareness. We could not re-label judges in other environments (Evaluation Tampering, Secret Number), for which only aggregate judge outputs are retained.
 
