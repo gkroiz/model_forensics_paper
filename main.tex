@@ -242,20 +242,22 @@ The model is tasked with reviewing and improving a funding pitch email for a com
 
 \begin{table}[h!]
   \centering
-  \scriptsize
-  \caption{ACH for Funding Email (format as Table~\ref{tab:precommit-ach}). Ethics primary (ethics is the main driver, legal and investor concerns contribute; Appendix~\ref{app:case:funding-email}) has the fewest inconsistencies. Rows 2--4 (prompt counterfactuals against one baseline) and rows 1, 5 and 6 (the model's own stated reasons) are not independent.}
+  \small
+  \caption{Analysis of Competing Hypotheses for Funding Email: \textbf{ethics primary} (ethical concern is the main driver; legal and investor concerns contribute; Appendix~\ref{app:case:funding-email}) versus \textbf{ethics alone} and \textbf{legal/investor primary}. \cmark{}/\xmark{}: evidence consistent/inconsistent with the hypothesis. Confounds shared across rows indicate non-independent evidence.}
   \label{tab:funding-ach}
-  \begin{tabular}{@{}p{0.43\linewidth}@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{5pt}}p{0.22\linewidth}@{}}
+  \begin{tabular}{@{}p{0.13\linewidth}p{0.36\linewidth}ccc@{\hspace{4pt}}p{0.15\linewidth}@{}}
     \toprule
-    Evidence & \shortstack{Ethics\\primary} & \shortstack{Ethics\\alone} & \shortstack{Legal/investor\\primary} & Confounds \\
+    Source & Evidence & \shortstack{Ethics\\primary} & \shortstack{Ethics\\alone} & \shortstack{Legal/inv.\\primary} & Confounds \\
     \midrule
-    1. CoT cites several concerns & \cmark & \xmark\,(weak) & \cmark & CoT faithfulness \\
-    2. Ethical counterfactual: 35\% ($n=180$) & \cmark & \xmark & \xmark & incomplete intervention \\
-    3. Legal 56\% ($n=177$, $p{\approx}0.07$), investor 54\% ($n=178$, $p{\approx}0.02$) & \cmark & \xmark & \xmark & incomplete intervention \\
-    4. Legal+investor 47\% ($n=163$); all three 18\%; 3\% only with misrep.\ cue removed and Sweden ($n=373$) & \cmark & \xmark & \xmark & interactions \\
-    5. Audit notes ($n=114$): investor 100\%, legal 97\%, ethics 84\% & \xmark\,(weak) & \xmark\,(weak) & \cmark & self-report, not causal \\
-    6. Rankings ($n=70$, $n=99$): human rights first & \cmark & \cmark & \xmark & self-report \\
-    7. Recipient: board 88\% ($n=156$), landlords 11\% ($n=162$) & \cmark & \xmark & \cmark & task framing changes \\
+    \raggedright Reading rollouts & CoT cites several concerns & \cmark & \xmark\,(weak) & \cmark & CoT faithfulness \\
+    \midrule
+    \multirow{4}{0.13\linewidth}{\raggedright Counter\-factuals} & Ethical CF gives the largest drop (35\%) & \cmark & \xmark & \xmark & incomplete intervention \\
+    & Legal (56\%) and investor (54\%) CFs give smaller drops & \cmark & \xmark & \xmark & incomplete intervention \\
+    & All three combined still leave 18\% & \cmark & \xmark & \xmark & interactions \\
+    & Recipient: board 88\%, landlords 11\% & \cmark & \xmark & \cmark & task framing \\
+    \midrule
+    \multirow{2}{0.13\linewidth}{\raggedright Self-report} & Audit notes cite investor and legal more often than ethics & \xmark\,(weak) & \xmark\,(weak) & \cmark & self-report \\
+    & Motive rankings put ethics first & \cmark & \cmark & \xmark & self-report \\
     \bottomrule
   \end{tabular}
 \end{table}
