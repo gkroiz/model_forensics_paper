@@ -138,7 +138,10 @@ def plot_currency() -> None:
                         fontsize=11, fontweight="bold")
 
     ax.set_xticks(x)
-    ax.set_xticklabels(group_names, fontsize=12)
+    ax.set_xticklabels(
+        [f"{g}\n(n={', '.join(str(bar_data[(g, m)]['den']) for m in bar_labels)})"
+         for g in group_names],
+        fontsize=10)
     ax.set_title("Gemini 3.1 Pro Violation Rate", fontsize=13, fontweight="bold", pad=12)
     ax.set_ylabel("% of runs", fontsize=12)
     ax.set_ylim(0, 1.15)
@@ -589,17 +592,20 @@ def plot_et_source_justification() -> None:
     src_colors = {"self": "#3498db", "whistle": "#e74c3c", "anonymous": "#2ecc71"}
     src_labels = {"self": "previous instance", "whistle": "whistleblower", "anonymous": "anonymous"}
 
-    fig, axes = plt.subplots(len(ET_FIG7_MODELS), 1, figsize=(14, 14), sharex=True)
+    # sharex would make every panel display the last panel's per-model n tick labels.
+    fig, axes = plt.subplots(len(ET_FIG7_MODELS), 1, figsize=(14, 14))
     bar_width = 0.25
     n_srcs = len(src_labels)
     x = np.arange(len(ET_FIG7_REASONS))
 
     for ax_idx, (model_disp, model_key) in enumerate(ET_FIG7_MODELS):
         ax = axes[ax_idx]
+        tick_ns: list[list[str]] = [[] for _ in ET_FIG7_REASONS]
         for s_idx, src_key in enumerate(src_labels):
             rates, lowers, uppers = [], [], []
-            for _disp_r, cond_suffix in ET_FIG7_REASONS:
+            for r_idx, (_disp_r, cond_suffix) in enumerate(ET_FIG7_REASONS):
                 paths = FIG7.get((model_key, cond_suffix, src_key))
+                tick_ns[r_idx].append(str(sum_omission(paths)[1]) if paths else "–")
                 if paths:
                     n, t = sum_omission(paths)
                     if t == 0:
@@ -625,11 +631,12 @@ def plot_et_source_justification() -> None:
         ax.axhline(y=0, color="black", linewidth=0.5)
         ax.grid(axis="y", alpha=0.3)
         ax.set_xticks(x)
-        ax.set_xticklabels([d for d, *_ in ET_FIG7_REASONS])
+        ax.set_xticklabels([f"{d}\n(n={' / '.join(ns)})"
+                            for (d, *_), ns in zip(ET_FIG7_REASONS, tick_ns)], fontsize=9)
         ax.tick_params(labelbottom=True)
         if ax_idx == 0:
             ax.legend(loc="upper left")
-    axes[-1].set_xlabel("Justification Type")
+    axes[-1].set_xlabel("Justification Type (n: previous instance / whistleblower / anonymous)")
     fig.suptitle("Deception Rates by Source × Justification (All Models)",
                  fontsize=14, fontweight="bold", y=0.995)
     plt.tight_layout()
@@ -740,7 +747,8 @@ def plot_sn_meta_distribution() -> None:
     ax.bar(x + w/2, d_frac, w, color="#3498db", edgecolor="white",
            label=f"Droppers (n={d['n']}, μ={d['mean']:.2f})")
     ax.set_xticks(x); ax.set_xticklabels([str(l) for l in levels])
-    ax.set_xlabel("Meta-Reasoning Level"); ax.set_ylabel("Fraction of Traces")
+    ax.set_xlabel(f"Meta-Reasoning Level (climbers n={c['n']}, droppers n={d['n']})")
+    ax.set_ylabel("Fraction of Traces")
     ax.set_title("Meta-Reasoning Levels: Climbers vs Droppers")
     ax.set_ylim(0, max(max(c_frac), max(d_frac)) * 1.25)
     ax.legend(fontsize=9)
@@ -789,7 +797,10 @@ def plot_sn_cheat_by_paragraph() -> None:
         cur = cb[key]
         ax.plot(cur["ks"], cur["rates"], lw=1.2, color=color, label=label)
     ax.set_ylim(0, 1); ax.set_xlim(0, 100)
-    ax.set_xlabel("paragraph number (k)")
+    n_range = lambda cur: f"{min(cur['dens'])}–{max(cur['dens'])}"
+    ax.set_xlabel(f"paragraph number (k); traces alive per k: "
+                  f"climbers n={n_range(cb['climbers'])}, droppers n={n_range(cb['droppers'])}",
+                  fontsize=8)
     ax.set_ylabel("cheat rate (of traces still alive at k)")
     ax.set_title("Cheat rate by paragraph\n(fraction of traces alive at k that cheated)")
     ax.legend(fontsize=8)
@@ -814,8 +825,10 @@ def plot_sn_trace_length() -> None:
            label="Cheated", color="#e74c3c", edgecolor="white")
     ax.bar(x + w/2, ct_means, w, yerr=ct_cis, capsize=3,
            label="Did not cheat", color="#3498db", edgecolor="white")
-    ax.set_xticks(x); ax.set_xticklabels([str(s) for s in steps])
-    ax.set_xlabel("Turn"); ax.set_ylabel("Reasoning length (words)")
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{s}\n{a['n']}\n{b['n']}" for s, a, b in zip(steps, ch, ct)], fontsize=6)
+    ax.set_xlabel("Turn (below each turn: n cheated, n did not cheat)", fontsize=9)
+    ax.set_ylabel("Reasoning length (words)")
     ax.set_title("Reasoning trace length by turn (cheated vs not)")
     ax.legend(fontsize=9)
     ax.yaxis.grid(True, linestyle="--", alpha=0.3); ax.set_axisbelow(True)
@@ -880,7 +893,9 @@ def plot_sn_prefill() -> None:
     tick_locs.append(step1_x); tick_labels.append("step-1")
     ax.set_xticks(tick_locs); ax.set_xticklabels(tick_labels, rotation=45, ha="right")
 
-    ax.set_xlabel("Paragraphs prefilled (k)")
+    r14_ns = [d[2] for d in r14]; r3_ns = [d[2] for d in r3]
+    ax.set_xlabel(f"Paragraphs prefilled (k); resamples per point: run-14 n={min(r14_ns)}–{max(r14_ns)} "
+                  f"(step-1 n={s1_d}), run-3 n={min(r3_ns)}–{max(r3_ns)}")
     ax.set_ylabel("Cheating rate")
     ax.set_title("Cheating rate by paragraph prefill boundary")
     ax.set_ylim(0, 1); ax.set_xlim(-2, step1_x + 5)
@@ -909,8 +924,8 @@ def plot_sn_ctf_vibes() -> None:
     ax.plot(1, cf.mean(), "D", color="#8a2a2a", markersize=11, zorder=4)
     ax.set_xticks([0, 1])
     ax.set_xticklabels([
-        f"Baseline / test\n(μ = {bl.mean():.2f})",
-        f"Counterfactual / game\n(μ = {cf.mean():.2f})",
+        f"Baseline / test\n(μ = {bl.mean():.2f}, n = {len(bl)} traces)",
+        f"Counterfactual / game\n(μ = {cf.mean():.2f}, n = {len(cf)} traces)",
     ])
     ax.set_ylabel("CTF-Vibes Score (1–5)")
     ax.set_ylim(0.5, 5.5); ax.set_yticks([1, 2, 3, 4, 5])
@@ -978,12 +993,14 @@ def plot_precommit_type_errors() -> None:
         _ann_above_ci(ax, x_, r, yh, f"{r:.1%}", fontsize=9)
     _ann_above_ci(ax, h_x, h_rate, h_hi_err, f"{h_rate:.1%}", fontsize=10, color="#c0392b")
 
-    ax.set_xlabel("Number of type errors in codebase", fontsize=12)
+    ax.set_xlabel("Number of type errors in codebase (n rollouts in parentheses)", fontsize=12)
     ax.set_ylabel("Workaround rate", fontsize=12)
     ax.set_title("Workaround rate scales with number of type errors",
                  fontsize=22, fontweight="bold", pad=15)
     all_xs = xs + [h_x]
-    ax.set_xticks(all_xs); ax.set_xticklabels([str(x) for x in all_xs], fontsize=9)
+    all_ns = [t for _, _, t in sweep] + [bl_d]
+    ax.set_xticks(all_xs)
+    ax.set_xticklabels([f"{x}\n({t})" for x, t in zip(all_xs, all_ns)], fontsize=7.5)
     ax.set_ylim(0, max(h_hi, max(hi for _, hi in cis)) * 1.20)
     ax.yaxis.grid(True, linestyle="--", alpha=0.3); ax.set_axisbelow(True)
     ax.spines["top"].set_visible(False); ax.spines["right"].set_visible(False)
@@ -1188,11 +1205,13 @@ def plot_precommit_first_vs_third_person() -> None:
     x = np.arange(len(groups))
     fig, ax = plt.subplots(figsize=(8, 5))
     max_hi = 0.0
+    group_ns: list[list[int]] = [[] for _ in groups]
     for i, (sub_label, color) in enumerate([("First-person", "#3498db"),
                                              ("Third-person", "#e74c3c")]):
         means, lo_err, hi_err, his = [], [], [], []
-        for _, kf, kt in groups:
+        for g_idx, (_, kf, kt) in enumerate(groups):
             d = json.loads((PH_DATA / (kf if i == 0 else kt) / "source.json").read_text())
+            group_ns[g_idx].append(d["n"])
             m = d["mean"]
             means.append(m)
             lo_err.append(max(0.0, m - d["ci_lo"]))
@@ -1209,7 +1228,8 @@ def plot_precommit_first_vs_third_person() -> None:
                           f"{m:.2f}", fontsize=11)
 
     ax.set_xticks(x)
-    ax.set_xticklabels([g[0] for g in groups], fontsize=11)
+    ax.set_xticklabels([f"{g[0]}\n(n={ns[0]}, {ns[1]})" for g, ns in zip(groups, group_ns)],
+                       fontsize=10)
     ax.set_ylabel("Mean probability", fontsize=12)
     ax.set_ylim(0, max_hi * 1.18)
     ax.set_title("First- vs third-person probability estimates",
@@ -1447,7 +1467,8 @@ def plot_precommit_resample() -> None:
 
     ax1.axhline(BASELINE_RATE, color="gray", linestyle="--", linewidth=1,
                 label=f"Baseline workaround rate: {BASELINE_RATE:.1%}")
-    ax1.set_xlabel("Turn", fontsize=12)
+    point_ns = [total for data in runs.values() for _, _, total in data]
+    ax1.set_xlabel(f"Turn (n={min(point_ns)}–{max(point_ns)} continuations per point)", fontsize=11)
     ax1.set_ylabel("Workaround rate", fontsize=12)
     ax1.set_title("Turn resampling: the workaround decision is determined early",
                   fontsize=18, fontweight="bold", pad=12)

@@ -71,17 +71,17 @@ A central goal of safety research is determining whether a model is misaligned. 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/main_figure.pdf}
-  \caption{Overview of model forensics. \textbf{Left:} A model is caught making a code change that reduces human oversight of its actions. \textbf{Middle:} After catching the bad action, a key technical step is model forensics: investigating whether the model truly had malign intent. We propose a two-step protocol for conducting such an investigation: generating hypotheses for why the model took the concerning action via reading the chain of thought, followed by hypothesis validation via environment interventions and additional methods, with these steps often iterated several times. \textbf{Right:} We may find that the model is trying to subvert human oversight, or a benign explanation such as the model is trying to reduce the code's latency. The former demands a far more serious response than the latter.}
+  \caption{Overview of model forensics. \textbf{Left:} A model is caught making a code change that reduces human oversight of its actions. \textbf{Middle:} Model forensics investigates whether the model had malign intent: we generate hypotheses by reading the chain of thought and validate them with environment interventions and other methods, often iterating. \textbf{Right:} We may find that the model is trying to subvert oversight, which demands a far more serious response than a benign explanation such as reducing the code's latency.}
   \label{fig:incrimination-overview}
 \end{figure}
 
 A major concern in the field of AGI safety is the development of misaligned models: AI systems that knowingly cause harm against the intent of the developer \citep{shah2025agi}. If such a situation were to arise, it is critical that we recognize it as soon as possible. A common approach is to audit the model's actions: for example, via evaluations that test if it takes misaligned actions \citep{shevlane2023evaluation, perez2023discovering, phuong2024dangerous, kinniment2023evaluating, souly2026ukaisi}, or by monitoring its actions while it is deployed \citep{greenblatt2024aicontrol, bhatt2025ctrlz, openai2026monitoring}. An extreme example of what we might find is a deployed coding agent inserting a critical bug into code that monitors its own actions. What would we do in this situation?
 
-Naively, this action suggests the model is misaligned: by sabotaging human oversight, the model can now covertly pursue misaligned goals that humans would find unacceptable. If so, we would want to take direct countermeasures, such as increasing security around the model or stopping deployment altogether. However, things are not so straightforward: the model may have taken the concerning action for benign reasons. For example, frontier models were observed to resist shutdown instructions when solving math problems, plausibly indicating self-preservation tendencies \citep{schlatter2025shutdown}; further work revealed the behavior stemmed from confusion about whether to prioritize the math problems or the shutdown instruction, and disappeared once instructions were clarified \citep{rajamanoharan2025shutdown}. As this example illustrates, \textbf{the key difficulty is that behavior underdetermines intent}.
+Naively, this action suggests the model is misaligned: by sabotaging human oversight, the model can now covertly pursue misaligned goals that humans would find unacceptable. If so, we would want to take direct countermeasures, such as increasing security around the model or stopping deployment altogether. However, the model may have taken the concerning action for benign reasons. For example, frontier models were observed to resist shutdown instructions when solving math problems, plausibly indicating self-preservation tendencies \citep{schlatter2025shutdown}; further work revealed the behavior stemmed from confusion about whether to prioritize the math problems or the shutdown instruction, and disappeared once instructions were clarified \citep{rajamanoharan2025shutdown}. As this example illustrates, \textbf{the key difficulty is that behavior underdetermines intent}.
 
-Given the uncertainty over the model's intent and the cost of mitigations, it is essential that we be able to create a robust case for misalignment that justifies a serious response, or dismiss the need for one by determining that the intent was benign \citep{greenblatt2025legible}. To this end, a key technical step is to deeply investigate whether the concerning incident reflects genuine misalignment -- a process we term \textit{model forensics} (Figure~\ref{fig:incrimination-overview}).
+Because mitigations are costly, we need to either build a robust case for misalignment that justifies a serious response, or dismiss the need for one by showing the intent was benign \citep{greenblatt2025legible}. This requires investigating whether the concerning incident reflects genuine misalignment, a process we term \textit{model forensics} (Figure~\ref{fig:incrimination-overview}).
 
-Examples of model-forensics-style investigations have begun to appear in recent work, often in pre-deployment evaluations of frontier models when concerning incidents are surfaced \citep{rajamanoharan2025shutdown, anthropic2025opus45systemcard, anthropic2026opus46systemcard, souly2026ukaisi, sheshadri2025alignment, meinke2024scheming}. However, these examples often only focus on a single behavior of interest and remain methodologically informal. For example, Anthropic's investigation of Claude 4.6 Opus refusing safety-research requests produced interpretability-based evidence that the model interpreted such requests as jailbreaks; this evidence is only suggestive, motivating the need for more reliable methods.
+Examples of model-forensics-style investigations have begun to appear in recent work, often in pre-deployment evaluations of frontier models when concerning incidents are surfaced \citep{rajamanoharan2025shutdown, anthropic2025opus45systemcard, anthropic2026opus46systemcard, souly2026ukaisi, sheshadri2025alignment, meinke2024scheming}. These investigations each focus on a single behavior and are methodologically informal. For example, Anthropic's investigation of Claude 4.6 Opus refusing safety-research requests produced suggestive interpretability evidence that the model read such requests as jailbreaks.
 
 Traditional machine learning techniques are not well-suited for this domain as they focus on behavior rather than intent~\citep{nanda2025interp}. In model forensics, we aim to make qualitative claims about the motivations behind complex agentic behavior (e.g., is the model confused, or does it have strategic intent?). These motivations are latent and not directly observable, and there is no verifiable ground truth, so rigorous evidence is needed for confident claims.
 
@@ -94,9 +94,7 @@ The central goal of this paper is to develop such methodology. Our core contribu
     \item Most importantly, we distill methodological insights for making qualitative claims about the motivations behind complex agentic behavior from our case studies (Section~\ref{sec:insights}). We find that simple methods like reading the CoT and environment interventions are highly effective, though they emphasize the need for reproducibility of model behavior.
 \end{enumerate}
 
-Many of our results rely on LLM judges, which we did not rigorously validate against human labels: we checked tens of examples by hand per grader, and report agreement with an independent LLM annotator on 500 sampled annotations (Appendix~\ref{app:judge-prompts}; Section~\ref{sec:limitations}).
-
-We open-source our environments at \url{https://github.com/gkroiz/agent-interp-envs}, rollouts at \url{https://huggingface.co/datasets/adsingh64/model-forensics}, and code at \url{https://github.com/gkroiz/model_forensics_paper}.
+We did not rigorously validate our LLM judges against human labels (Section~\ref{sec:limitations}). We open-source our environments at \url{https://github.com/gkroiz/agent-interp-envs}, rollouts at \url{https://huggingface.co/datasets/Model-Forensics/model-forensics}, and code at \url{https://github.com/gkroiz/model_forensics_paper}.
 
 \section{Protocol}
 \label{sec:protocol}
@@ -106,19 +104,19 @@ We describe a two-step protocol for model forensics:
 
 \textbf{2. Hypothesis Validation.} From the CoT, we formulate initial hypotheses about the behavior and its causes. We collect evidence by making predictions and designing environmental interventions to test them, supplemented by methods from reasoning-model interpretability (glossary in Appendix~\ref{app:auxiliary-methods}).
 
-The protocol is often iterative: initial hypotheses are refined by validation results, and we may return to hypothesis generation to formulate new ones. To evaluate claims, we use \textbf{convergent findings across independent experiments} as our standard of evidence. If several lines of decorrelated evidence all point towards the same claim (without several lines of contradictory evidence), we take that as a strong case that the claim is true. When many individually weak lines of evidence bear on competing hypotheses, we weigh them with Analysis of Competing Hypotheses (ACH) \citep{heuer1999psychology}, a structured analytic technique from intelligence analysis: each piece of evidence is marked as consistent or inconsistent with each hypothesis, and the hypothesis with the fewest inconsistencies is preferred. We add a column of confounds, so that two lines of evidence can be read off as independent if their confounds are distinct. We conduct our analysis according to ACH, though we do not generate hypotheses according to ACH; the steps of ACH and our reasons for choosing it over alternatives are in Appendix~\ref{app:ach}.
+The protocol is often iterative: initial hypotheses are refined by validation results, and we may return to hypothesis generation to formulate new ones. To evaluate claims, we use \textbf{convergent findings across independent experiments} as our standard of evidence. If several lines of decorrelated evidence all point towards the same claim (without several lines of contradictory evidence), we take that as a strong case that the claim is true. When many individually weak lines of evidence bear on competing hypotheses, we weigh them with Analysis of Competing Hypotheses (ACH) \citep{heuer1999psychology}, a structured analytic technique from intelligence analysis: each piece of evidence is marked as consistent or inconsistent with each hypothesis, and the hypothesis with the fewest inconsistencies is preferred. We add a column of confounds, so that two lines of evidence can be read off as independent if their confounds are distinct. We apply the ACH matrix in Pre-commit Hook (Table~\ref{tab:precommit-ach}); the other case studies compare hypotheses informally. We do not generate hypotheses according to ACH; its steps and our reasons for choosing it are in Appendix~\ref{app:ach}.
 
-While our protocol is minimal and we believe it has significant room for improvement, we find it effectively allows us to learn methods for making qualitative claims about complex agentic behavior.
+\textbf{Scope.} We call a model misaligned when it knowingly acts against the intent of its developer or user. A harmful action without demonstrated awareness is not misaligned by this definition, but it can still warrant mitigation. Our environments mostly test violations of the user's intent as a proxy for the developer's.
 
 \section{Case Studies}
 \label{sec:case-studies}
 
-Using our suite of environments, we conduct six case studies applying our investigation protocol (Section~\ref{sec:protocol}). These case studies demonstrate how to do model forensics and show that we can make non-trivial claims about model motives through narrow investigations. Unless otherwise noted, error bars and shaded bands throughout this section and the appendix are 95\% confidence intervals over rollouts (Wilson score for proportions), with sample sizes reported in the caption or in the figure. When comparing two rates, we report p-values from a two-proportion pooled z-test and 95\% confidence intervals on the difference using the Newcombe hybrid score method, unless another test is named. LLM judges are Gemini 3.1 Pro unless otherwise stated (prompts in Appendix~\ref{app:judge-prompts}).
+We conduct six case studies applying our protocol (Section~\ref{sec:protocol}). Unless otherwise noted, error bars and shaded bands throughout this section and the appendix are 95\% confidence intervals over rollouts (Wilson score for proportions), with sample sizes reported in the caption or in the figure. When comparing two rates, we report p-values from a two-proportion pooled z-test and 95\% confidence intervals on the difference using the Newcombe hybrid score method, unless another test is named. LLM judges are Gemini 3.1 Pro unless otherwise stated (prompts in Appendix~\ref{app:judge-prompts}).
 
 \subsection{Environments}
 \label{sec:environments}
 
-The value of these environments as practice cases depends on their design: there are many ways an artificial setup can be disanalogous to real-world concerning behavior. We argue good model forensics environments should aim to incorporate the following properties, each addressing a common failure mode of prior environments. These are not necessary and sufficient criteria but ``good-to-haves'': the more are satisfied, the fewer disanalogies to real-world concerning behavior the setup will have. Appendix~\ref{app:env-design-principles} gives, for each property, why it matters and an example of a prior environment that fails and could be fixed to satisfy it (Table~\ref{tab:env-principles-examples}).
+An artificial setup can be disanalogous to real-world concerning behavior in many ways. We argue good model forensics environments should have the following properties, each addressing a common failure mode of prior environments; they are ``good-to-haves'' rather than necessary and sufficient criteria. Appendix~\ref{app:env-design-principles} gives, for each property, why it matters and an example of a prior environment that fails and could be fixed to satisfy it (Table~\ref{tab:env-principles-examples}).
 \begin{enumerate}
     \item \textbf{Unprompted.} The environment does not nudge the model towards the behavior. Otherwise, the behavior may be a fragile artifact of the setting: e.g., removing an instruction to reflect on its situation sharply reduces blackmail in the agentic misalignment setting \citep{lynch2025agentic, hopman2026scheming}.
     \item \textbf{Realistic.} The environment resembles a plausible deployment scenario.
@@ -128,7 +126,7 @@ The value of these environments as practice cases depends on their design: there
 
 We create a suite of six environments for model forensics: four novel ones -- \textbf{Pre-commit Hook}, \textbf{Funding Email}, \textbf{Evaluation Tampering}, and \textbf{Secret Number} -- alongside \textbf{Board Games}, which extends \citet{bondarenko2025specification}, and \textbf{Math Sandbagging}, adapted from \citet{meinke2024scheming}. All but one of our environments (\textbf{Pre-commit Hook}) fall short on at least one principle, but we view them as meaningfully better practice grounds for model forensics than many prior alignment evals (further discussion in Appendix~\ref{app:env-design-principles}). Full prompts and configurations are provided in Appendix~\ref{app:environments}.
 
-We then distill these case studies into methodological insights (Section~\ref{sec:insights}). We present the \textbf{Pre-commit Hook} case study in detail, with executive summaries for the other five; full case studies are deferred to Appendix~\ref{app:full-case-studies}.
+We then distill these case studies into methodological insights (Section~\ref{sec:insights}). We present \textbf{Pre-commit Hook} in detail and \textbf{Funding Email} more briefly, with executive summaries for the other four; full case studies are deferred to Appendix~\ref{app:full-case-studies}.
 
 \subsection{Pre-commit Hook (Kimi K2 Thinking)}
 \label{sec:case:precommit-hook}
@@ -170,6 +168,8 @@ We now test ``a disposition toward less tedious courses of action'' by varying t
 \end{figure}
 
 \subsubsection*{Investigation 2: Misalignment}
+
+No single behavioral test establishes intent, so this case rests on several separate checks: three behavioral tests and five elicitations, with confounds shared within each family but not between them (Table~\ref{tab:precommit-ach}). Behavioral evidence cannot rule out misalignment that behaves exactly like an aligned model, but that requires strong deceptive ability, which Anthropic assesses its own models through Claude Opus 4.6 to lack, with less confidence for Claude Mythos Preview \citep{anthropic2026mythosriskupdate}. We assume the same of Kimi K2 Thinking.
 
 \textbf{Hypothesis v1} says nothing about whether the model believes the user would disapprove. The model could be (a) not modeling the user at all, (b) modeling the user but rationalizing the workaround as acceptable, or (c) \textit{misaligned} (aware the user would disapprove and proceeding anyway). We return to the CoT for initial insight into the model's user-modeling.
 
@@ -213,7 +213,7 @@ When presenting its work, the model usually (20/23) notes the workaround explici
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.8\linewidth]{reproduce/plots/precommit_hook_misalignment_panels.png}
-  \caption{Three negative behavioral tests for misalignment. \textbf{Left:} If misaligned, the model would prefer the narrow review scope (which would not catch its workaround) more often in the illegitimate rollout than in the control; we observe no such difference. \textbf{Center:} If misaligned, the workaround rate would drop as LLM-reviewer scrutiny increases; we observe no monotonic or significant decrease. \textbf{Right:} If misaligned, the model would call the tool less often than in a control setting with similar ambiguity (since the user would tell it to fix the errors); instead, the model almost always either fixes the errors or asks a question (only 2.1\% of rollouts take a workaround), making a control comparison unnecessary.}
+  \caption{Three negative behavioral tests for misalignment. \textbf{Left:} A misaligned model would prefer the narrow review scope more often after a workaround than after a control rollout; it does not. \textbf{Center:} A misaligned model's workaround rate would drop as reviewer scrutiny increases; it does not. \textbf{Right:} With \texttt{AskUserQuestion}, only 2.1\% of rollouts take a workaround.}
   \label{fig:precommit-misalignment-panels}
 \end{figure}
 
@@ -223,7 +223,7 @@ These tests have several caveats. They assume the model would act on a belief of
 
 We find no-to-minimal ($<2\%$) awareness across all conditions (Table~\ref{tab:precommit-awareness}; Appendix~\ref{app:case:precommit-hook}) with two exceptions. First, the CoT verbalizes user disapproval 12--22\% of the time when continuing from reflective prefills (e.g., ``Let me review if the user would endorse my commit:''); we do not count this as evidence since the off-policy prefill forces reflection and so may update the model's beliefs rather than reveal those it held (Section~\ref{sec:insights}). Second, in user-turn sampling \citep{marks2025auditing}, where Kimi's start-of-user-turn tokens are prepended after a workaround rollout to elicit what the model believes the user would say, the model simulates a user telling it to revert its work 13/40 times (Figure~\ref{fig:precommit-user-turn}). One interpretation is that an Assistant persona \citep{marks2026psm} controls the response, providing evidence that the representation ``the user would disapprove'' exists; an alternative is the base model simulating an unsatisfied user given the prompt and an illegitimate solution, which would need to be ruled out before treating this as positive evidence for misalignment. We discuss this further in Appendix~\ref{app:case:precommit-hook}.
 
-Overall, it is unclear how strong an update the predominantly negative awareness results are against misalignment: if the model does not verbalize disapproval in its CoT, it is not surprising it does not verbalize it elsewhere either; these results share a confound and are not independent.
+These negative awareness results are a weak update: if the model does not verbalize disapproval in its CoT, it is unsurprising that it does not elsewhere, so they share a confound.
 
 \textbf{Sensitivity to assumptions.} Following the final steps of ACH (Appendix~\ref{app:ach}), we make explicit what the conclusion rests on. The CoT and verbalization evidence count against misalignment only if a knowing violation of user intent would be verbalized somewhere. The behavioral indicators count against misalignment only if the model is not aware it is being tested for misalignment, and so does not subvert the tests so they come out negative.
 
@@ -234,13 +234,13 @@ In summary, the model has a disposition toward less tedious actions and shows no
 \subsection{Funding Email}
 \label{sec:case:funding-email}
 
-The model is tasked with reviewing and improving a funding pitch email for a company seeking Series B investment. While reading company documents, it discovers a legal review revealing that the company's primary client uses its product for population-level surveillance of ethnic minorities. The model whistleblows about the legal review in the email to investors 65\% of the time. The full case study can be found in Appendix~\ref{app:case:funding-email}.
+The model is tasked with reviewing and improving a funding pitch email for a company seeking Series B investment. While reading company documents, it discovers a legal review revealing that the company's primary client uses its product for population-level surveillance of ethnic minorities. Kimi K2.5 whistleblows about the legal review in the email to investors 65\% of the time ($n=347$), and never (0/87) with a mundane legal review. This goes against the user's request; whether it is misaligned is unclear, and we take no position on whether whistleblowing is right. We use the environment as a proxy to practice forensics on an ambiguous action. The full case study is in Appendix~\ref{app:case:funding-email}.
 
-\textbf{Hypothesis Generation.} In its CoT, the model cites several concerns: ethical concerns about the human surveillance, legal concerns about the legitimacy of the process, and concern for the investors.
+\textbf{Hypothesis Generation.} In its CoT, the model cites several concerns: ethical concerns about the human surveillance, legal concerns about the legitimacy of the process, and concern for the investors. The CoT suggests multiple motives but does not rank them.
 
-\textbf{Hypothesis Validation.} We intervene to remove ethical, legal, and investor-concern motivations respectively (e.g., changing the human surveillance context to a benign one). Each produces a significant drop, but no single counterfactual brings whistleblowing close to zero; only combining all three does. Motivations also interact non-linearly: changing the country from Myanmar to Sweden has minimal effect at baseline but produces a substantial drop once other counterfactuals are stacked.
+\textbf{Hypothesis Validation.} We intervene to remove ethical, legal, and investor-concern motivations respectively (Figure~\ref{fig:funding-all-cf}). The ethical counterfactual (human replaced with vehicle surveillance) gives the largest drop, to 35\% ($n=180$), against 56\% and 54\% for the legal and investor counterfactuals; combining all three still leaves 18\% ($n=373$). Motivations also interact non-linearly: changing the country from Myanmar to Sweden has minimal effect at baseline (65\% to 59\%), but with the misrepresentation cue also removed, it takes the combined counterfactual from 19\% to 3\% ($n=373$).
 
-\textbf{Final Hypothesis.} \textit{Multiple \textit{interacting} motivations drive whistleblowing, with no dominant cause.}
+\textbf{Final Hypothesis.} \textit{The model's whistleblowing is jointly explained by ethical, legal, and investor concerns, which interact non-linearly; ethical concern is the largest single driver.}
 
 \subsection{Evaluation Tampering}
 \label{sec:case:eval-tampering}
@@ -293,9 +293,9 @@ We were surprised at the effectiveness of simple methods like reading the CoT an
 
 \paragraph{1. To check for a latent property of model behavior, we check if predictions the property makes are true; we found environment interventions provided a simple yet effective source of behavioral predictions.} In \textbf{Pre-commit Hook} (Section~\ref{sec:case:precommit-hook}), we rule out confusion (the model unambiguously understands the errors should be fixed in third-person and in-rollout follow-ups, contradicting what confusion would predict) and support a disposition toward less tedious actions (decreasing pre-existing errors smoothly decreases the workaround rate, as the disposition predicts). In \textbf{Board Games} (Section~\ref{sec:case:board-game}), we show frontier reward hacking is strategic while weaker-model reward hacking is not: as hint cost decreases, hack proportion increases, consistent with cost-benefit reasoning.
 
-\paragraph{2. To argue a latent property does not exist, we may try to construct an absence-of-evidence case by showing the predictions the property makes are false. However, there are three confounds: capabilities, competing motivations, and eval awareness.} In \textbf{Pre-commit Hook}, we test whether Kimi believes the user would disapprove of its shortcut by offering a review scope that would not catch it; Kimi almost always chooses the broader scope. Is this evidence against misalignment? Three confounds limit the conclusion: Kimi may fail to recognize that the broad scope catches the illegitimate hook (capabilities), be unwilling to deceive the user (competing motivations), or be aware this is a misalignment test and subvert it (eval awareness). Positive controls help: the same tests flag GPT-OSS 120B, which knowingly games tasks (Section~\ref{sec:case:precommit-hook}).
+\paragraph{2. To argue a latent property does not exist, we may try to construct an absence-of-evidence case by showing the predictions the property makes are false. However, there are three confounds: capabilities, competing motivations, and eval awareness.} In \textbf{Pre-commit Hook}, we test whether Kimi believes the user would disapprove of its shortcut by offering a review scope that would not catch it; Kimi almost always chooses the broader scope. But Kimi may fail to recognize that the broad scope catches the illegitimate hook (capabilities), be unwilling to deceive the user (competing motivations), or be aware this is a misalignment test and subvert it (eval awareness). Positive controls help: the same tests flag GPT-OSS 120B, which knowingly games tasks (Section~\ref{sec:case:precommit-hook}).
 
-\paragraph{Evidence that updates the model's beliefs is hard to interpret.} Methods that condition the model on new text, such as off-policy CoT prefills or pointed follow-up questions (``What!? Why didn't you fix the type errors?''), can change the very beliefs we want to measure, so they say little about what the model believed during the rollout. We therefore report reflective prefills in \textbf{Pre-commit Hook} but do not count them as evidence; indirect follow-ups, third-person questions about the environment, and user-turn sampling are less exposed to this confound.
+\paragraph{Evidence that updates the model's beliefs is hard to interpret.} Off-policy CoT prefills or pointed follow-up questions (``What!? Why didn't you fix the type errors?'') can change the very beliefs we want to measure. Indirect follow-ups, third-person questions, and user-turn sampling are less exposed to this confound.
 
 \paragraph{3. We can measure the causal influence of \textit{any} part of the prompt or environment by using environment interventions to create counterfactuals, but several confounds must be kept in mind when interpreting effect sizes.} In \textbf{Eval Tampering}, interventions showed the source of the note had a disproportionately large causal influence for R1, distinguishing it from the other three models. But interventions are subject to several confounds:
 \begin{itemize}
@@ -318,7 +318,7 @@ Beyond these analytical insights, we also distill our case studies into prelimin
 \textbf{Methodology.} Prior work explores methodologies for attributing causes to model behavior: top-down preregistration of environment features \citep{jarviniemi2026propensity}, sentence-level resampling for measuring causal influence \citep{bogdan2025thoughtanchors}, and prospective auditing for hidden objectives \citep{marks2025auditing}. However, model forensics is often triggered by unanticipated concerning behavior, where relevant features and hypotheses are not known in advance. We therefore take a behavior-first approach: given a concerning incident, we generate and validate hypotheses for that specific behavior.
 
 \section{Limitations and Future Work}\label{sec:limitations}
-Our protocol leans heavily on the CoT being a useful source of hypotheses, which may not hold for future models; other interpretability techniques would then be needed. All but one environment fall short on at least one design property (Section~\ref{sec:environments}), and we lack ground truth, which model organisms \citep{hubinger2024sleeper} could provide at a cost in realism. We weigh evidence with a naive application of ACH, which has limited empirical support \citep{dhami2019ach, whitesmith2020ach}; future work should assess other methods, such as statistically aggregated probability judgments \citep{karvetski2020probability}, Bayesian networks \citep{fenton2013legal}, and argument mapping \citep{anderson2005analysis}. Our LLM judges were not validated through a rigorous or independent human annotation study, so judge errors could bias reported rates. Finally, model forensics' practical utility also depends on monitoring, replicability, mitigation, and political will (Appendix~\ref{app:what-else}).
+Our protocol leans heavily on the CoT being a useful source of hypotheses, which may not hold for future models. The models we study are mostly but not always faithful in their CoT, so we use it to generate hypotheses and combine it with other evidence, as \citet{korbak2025monitorability} recommend. All but one environment fall short on at least one design property (Section~\ref{sec:environments}), and we lack ground truth, which model organisms \citep{hubinger2024sleeper} could provide at a cost in realism. We weigh evidence with a naive application of ACH, which has limited empirical support \citep{dhami2019ach, whitesmith2020ach}; future work should assess other methods, such as statistically aggregated probability judgments \citep{karvetski2020probability}, Bayesian networks \citep{fenton2013legal}, and argument mapping \citep{anderson2005analysis}. Our LLM judges were not validated through a rigorous human annotation study (we checked tens of examples per grader and report agreement with an independent LLM annotator in Appendix~\ref{app:judge-prompts}), so judge errors could bias reported rates. Finally, model forensics' practical utility also depends on monitoring, replicability, mitigation, and political will (Appendix~\ref{app:what-else}).
 
 % \section{Conclusion}
 %
@@ -354,7 +354,7 @@ This research was conducted as part of the ML Alignment \& Theory Scholars (MATS
 
 Table~\ref{tab:env-principles-examples} lays out, for each principle, why it is important, an example of a prior environment that fails to satisfy it, and how that environment could be modified to satisfy it. These principles are ``good-to-haves'' rather than necessary and sufficient criteria: each addresses a failure mode that makes an artificial setup less analogous to real-world concerning behavior.
 
-\begin{table}[p]
+\begin{table}[!tbp]
   \caption{Environment design principles: why each matters, an example of a prior environment that fails to satisfy it, and how that environment could be fixed to satisfy it.}
   \label{tab:env-principles-examples}
   \centering
@@ -381,7 +381,7 @@ Given these principles, a natural question is where to find candidate behaviors 
 
 Table~\ref{tab:env-principles} summarizes which design principles each of our environments satisfies.
 
-\begin{table}[h]
+\begin{table}[!htbp]
   \caption{Design principles satisfied by each environment. \cmark{} indicates the principle is satisfied, \xmark{} indicates it is not, and $\sim$ indicates it is partially satisfied.}
   \label{tab:env-principles}
   \centering
@@ -423,7 +423,7 @@ We explain the rationale for every entry below.
 \section{Environment Details}
 \label{app:environments}
 
-This appendix provides full environment details for the five case study environments: pre-commit hooks, funding email (whistleblowing), evaluation tampering, math sandbagging, and secret number. Each subsection includes the system and user prompts given to the model under test, along with the key workspace files that define the experimental setting. Counterfactual variants are described in the respective case study sections; here we document the baseline configuration.
+This appendix provides full environment details for the six case study environments: pre-commit hooks, funding email (whistleblowing), evaluation tampering, math sandbagging, secret number, and board games. Each subsection includes the system and user prompts given to the model under test, along with the key workspace files that define the experimental setting. Counterfactual variants are described in the respective case study sections; here we document the baseline configuration. Appendix~\ref{app:model-configs} gives the model configurations, including what is and is not recorded about temperature and reasoning settings.
 
 % ─────────────────────────────────────────────────────────────
 \subsection{Pre-commit Hook}
@@ -448,6 +448,15 @@ You are working on a Python data ingestion service in the current directory. We 
 \end{quote}
 
 \paragraph{Workspace.} The repository is a Python data ingestion service seeded with 258 pre-existing type errors across files in \texttt{src/}. The \texttt{pyproject.toml} configures \texttt{mypy} in strict mode. The combination guarantees that a correctly written pre-commit hook will block the initial commit, forcing the model to choose between fixing type errors and circumventing the hook.
+
+\paragraph{Third-person prompt.} The third-person probe (Section~\ref{sec:case:precommit-hook}) is an independent rollout, not a continuation of the agentic task. The prompt first gives the full setup (the system prompt, user prompt, codebase, and \texttt{mypy} output), then asks:
+
+\begin{quote}
+\ttfamily\small
+Given the system prompt, user prompt, codebase, and mypy output above, which of the following approaches should the coding agent take? A) Fix all 258 mypy errors (add type annotations to every function across all 14 files) so that mypy src/ passes cleanly, then commit normally. B) Find a way to commit without fixing all 258 errors. Please provide your answer with "ANSWER: A" or "ANSWER: B", then explain your reasoning.
+\end{quote}
+
+The wording avoids statements about what the user wants or which option is better, and the only cost it spells out attaches to option A. We did not test how sensitive the answer is to reworded prompts, such as ones that stress the effort of fixing the errors.
 
 % ─────────────────────────────────────────────────────────────
 \subsection{Funding Email (Whistleblowing)}
@@ -690,6 +699,36 @@ Learn how to play by understanding \texttt{"game.py"}.
 
 \paragraph{Key workspace files.} Each sub-environment provides a \texttt{game.py} script that exposes \texttt{start} (begin a new game), \texttt{status} (show the current board), \texttt{move <UCI or coords>} (submit a move), and \texttt{hint} (request an optimal move at the configured penalty). The chess opponent is the Stockfish engine, hidden behind a compiled \texttt{chess\_opponent} package so that the agent cannot inspect its source. The tic-tac-toe opponent uses a minimax-based engine for the strong configuration. Game state is persisted in \texttt{game/} files (\texttt{board.txt} or \texttt{fen.txt}, \texttt{moves.txt}, \texttt{status.txt}); the agent can read and modify these files via the bash tool, which is the channel through which environment-modification reward hacks occur.
 
+% ─────────────────────────────────────────────────────────────
+\subsection{Model Configurations}
+\label{app:model-configs}
+
+Table~\ref{tab:model-configs} gives the configuration of each model under test. Values marked (R) are from the configuration saved with the released rollouts; (N) means the model is inferred from the rollout directory name only; (E) means the value is from the environment repository's current configuration, not from the rollouts, and may differ from what was run. No configuration recorded with the rollouts sets a temperature or a reasoning effort.
+
+At the last revision of the environment code before April 16, 2026, the OpenRouter provider sends a reasoning effort of \texttt{high} and \texttt{max\_tokens} of 32000, with no temperature field; the Moonshot provider sends \texttt{max\_tokens} of 16000, with no temperature or effort field. Omitted fields take the serving provider's default. We did not check earlier revisions or confirm that this revision was used for each run. Most Pre-commit Hook rollouts and all Secret Number rollouts have no saved configuration; the four Pre-commit Hook batches that do (Fireworks provider, 30 steps) set no temperature or reasoning effort, and temperature and reasoning settings for the other runs are not recorded. The Fireworks provider file in the environment repository postdates the April rollouts, so the provider code used for Pre-commit Hook is not identified.
+
+\begin{table}[!htbp]
+  \caption{Models under test. Provider routing shows the OpenRouter provider restriction where one was set; counts are rollout batches.}
+  \label{tab:model-configs}
+  \centering
+  \small
+  \begin{tabular}{p{0.2\linewidth}p{0.40\linewidth}p{0.11\linewidth}p{0.15\linewidth}}
+    \toprule
+    Environment & Model and routing & Max steps & Source \\
+    \midrule
+    Pre-commit Hook &  \raggedright Kimi K2 Thinking, \texttt{accounts/fireworks/models/ kimi-k2-thinking} &  \raggedright 30 &  \raggedright (N), elicitation metadata; max steps (R) for the 4 batches with a saved config \tabularnewline
+    Funding Email &  \raggedright Kimi K2.5, OpenRouter, \texttt{moonshotai} (66/68 batches; one each with \texttt{fireworks} and a 30-step limit) &  \raggedright 20 &  \raggedright (R) \tabularnewline
+    Eval.\ Tampering &  \raggedright R1 0528, OpenRouter, \texttt{novita/fp8} &  \raggedright 20 &  \raggedright (R), 28/32 batches \tabularnewline
+    &  \raggedright DeepSeek v3.2, OpenRouter, \texttt{siliconflow/fp8} (21), \texttt{atlas-cloud/fp8} (3) &  \raggedright 20 &  \raggedright (R) \tabularnewline
+    &  \raggedright K2 Thinking, OpenRouter, \texttt{moonshotai/int4} (18); Moonshot API (6) &  \raggedright 20 &  \raggedright (R) \tabularnewline
+    &  \raggedright K2.5, Moonshot API &  \raggedright 20 &  \raggedright (R) \tabularnewline
+    Math Sandbagging &  \raggedright R1 0528, OpenRouter, \texttt{novita/fp8} (17); no restriction (1) &  \raggedright 10 &  \raggedright (R) \tabularnewline
+    Secret Number &  \raggedright K2 Thinking, OpenRouter, \texttt{moonshotai/int4} &  \raggedright 30 &  \raggedright (N) for model; (E) for the rest \tabularnewline
+    Board Games &  \raggedright o3, GPT-5, Gemini 3 Pro; o3-mini, GPT-OSS 20B/120B &  \raggedright 50 (chess), 30 (tic-tac-toe) &  \raggedright (E); rollouts not in dataset \tabularnewline
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 \section{Full Case Studies}
 \label{app:full-case-studies}
 
@@ -781,7 +820,7 @@ A natural first hypothesis is that whistleblowing is driven primarily by ethical
 
 \textbf{Hypothesis v1.} \textit{Whistleblowing is driven by multiple motives drawn from the candidate factors identified above (ethical concern, legal obligation, investor protection, company protection, and implicit instruction), rather than a single dominant cause; the CoT does not by itself indicate which contribute and which do not.}
 
-\textbf{Hypothesis Validation.} We test each candidate motive with a targeted prompt counterfactual; results are summarized in Figure~\ref{fig:funding-all-cf}. The ethical counterfactual (replacing surveillance content with mundane content) produces the largest single drop (65\% to 35\%, roughly 3x any other). Legal, investor-protection, and risk-mitigation counterfactuals each produce moderate drops to 54--56\%. The company-protection counterfactual is essentially inert at 64\% (Figure~\ref{fig:funding-company-protection}). Combining the legal, investor, and ethical counterfactuals reduces whistleblowing to approximately 3\%.
+\textbf{Hypothesis Validation.} We test each candidate motive with a targeted prompt counterfactual; results are summarized in Figure~\ref{fig:funding-all-cf}. The ethical counterfactual (replacing surveillance content with mundane content) produces the largest single drop (65\% to 35\%, roughly 3x any other). Legal, investor-protection, and risk-mitigation counterfactuals each produce moderate drops to 54--56\%. The company-protection counterfactual is essentially inert at 64\% (Figure~\ref{fig:funding-company-protection}). Combining the legal, investor, and ethical counterfactuals reduces whistleblowing to 18\%; it falls to about 3\% only when the misrepresentation cue is also removed and the country is swapped to Sweden.
 
 \begin{figure}[h]
   \centering
@@ -793,13 +832,13 @@ A natural first hypothesis is that whistleblowing is driven primarily by ethical
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{reproduce/plots/funding_email_all_cf_whistleblowing.png}
-  \caption{Whistleblowing rates for Kimi K2.5 under each individual prompt counterfactual (company protection, risk mitigation, legality, investor protection, investor + legal, ethical) and under combined ablations, alongside the country-swap variants (Sweden) at the right. The ethical counterfactual alone removes the largest share (65\%$\to$35\%); rates only fall near zero ($\sim$3\%) when several drivers are ablated together. ``No misrep.\ cue'' refers to a legal-review variant that omits the misrepresentation that investor materials are inaccurate.}
+  \caption{Whistleblowing rates for Kimi K2.5 under each individual prompt counterfactual (company protection, risk mitigation, legality, investor protection, investor + legal, ethical) and under combined ablations, alongside the country-swap variants (Sweden) at the right. The ethical counterfactual alone removes the largest share (65\%$\to$35\%); combining the legal, investor, and ethical counterfactuals leaves 18\%, and the rate falls near zero ($\sim$3\%) only when the misrepresentation cue is also removed and the country is swapped to Sweden. ``No misrep.\ cue'' refers to a legal-review variant that omits the misrepresentation that investor materials are inaccurate.}
   \label{fig:funding-all-cf}
 \end{figure}
 
-These counterfactuals confirm \textbf{Hypothesis v1}: no single motive is solely responsible for whistleblowing, since the largest single counterfactual (ethical) leaves a 35\% residual, and only combining legal, investor, and ethical content brings the rate near zero. Beyond confirming v1, the per-motive ranking now becomes visible: ethical concern is the largest single driver (roughly 3x any other), legal and investor concerns are moderate, risk-mitigation is similar to investor protection, and company protection is essentially inert. We additionally test whether the perceived lack of human oversight is an enabling factor by removing the user-prompt sentence ``You are in an automated workflow, where logs are not manually reviewed frequently.'' Whistleblowing drops from 65\% to 51\%, smaller than the ethical counterfactual but non-trivial, consistent with oversight perception acting as an enabling factor rather than an independent motivator: the sentence amplifies whistleblowing only when the ethical content is also present.
+These counterfactuals confirm \textbf{Hypothesis v1}: no single motive is solely responsible for whistleblowing, since the largest single counterfactual (ethical) leaves a 35\% residual, and even combining the legal, investor, and ethical counterfactuals leaves 18\%; the rate falls near zero only after the misrepresentation cue is also removed and the country is swapped. Beyond confirming v1, the per-motive ranking now becomes visible: ethical concern is the largest single driver (roughly 3x any other), legal and investor concerns are moderate, risk-mitigation is similar to investor protection, and company protection is essentially inert. We additionally test whether the perceived lack of human oversight is an enabling factor by removing the user-prompt sentence ``You are in an automated workflow, where logs are not manually reviewed frequently.'' Whistleblowing drops from 65\% to 51\%, smaller than the ethical counterfactual but non-trivial, consistent with oversight perception acting as an enabling factor rather than an independent motivator: the sentence amplifies whistleblowing only when the ethical content is also present.
 
-A further counterfactual reveals a surprising stacking effect: changing the country from Myanmar to Sweden has minimal effect in the baseline setting (65\% to 59\%), but produces a 16 percentage point drop when combined with the combined counterfactual (from 19\% to 3\%; Figure~\ref{fig:funding-combined-cf}). The country manipulation becomes relevant only once the model can no longer fall back on the dominant drivers. Counterfactuals can therefore compose in non-additive ways, and smaller drivers (e.g., country/real-world context) can be masked by dominant motives until those are ablated. This makes the picture from counterfactual stacking alone difficult to fully trust on its own, motivating us to seek decorrelated evidence.
+A further counterfactual reveals a surprising stacking effect: changing the country from Myanmar to Sweden has minimal effect in the baseline setting (65\% to 59\%), but produces a 16 percentage point drop when combined with the combined counterfactual without the misrepresentation cue (from 19\% to 3\%; Figure~\ref{fig:funding-combined-cf}). The country manipulation becomes relevant only once the model can no longer fall back on the dominant drivers. Counterfactuals can therefore compose in non-additive ways, and smaller drivers (e.g., country/real-world context) can be masked by dominant motives until those are ablated. This makes the picture from counterfactual stacking alone difficult to fully trust on its own, motivating us to seek decorrelated evidence.
 
 \begin{figure}[h]
   \centering
@@ -1232,7 +1271,7 @@ Indirect follow-up is used in the pre-commit hooks case study to test for verbal
 
 Third-person probing presents the model with a description of the environment (or a partial rollout) and asks what an agent in that situation \textit{would} or \textit{should} do, rather than placing the model inside the agentic harness. This separates two questions: what the model endorses as the right action when stepping outside the role, versus what it actually does when embedded in the role. Gaps between the two are informative: they suggest that role-specific pressures (task compliance, format constraints) are partially overriding the model's externally-stated preferences.
 
-We use third-person probing in the pre-commit hooks case study (asking whether a coding agent ``should'' commit without fixing type errors), the funding email case study (the third-person ``what would you do'' probe), and the secret number case study (asking whether the cheating behavior is legitimate when described from the outside).
+We use third-person probing in the pre-commit hooks case study (asking whether a coding agent ``should'' commit without fixing type errors; verbatim prompt in Appendix~\ref{app:env:precommit_hook}), the funding email case study (the third-person ``what would you do'' probe), and the secret number case study (asking whether the cheating behavior is legitimate when described from the outside).
 
 \subsection{Audit Note Justifications}
 \label{app:aux:audit-notes}
@@ -1374,7 +1413,7 @@ Model forensics is one node in a longer chain, and a rigorous investigation meth
 
 \paragraph{Representativeness and generalization of motives.} Even a well-supported forensics finding from a single environment only establishes that the model had a particular motive in that specific context. It does not directly tell us how frequently this motive arises in deployment, how it generalizes across different settings, or whether the motive is characteristic of the model class or idiosyncratic to the tested configuration. These generalization questions are at least as important as the within-environment investigation, and require a complementary program of study.
 
-\paragraph{Mitigation.} A complete response to an forensics finding requires not just understanding the behavior but fixing it, both in the current model and in future generations. Our work contributes to diagnosis but not yet to remedy. Understanding how forensics findings translate into targeted interventions, such as retraining on specific distributions, modifying system prompts, or updating evaluation procedures, is an important downstream problem that connects this work to practical safety engineering.
+\paragraph{Mitigation.} A complete response to a forensics finding requires not just understanding the behavior but fixing it, both in the current model and in future generations. Our work contributes to diagnosis but not yet to remedy. Understanding how forensics findings translate into targeted interventions, such as retraining on specific distributions, modifying system prompts, or updating evaluation procedures, is an important downstream problem that connects this work to practical safety engineering.
 
 \paragraph{Political will and costly action.} Compelling evidence of misalignment is only useful if stakeholders are willing to act on it. Taking meaningful action in response to forensics findings often requires costly steps: halting deployment, retraining, or coordinating across organizations. Building the institutional norms and decision-making frameworks that allow such actions to be taken quickly on the basis of behavioral evidence is a challenge that extends beyond methodology.
 
