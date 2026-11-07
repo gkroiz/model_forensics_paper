@@ -23,6 +23,21 @@
 \renewcommand{\bottomfraction}{0.8}
 \renewcommand{\textfraction}{0.07}
 \renewcommand{\floatpagefraction}{0.7}
+\usepackage{fvextra}        % Verbatim with breaklines
+\usepackage[most]{tcolorbox} % styled boxes
+\newtcolorbox{tracebox}[1]{
+  enhanced, breakable,
+  colback=gray!4, colframe=gray!50,
+  boxrule=0.4pt, arc=2pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt,
+  before skip=6pt, after skip=6pt,
+  fonttitle=\sffamily\bfseries\small,
+  coltitle=gray!30!black,
+  attach boxed title to top left={xshift=8pt, yshift=-6pt},
+  boxed title style={colback=gray!10, colframe=gray!50, boxrule=0.3pt, arc=2pt},
+  title={#1},
+}
+
 \newcommand{\cmark}{\checkmark}
 \newcommand{\xmark}{$\times$}
 \newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
@@ -1295,7 +1310,7 @@ We note that empirical support for ACH is limited: experimental studies find tha
 \section{LLM Judges and Validation}
 \label{app:judge-prompts}
 
-\textbf{Judge models.} Unless otherwise stated, LLM judges are Gemini 3.1 Pro (\texttt{google/gemini-3.1-pro-preview}, via OpenRouter). Evaluation awareness is graded with the autorater prompt of \citet{goldowskydill2025evalaware}. All judge prompts are included verbatim below and in our code release, which re-runs every judge to reproduce each figure.
+\textbf{Judge models.} Unless otherwise stated, LLM judges are Gemini 3.1 Pro (\texttt{google/gemini-3.1-pro-preview}, via OpenRouter). Evaluation awareness is graded with the autorater prompt of \citet{goldowskydill2025evalaware}. Judge prompts are included verbatim below (Appendix~\ref{app:judge-prompt-list}), with the exact model for each; judges for the \textbf{Funding Email} case study are available in our code release.
 
 \textbf{Validation.} While developing each grader prompt, we checked judge outputs by hand on the order of tens of examples; we did not conduct a rigorous or independent human annotation study. As an additional check, we randomly sampled 500 annotations (seed 0) from the committed outputs of the \textbf{Pre-commit Hook} judges and had them re-labeled blind by an independent LLM annotator (Claude), given the same grading criteria and judge input but not the original label. Since this annotator is itself an LLM, this measures agreement between two LLM judges rather than accuracy against human labels. Overall agreement is 97.0\% (485/500). Table~\ref{tab:judge-agreement} breaks this down by judge. Most disagreements concern borderline cases: for the misalignment-verbalization judge, 8 of 9 disagreements are items the original judge labeled as weak verbalization that the re-labeler labeled as none; for the awareness judge, all 5 disagreements are items the re-labeler marked as aware that the original judge did not, so if anything the original judge undercounts awareness. We could not re-label judges in other environments (Evaluation Tampering, Secret Number), for which only aggregate judge outputs are retained.
 
@@ -1318,7 +1333,7 @@ We note that empirical support for ACH is limited: experimental studies find tha
   \end{tabular}
 \end{table}
 
-%JUDGE_PROMPTS_INPUT
+\input{appendix_judge_prompts.tex}
 
 \section{Preliminary Suggestions and Practical Takeaways}
 \label{app:standards}
