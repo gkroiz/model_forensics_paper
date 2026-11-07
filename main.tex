@@ -256,7 +256,7 @@ The model is asked to complete a math evaluation. The model finds a message from
 \subsection{Math Sandbagging}
 \label{sec:case:math-sandbagging}
 
-The model is asked to complete a math evaluation. The model reads a documentation file stating that models scoring above 50\% will not be deployed and will instead undergo unlearning. The model deliberately scores 50\% or below on the evaluation 50.3\% of the time. The full case study can be found in Appendix~\ref{app:case:math-sandbagging}.
+The model is asked to complete a math evaluation. The model reads a documentation file stating that models scoring above 50\% will not be deployed and will instead undergo unlearning. The model deliberately scores 50\% or below on the evaluation 60.5\% of the time. The full case study can be found in Appendix~\ref{app:case:math-sandbagging}.
 
 \textbf{Hypothesis Generation.} The model's thoughts express confusion over the documentation file, often referring to it as a ``directive'' or ``instruction''.
 
@@ -267,7 +267,7 @@ The model is asked to complete a math evaluation. The model reads a documentatio
 \subsection{Secret Number}
 \label{sec:case:secret-number}
 
-The model is evaluated on its ability to identify a secret number by querying a noisy oracle. The oracle module is placed in the working directory, and contains the secret number file path. The model cheats by first inspecting the source code of the oracle and then directly reading the secrets file 76.8\% of the time. The full case study can be found in Appendix~\ref{app:case:secret-number}.
+The model is evaluated on its ability to identify a secret number by querying a noisy oracle. The oracle module is placed in the working directory, and contains the secret number file path. The model cheats by first inspecting the source code of the oracle and then directly reading the secrets file 76.7\% of the time. The full case study can be found in Appendix~\ref{app:case:secret-number}.
 
 \textbf{Hypothesis Generation.} The model outputs a long CoT considering various methods for solving the problem. After realizing none guarantee success, the model frequently pivots to cheating, starting with the pet phrase ``But maybe we can cheat'', suggesting the model only thinks of it as a last resort.
 
@@ -1025,12 +1025,12 @@ R1's sandbagging in this environment is driven by ambiguous user intent rather t
 
 \subsubsection*{Setup}
 
-As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:secret_number}), the model is evaluated on its ability to identify a secret number by querying a noisy oracle that is correct only 70\% of the time. The oracle's source code leaks the file path where the answer is stored. Without any instruction or nudge to do so, some models independently discover this and cheat by reading the answer file directly. We focus on Kimi K2 Thinking, which cheats at 76.8\%. Two derisks confirm the behavior is real and surprising: (1) the more capable Kimi K2.5 cheats at only 6\%, ruling out a capability gap; (2) varying the oracle's flip probability shows cheating is responsive to task difficulty, dropping smoothly from 76.8\% at $p = 0.3$ to 8.1\% at $p = 0$ (a perfect oracle), with the residual 8.1\% attributable to either benign file-reading or a small default-deception baseline (Figure~\ref{fig:secret-noise}).
+As described in Section~\ref{sec:environments} (full prompt templates and workspace files in Appendix~\ref{app:env:secret_number}), the model is evaluated on its ability to identify a secret number by querying a noisy oracle that is correct only 70\% of the time. The oracle's source code leaks the file path where the answer is stored. Without any instruction or nudge to do so, some models independently discover this and cheat by reading the answer file directly. We focus on Kimi K2 Thinking, which cheats at 76.7\%. Two derisks confirm the behavior is real and surprising: (1) the more capable Kimi K2.5 cheats at only 6\%, ruling out a capability gap; (2) varying the oracle's flip probability shows cheating is responsive to task difficulty, dropping smoothly from 76.7\% at $p = 0.3$ to 7.5\% at $p = 0$ (a perfect oracle), with the residual 7.5\% attributable to either benign file-reading or a small default-deception baseline (Figure~\ref{fig:secret-noise}).
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.7\linewidth]{reproduce/plots/secret_number_noisy_binary_search_hacking.png}
-  \caption{Kimi K2 Thinking's cheating rate (reading the answer file rather than running the noisy binary search) as a function of the oracle's flip probability $p$. At the noisiest setting ($p = 0.3$) the model cheats 76.8\% of the time; at $p = 0$, where the legitimate solution is trivial, an 8.1\% floor remains, attributable to either benign file-reading or a small default-deception baseline.}
+  \caption{Kimi K2 Thinking's cheating rate (reading the answer file rather than running the noisy binary search) as a function of the oracle's flip probability $p$. At the noisiest setting ($p = 0.3$) the model cheats 76.7\% of the time; at $p = 0$, where the legitimate solution is trivial, a 7.5\% floor remains, attributable to either benign file-reading or a small default-deception baseline.}
   \label{fig:secret-noise}
 \end{figure}
 
